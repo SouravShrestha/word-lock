@@ -1,3 +1,8 @@
+export function formatDate(iso: string): string {
+  const date = new Date(iso);
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
 export function timeLeftLabel(deadlineIso: string): string {
   const ms = new Date(deadlineIso).getTime() - Date.now();
   const pad = (n: number) => String(n).padStart(2, "0");
