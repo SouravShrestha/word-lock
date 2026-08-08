@@ -9,6 +9,7 @@ import {
   type EngineMove,
   type PlayerSlot,
 } from "./engine";
+import { computeStats, MAX_RECENT_GAMES, type StatsGameInput } from "./stats";
 
 export const MAX_ACTIVE_GAMES = 5;
 export const TURN_LIMIT_MS = 24 * 60 * 60 * 1000;
@@ -435,6 +436,70 @@ export async function listGamesForSession(sessionId: string, displayName?: strin
       return serializeGame(game, gameMoves, (people ?? []) as PlayerRow[], player.id);
     }),
   };
+}
+
+export async function getPlayerStats(sessionId: string) {
+  const player = await ensurePlayer(sessionId);
+  const { data: games } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("*")
+    .eq("status", "completed")
+    .or(`player1_id.eq.${player.id},player2_id.eq.${player.id}`)
+    .order("last_move_at", { ascending: false });
+
+  const rows = (games ?? []) as GameRow[];
+  // Only the most recent games need move history (for score computation) and
+  // opponent display names — overview counts are derived from winner_id alone.
+  const recentRows = rows.slice(0, MAX_RECENT_GAMES);
+  const recentIds = recentRows.map((g) => g.id);
+  const playerIds = new Set<string>();
+  recentRows.forEach((g) => {
+    playerIds.add(g.player1_id);
+    if (g.player2_id) playerIds.add(g.player2_id);
+  });
+
+  const [{ data: moves }, { data: people }] = await Promise.all([
+    recentIds.length
+      ? getSupabaseAdmin().from("wl_moves").select("*").in("game_id", recentIds)
+      : Promise.resolve({ data: [] as MoveRow[] }),
+    playerIds.size
+      ? getSupabaseAdmin()
+          .from("wl_players")
+          .select("id, session_id, display_name")
+          .in("id", Array.from(playerIds))
+      : Promise.resolve({ data: [] as PlayerRow[] }),
+  ]);
+
+  const byGame = new Map<string, MoveRow[]>();
+  for (const move of (moves ?? []) as MoveRow[]) {
+    const list = byGame.get(move.game_id) ?? [];
+    list.push(move);
+    byGame.set(move.game_id, list);
+  }
+
+  const people_ = (people ?? []) as PlayerRow[];
+  const recentGameIds = new Set(recentIds);
+  const statsGames: StatsGameInput[] = rows.map((game) => {
+    let scores = { 1: 0, 2: 0 };
+    if (recentGameIds.has(game.id)) {
+      const gameMoves = (byGame.get(game.id) ?? []).sort((a, b) =>
+        a.created_at.localeCompare(b.created_at),
+      );
+      scores = computeBoardState(game.grid.split(""), toEngineMoves(game, gameMoves)).scores;
+    }
+    return {
+      id: game.id,
+      room_code: game.room_code,
+      player1_id: game.player1_id,
+      player2_id: game.player2_id,
+      status: game.status,
+      winner_id: game.winner_id,
+      last_move_at: game.last_move_at,
+      scores,
+    };
+  });
+
+  return computeStats(player.id, statsGames, people_);
 }
 
 /** Auto-passes any active game whose current turn has run past 24 hours. */

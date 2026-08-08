@@ -26,10 +26,10 @@ export function Header({
 } = {}) {
   const router = useRouter();
   const pathname = usePathname();
-  const { displayName, setDisplayName } = useSession();
+  const { displayName } = useSession();
 
   const isHome = pathname === "/";
-  const needsConfirm = !isHome && !pathname.startsWith("/join");
+  const needsConfirm = !isHome && !pathname.startsWith("/join") && !pathname.startsWith("/profile");
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleExit = () => {
@@ -44,7 +44,7 @@ export function Header({
   return (
     <header className={`flex justify-between items-center w-full ${compact ? "mb-1" : "mb-4"}`}>
       {isHome ? (
-        <NameBadge value={displayName} onChange={setDisplayName} />
+        <NameBadge value={displayName} />
       ) : needsConfirm ? (
         <>
           <button

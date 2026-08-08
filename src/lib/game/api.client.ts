@@ -70,3 +70,7 @@ export async function timeoutGameFn(data: { sessionId: string; roomCode: string 
 export async function leaveLobbyFn(data: { sessionId: string; roomCode: string }) {
   return fetcher("leave", data);
 }
+
+export async function fetchProfileFn(data: { sessionId: string }) {
+  return fetcher("profile", data);
+}
