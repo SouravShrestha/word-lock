@@ -1,6 +1,7 @@
 import { CelebrateIcon } from "@/components/icons/CelebrateIcon";
 import { MainMenuIcon } from "@/components/icons/MainMenuIcon";
 import { Tile, type TileOwner } from "@/components/Tile";
+import { PlayedWords } from "./PlayedWords";
 
 export function GameOver({ game, onNew }: { game: any; onNew: () => void }) {
   const p1 = game.players.one;
@@ -69,6 +70,11 @@ export function GameOver({ game, onNew }: { game: any; onNew: () => void }) {
               <span className="text-[10px] font-bold text-p2 uppercase tracking-wider">winner</span>
             )}
           </div>
+        </div>
+
+        {/* Word history */}
+        <div className="mb-3 w-full">
+          <PlayedWords game={game} />
         </div>
 
         {/* Board snapshot */}
