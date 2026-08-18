@@ -5,7 +5,20 @@ import { SoundContext, useSoundState } from "@/hooks/use-sound";
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
   const sound = useSoundState();
-  const { play } = sound;
+  const { play, primeAll } = sound;
+
+  // Unlock audio playback on the very first user gesture anywhere on the
+  // page. Without this, sounds triggered by realtime events with no click
+  // in the call stack (opponent's move landing, "your turn", tile locking,
+  // game over) get silently blocked by the browser until some button is
+  // pressed on that tab.
+  useEffect(() => {
+    const events: (keyof DocumentEventMap)[] = ["pointerdown", "keydown", "touchstart"];
+    events.forEach((event) => document.addEventListener(event, primeAll, { once: true }));
+    return () => {
+      events.forEach((event) => document.removeEventListener(event, primeAll));
+    };
+  }, [primeAll]);
 
   // Global press-sound: every <button> in the app gets a click sound by
   // default. Elements that need a different sound (e.g. keyboard keys, word
