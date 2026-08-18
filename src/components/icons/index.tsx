@@ -99,3 +99,19 @@ export const Search = createIcon(
 export const Circle = createIcon(<circle cx="12" cy="12" r="10" />);
 
 export const Minus = createIcon(<path d="M5 12h14" />);
+
+export const Volume2 = createIcon(
+  <>
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+  </>,
+);
+
+export const VolumeX = createIcon(
+  <>
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+    <line x1="22" x2="16" y1="9" y2="15" />
+    <line x1="16" x2="22" y1="9" y2="15" />
+  </>,
+);

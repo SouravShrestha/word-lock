@@ -56,6 +56,7 @@ export function Tile({
       disabled={disabled}
       aria-pressed={selected}
       aria-label={`Letter ${letter}${locked ? ", locked" : ""}`}
+      data-sound="key"
       className={cn(
         "tile-face relative aspect-square w-full text-[clamp(0.85rem,3.5vw,1.25rem)]",
         getOwnerStyles(owner, locked, selected),

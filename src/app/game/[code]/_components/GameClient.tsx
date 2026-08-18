@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import { Tile, type TileOwner } from "@/components/Tile";
 import { useSession } from "@/hooks/use-session";
+import { useSound } from "@/hooks/use-sound";
 import { supabase } from "@/integrations/supabase/client";
 import {
   fetchGameFn,
@@ -33,6 +34,7 @@ import { WordPreview } from "./WordPreview";
 export function GameClient({ code }: { code: string }) {
   const roomCode = code.toUpperCase();
   const { sessionId, displayName, isNameSet, ready } = useSession();
+  const { play } = useSound();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [selection, setSelection] = useState<number[]>([]);
@@ -43,6 +45,10 @@ export function GameClient({ code }: { code: string }) {
   const [hostLeftCountdown, setHostLeftCountdown] = useState<number | null>(null);
   const isHostWaitingRef = useRef(false);
   const isNonHostWaitingRef = useRef(false);
+  const prevLockedRef = useRef<boolean[] | null>(null);
+  const prevYourTurnRef = useRef<boolean | null>(null);
+  const prevStatusRef = useRef<string | null>(null);
+  const prevOpponentJoinedRef = useRef<boolean | null>(null);
 
   const queryKey = useMemo(() => ["game", roomCode, sessionId], [roomCode, sessionId]);
   const { data: game, isLoading } = useQuery({
@@ -157,6 +163,64 @@ export function GameClient({ code }: { code: string }) {
     return () => clearTimeout(timer);
   }, [game?.turnDeadline, game?.status, queryClient, queryKey, sessionId, roomCode]);
 
+  // Sound: tile locking. Diff the locked array between renders and play a
+  // "lock" sound whenever a previously-unlocked tile becomes locked.
+  useEffect(() => {
+    if (!game?.locked) return;
+    const prev = prevLockedRef.current;
+    if (prev) {
+      const newlyLocked = game.locked.some(
+        (locked: boolean, i: number) => locked && !prev[i],
+      );
+      if (newlyLocked) play("lock");
+    }
+    prevLockedRef.current = game.locked;
+  }, [game?.locked, play]);
+
+  // Sound: "your turn" notification. Fires only on the false -> true edge so
+  // it doesn't replay on every unrelated refetch.
+  useEffect(() => {
+    if (!game) return;
+    const viewerId =
+      game.viewerSlot === 1
+        ? game.players.one?.id
+        : game.viewerSlot === 2
+          ? game.players.two?.id
+          : null;
+    const isYourTurn =
+      !!viewerId && viewerId === game.currentTurnPlayerId && game.status === "active";
+    if (prevYourTurnRef.current === false && isYourTurn) play("your-turn");
+    prevYourTurnRef.current = isYourTurn;
+  }, [game, play]);
+
+  // Sound: opponent joins the lobby.
+  useEffect(() => {
+    if (!game || game.status !== "waiting") return;
+    const opponentJoined = !!game.players.two;
+    if (prevOpponentJoinedRef.current === false && opponentJoined) play("opponent-joined");
+    prevOpponentJoinedRef.current = opponentJoined;
+  }, [game, play]);
+
+  // Sound: game start / game over transitions.
+  useEffect(() => {
+    if (!game) return;
+    const prevStatus = prevStatusRef.current;
+    if (prevStatus === "waiting" && game.status === "active") {
+      play("game-start");
+    } else if (prevStatus === "active" && game.status === "completed") {
+      const viewerId =
+        game.viewerSlot === 1
+          ? game.players.one?.id
+          : game.viewerSlot === 2
+            ? game.players.two?.id
+            : null;
+      if (!game.winnerId) play("draw");
+      else if (viewerId && game.winnerId === viewerId) play("win");
+      else play("lose");
+    }
+    prevStatusRef.current = game.status;
+  }, [game, play]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const win = window as any;
@@ -213,15 +277,20 @@ export function GameClient({ code }: { code: string }) {
         tileIndices: selection,
       }),
     onSuccess: () => {
+      play("success");
       setSelection([]);
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      play("error");
+      toast.error(error.message);
+    },
   });
 
   const passMutation = useMutation({
     mutationFn: () => passTurnFn({ sessionId: sessionId!, roomCode }),
     onSuccess: () => {
+      play("pass");
       setSelection([]);
       toast("Turn passed.");
       queryClient.invalidateQueries({ queryKey });
@@ -306,6 +375,7 @@ export function GameClient({ code }: { code: string }) {
 
   function toggleTile(index: number) {
     if (!yourTurn) return;
+    // Tile press sound (key.mp3) is handled globally via data-sound="key" on <Tile>.
     setSelection((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );

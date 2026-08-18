@@ -7,6 +7,7 @@ import { QueryProvider } from "@/components/QueryProvider";
 import { TopLoader } from "@/components/TopLoader";
 import { UsernamePrompt } from "@/components/UsernamePrompt";
 import { SessionProvider } from "@/components/SessionProvider";
+import { SoundProvider } from "@/components/SoundProvider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -80,8 +81,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SessionProvider>
-              {children}
-              <UsernamePrompt />
+              <SoundProvider>
+                {children}
+                <UsernamePrompt />
+              </SoundProvider>
             </SessionProvider>
             <Toaster position="top-center" richColors />
           </ThemeProvider>

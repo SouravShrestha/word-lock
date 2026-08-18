@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LeftArrowIcon } from "@/components/icons/LeftArrowIcon";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SoundToggle } from "@/components/SoundToggle";
 import { NameBadge } from "@/components/NameBadge";
 import { useSession } from "@/hooks/use-session";
 
@@ -89,7 +90,10 @@ export function Header({
           <LeftArrowIcon className="w-5 h-5" />
         </button>
       )}
-      <ThemeToggle />
+      <div className="flex items-center gap-2">
+        <SoundToggle />
+        <ThemeToggle />
+      </div>
     </header>
   );
 }

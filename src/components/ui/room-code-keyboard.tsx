@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useRef, useState } from "react";
 import { Delete } from "@/components/icons";
+import { useSound } from "@/hooks/use-sound";
 import { cn } from "@/lib/utils";
 
 const NUMBER_ROW = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"] as const;
@@ -29,6 +30,7 @@ export function RoomCodeKeyboard({
   className,
 }: RoomCodeKeyboardProps) {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
+  const { play } = useSound();
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -60,16 +62,19 @@ export function RoomCodeKeyboard({
 
       if (key === "BACKSPACE" || key === "DELETE") {
         e.preventDefault();
+        play("key");
         onBackspace();
       } else if (key === "ENTER") {
         e.preventDefault();
+        play("key");
         onEnter();
       } else if (PHYSICAL_KEY_WHITELIST.has(key)) {
         e.preventDefault();
+        play("key");
         onKey(key);
       }
     },
-    [onKey, onBackspace, onEnter, disabled],
+    [onKey, onBackspace, onEnter, disabled, play],
   );
 
   useEffect(() => {
@@ -150,11 +155,14 @@ function LetterKey({
   onPress: () => void;
   isActive?: boolean;
 }) {
+  const { play } = useSound();
   return (
     <button
       type="button"
+      data-sound="none"
       onPointerDown={(e) => {
         e.preventDefault();
+        play("key");
         onPress();
       }}
       className={cn(
@@ -184,6 +192,7 @@ function ActionKey({
 }) {
   const holdTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { play } = useSound();
 
   const cancelHold = () => {
     if (holdTimeout.current) {
@@ -199,12 +208,17 @@ function ActionKey({
   return (
     <button
       type="button"
+      data-sound="none"
       onPointerDown={(e) => {
         e.preventDefault();
+        play("key");
         onPress();
         // After 500ms initial delay, repeat every 50ms
         holdTimeout.current = setTimeout(() => {
-          holdInterval.current = setInterval(onPress, 50);
+          holdInterval.current = setInterval(() => {
+            play("key");
+            onPress();
+          }, 50);
         }, 500);
       }}
       onPointerUp={cancelHold}
