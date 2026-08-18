@@ -5,6 +5,7 @@ import { SoundContext, useSoundState } from "@/hooks/use-sound";
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
   const sound = useSoundState();
+  const { play } = sound;
 
   // Global press-sound: every <button> in the app gets a click sound by
   // default. Elements that need a different sound (e.g. keyboard keys, word
@@ -17,11 +18,11 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
       if (!button || button.disabled) return;
       const override = button.dataset.sound;
       if (override === "none") return;
-      sound.play(override === "key" ? "key" : "click");
+      play(override === "key" ? "key" : "click");
     }
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
-  }, [sound.play]);
+  }, [play]);
 
   return <SoundContext.Provider value={sound}>{children}</SoundContext.Provider>;
 }

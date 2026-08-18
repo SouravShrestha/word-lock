@@ -169,9 +169,7 @@ export function GameClient({ code }: { code: string }) {
     if (!game?.locked) return;
     const prev = prevLockedRef.current;
     if (prev) {
-      const newlyLocked = game.locked.some(
-        (locked: boolean, i: number) => locked && !prev[i],
-      );
+      const newlyLocked = game.locked.some((locked: boolean, i: number) => locked && !prev[i]);
       if (newlyLocked) play("lock");
     }
     prevLockedRef.current = game.locked;
