@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-v1.1.0...word-lock-v1.2.0) (2026-08-18)
+
+
+### Features
+
+* **game:** add word history display to game over screen ([654949b](https://github.com/SouravShrestha/word-lock/commit/654949b205bb7a37e24d4a23ec3143c68457db0d))
+
 ## [1.1.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-v1.0.0...word-lock-v1.1.0) (2026-08-08)
 
 
