@@ -46,6 +46,7 @@ export function GameClient({ code }: { code: string }) {
   const isHostWaitingRef = useRef(false);
   const isNonHostWaitingRef = useRef(false);
   const prevLockedRef = useRef<boolean[] | null>(null);
+  const prevHistoryCountRef = useRef<number | null>(null);
   const prevYourTurnRef = useRef<boolean | null>(null);
   const prevStatusRef = useRef<string | null>(null);
   const prevOpponentJoinedRef = useRef<boolean | null>(null);
@@ -65,6 +66,14 @@ export function GameClient({ code }: { code: string }) {
       return false;
     },
   });
+
+  // The viewer's own player id, resolved from their seat in this game.
+  const viewerId = useMemo(() => {
+    if (!game) return null;
+    if (game.viewerSlot === 1) return game.players.one?.id ?? null;
+    if (game.viewerSlot === 2) return game.players.two?.id ?? null;
+    return null;
+  }, [game]);
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
@@ -175,21 +184,33 @@ export function GameClient({ code }: { code: string }) {
     prevLockedRef.current = game.locked;
   }, [game?.locked, play]);
 
+  // Sound: opponent's move landing. Realtime only invalidates the query, so
+  // the only way to notice the opponent played is to diff the move history.
+  // The first observation just seeds the ref, otherwise loading into an
+  // in-progress game would fire for moves that happened before we arrived.
+  useEffect(() => {
+    if (!game?.history) return;
+    const prevCount = prevHistoryCountRef.current;
+    prevHistoryCountRef.current = game.history.length;
+    if (prevCount === null || game.history.length <= prevCount) return;
+
+    // Only the moves we haven't seen yet, and only the opponent's.
+    const fresh = game.history.slice(prevCount);
+    const opponentMove = [...fresh].reverse().find((m) => m.playerId !== viewerId);
+    if (!opponentMove) return;
+    play(opponentMove.passed ? "pass" : "success");
+  }, [game?.history, viewerId, play]);
+
   // Sound: "your turn" notification. Fires only on the false -> true edge so
   // it doesn't replay on every unrelated refetch.
   useEffect(() => {
     if (!game) return;
-    const viewerId =
-      game.viewerSlot === 1
-        ? game.players.one?.id
-        : game.viewerSlot === 2
-          ? game.players.two?.id
-          : null;
     const isYourTurn =
       !!viewerId && viewerId === game.currentTurnPlayerId && game.status === "active";
-    if (prevYourTurnRef.current === false && isYourTurn) play("your-turn");
+    const prev = prevYourTurnRef.current;
     prevYourTurnRef.current = isYourTurn;
-  }, [game, play]);
+    if (prev === false && isYourTurn) play("your-turn");
+  }, [game, viewerId, play]);
 
   // Sound: opponent joins the lobby.
   useEffect(() => {
@@ -206,18 +227,12 @@ export function GameClient({ code }: { code: string }) {
     if (prevStatus === "waiting" && game.status === "active") {
       play("game-start");
     } else if (prevStatus === "active" && game.status === "completed") {
-      const viewerId =
-        game.viewerSlot === 1
-          ? game.players.one?.id
-          : game.viewerSlot === 2
-            ? game.players.two?.id
-            : null;
       if (!game.winnerId) play("draw");
       else if (viewerId && game.winnerId === viewerId) play("win");
       else play("lose");
     }
     prevStatusRef.current = game.status;
-  }, [game, play]);
+  }, [game, viewerId, play]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

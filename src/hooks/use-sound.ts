@@ -35,6 +35,11 @@ const SOUND_FILES: Record<SoundName, string> = {
   draw: "/sounds/draw.mp3",
 };
 
+// Number of pre-created <audio> elements kept per sound. Overlapping triggers
+// (opponent's word + tile lock + "your turn" can all land in the same tick)
+// rotate through the pool instead of cutting each other off.
+const POOL_SIZE = 3;
+
 interface SoundContextValue {
   muted: boolean;
   toggleMuted: () => void;
@@ -49,19 +54,28 @@ export function useSoundState(): SoundContextValue {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(MUTED_KEY) === "1";
   });
-  // Cache one <audio> element per sound so the browser only fetches/decodes it once.
-  // Each play() clones the node so overlapping/rapid triggers don't cut each other off.
-  const cacheRef = useRef<Partial<Record<SoundName, HTMLAudioElement>>>({});
+  // A small pool of <audio> elements per sound. These exact elements are the
+  // ones primeAll() unlocks during a user gesture and the ones play() reuses
+  // afterwards -- browsers gate autoplay per element, so a freshly created or
+  // cloned node would be blocked even after priming.
+  const poolRef = useRef<Partial<Record<SoundName, HTMLAudioElement[]>>>({});
   const primedRef = useRef(false);
+  // Elements currently mid-priming. The first gesture primes and plays a click
+  // sound at the same time, so priming must never pause an element that play()
+  // has since taken over.
+  const primingRef = useRef<WeakSet<HTMLAudioElement>>(new WeakSet());
 
-  const getOrCreate = useCallback((name: SoundName) => {
-    let base = cacheRef.current[name];
-    if (!base) {
-      base = new Audio(SOUND_FILES[name]);
-      base.preload = "auto";
-      cacheRef.current[name] = base;
+  const getPool = useCallback((name: SoundName) => {
+    let pool = poolRef.current[name];
+    if (!pool) {
+      pool = Array.from({ length: POOL_SIZE }, () => {
+        const el = new Audio(SOUND_FILES[name]);
+        el.preload = "auto";
+        return el;
+      });
+      poolRef.current[name] = pool;
     }
-    return base;
+    return pool;
   }, []);
 
   const toggleMuted = useCallback(() => {
@@ -76,45 +90,71 @@ export function useSoundState(): SoundContextValue {
     (name: SoundName) => {
       if (muted || typeof window === "undefined") return;
       try {
-        const base = getOrCreate(name);
-        const instance = base.cloneNode(true) as HTMLAudioElement;
-        instance.volume = 1;
+        const pool = getPool(name);
+        // Prefer an idle element that isn't mid-priming; otherwise steal the first.
+        const el =
+          pool.find(
+            (candidate) =>
+              (candidate.paused || candidate.ended) && !primingRef.current.has(candidate),
+          ) ?? pool[0];
+        // Claim it so a pending priming callback won't pause it underneath us.
+        primingRef.current.delete(el);
+        el.muted = false;
+        el.volume = 1;
+        el.currentTime = 0;
         // Missing/undecodable files reject the play() promise -- swallow it so
         // gameplay never breaks while sound assets are still being sourced.
-        void instance.play().catch(() => {});
+        void el.play().catch(() => {});
       } catch {
         // Ignore playback errors.
       }
     },
-    [muted, getOrCreate],
+    [muted, getPool],
   );
 
-  // Browsers block audio.play() until the page has received a user gesture.
-  // Realtime-driven sounds (opponent moved, your turn, lock, game over) can
-  // fire with no gesture in the call stack, so they'd silently get blocked
-  // forever on a tab that hasn't been touched yet. Call this once on the
-  // first pointerdown/keydown/touchstart anywhere on the page to "unlock"
-  // every sound (play + immediately pause/rewind at ~0 volume) while a
-  // gesture is active, so later programmatic play() calls succeed.
+  // Browsers block audio.play() until the page has received a user gesture,
+  // and the permission is granted per <audio> element. Realtime-driven sounds
+  // (opponent moved, your turn, lock, game over) fire with no gesture in the
+  // call stack, so without priming they get silently blocked on a tab that
+  // hasn't been touched. Called from a real gesture handler: start every
+  // pooled element unmuted at volume 0 and pause it again immediately, which
+  // marks each element as user-activated for later programmatic play() calls.
   const primeAll = useCallback(() => {
     if (primedRef.current || typeof window === "undefined") return;
     primedRef.current = true;
     (Object.keys(SOUND_FILES) as SoundName[]).forEach((name) => {
-      const base = getOrCreate(name);
-      const instance = base.cloneNode(true) as HTMLAudioElement;
-      instance.muted = true;
-      instance
-        .play()
-        .then(() => {
-          instance.pause();
-          instance.currentTime = 0;
-        })
-        .catch(() => {
-          // If even the muted priming play fails, allow a retry on the next gesture.
+      getPool(name).forEach((el) => {
+        // Unmuted playback is what actually lifts the per-element gate in
+        // WebKit; volume 0 keeps the priming inaudible.
+        el.muted = false;
+        el.volume = 0;
+        primingRef.current.add(el);
+        const settle = () => {
+          // play() took this element over in the meantime -- leave it alone.
+          if (!primingRef.current.has(el)) return;
+          primingRef.current.delete(el);
+          el.pause();
+          el.currentTime = 0;
+          el.volume = 1;
+        };
+        try {
+          const started = el.play();
+          if (started) {
+            started.then(settle).catch(() => {
+              settle();
+              // Allow a retry on the next gesture.
+              primedRef.current = false;
+            });
+          } else {
+            settle();
+          }
+        } catch {
+          settle();
           primedRef.current = false;
-        });
+        }
+      });
     });
-  }, [getOrCreate]);
+  }, [getPool]);
 
   return { muted, toggleMuted, play, primeAll };
 }
