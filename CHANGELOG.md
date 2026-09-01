@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/SouravShrestha/word-lock/compare/word-lock-v1.2.0...word-lock-v1.2.1) (2026-09-01)
+
+
+### Bug Fixes
+
+* **dictionary:** regenerate wordlist from words_alpha.txt with 3-12 letter cap ([39f33d8](https://github.com/SouravShrestha/word-lock/commit/39f33d8fc7c2b823e56ff0ec94b4dc9a2b3c4d08))
+
 ## [1.2.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-v1.1.0...word-lock-v1.2.0) (2026-08-18)
 
 
