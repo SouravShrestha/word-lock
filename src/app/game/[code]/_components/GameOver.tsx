@@ -1,6 +1,13 @@
+"use client";
+
 import { CelebrateIcon } from "@/components/icons/CelebrateIcon";
 import { MainMenuIcon } from "@/components/icons/MainMenuIcon";
+import { StarIcon } from "@/components/icons/StarIcon";
+import { LeagueIcon, LEAGUE_TEXT_CLASS } from "@/components/icons/LeagueIcon";
 import { Tile, type TileOwner } from "@/components/Tile";
+import { useAccount } from "@/hooks/use-account";
+import { leagueChange, leagueForStars } from "@/lib/account/leagues";
+import { cn } from "@/lib/utils";
 import { PlayedWords } from "./PlayedWords";
 
 export function GameOver({ game, onNew }: { game: any; onNew: () => void }) {
@@ -72,6 +79,9 @@ export function GameOver({ game, onNew }: { game: any; onNew: () => void }) {
           </div>
         </div>
 
+        {/* Star movement */}
+        <StarResult game={game} />
+
         {/* Word history */}
         <div className="mb-3 w-full">
           <PlayedWords game={game} />
@@ -95,12 +105,65 @@ export function GameOver({ game, onNew }: { game: any; onNew: () => void }) {
         {/* CTA */}
         <button
           onClick={onNew}
-          className="chunky-btn w-full bg-primary py-2 text-primary-foreground font-semibold flex items-center justify-center gap-2"
+          className="chunky-btn btn-primary w-full py-2 font-semibold flex items-center justify-center gap-2"
         >
           <MainMenuIcon className="w-4 h-4" color="currentColor" />
           Back to lobby
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The viewer's star change from this game, with a callout when it crossed a
+ * league boundary.
+ *
+ * Renders nothing at all when the game was unranked. The server records a null
+ * delta in that case — one side was a guest — and "0 stars" would read as a
+ * result rather than as the absence of one.
+ *
+ * The delta comes from the game payload, which is authoritative and immutable
+ * once the game is complete. The *league* change has to be worked back from the
+ * account's current star count, since only the total is stored: after minus the
+ * delta is where the player stood before. `GameClient` refreshes the account
+ * summary on completion so that total is the post-game one.
+ */
+function StarResult({ game }: { game: any }) {
+  const { data: account } = useAccount();
+
+  const slot = game.viewerSlot as 1 | 2 | null;
+  const delta: number | null = slot ? (game.starDeltas?.[slot] ?? null) : null;
+
+  if (delta === null) return null;
+
+  const after = account?.stars ?? null;
+  const league = after !== null ? leagueForStars(after) : null;
+  const change = after !== null ? leagueChange(after - delta, after) : null;
+
+  const gained = delta > 0;
+
+  return (
+    <div className="mb-4 flex flex-col items-center gap-1.5">
+      <span className={cn("stat-pill text-base", gained ? "text-mint" : "text-muted-foreground")}>
+        <StarIcon className="h-5 w-5" />
+        <span className="font-display font-bold tabular-nums">
+          {gained ? "+" : ""}
+          {delta}
+        </span>
+      </span>
+
+      {change && league && (
+        <span
+          className={cn(
+            "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider",
+            LEAGUE_TEXT_CLASS[league.id],
+          )}
+        >
+          <LeagueIcon league={league.id} className="h-5 w-5" />
+          {change === "promotion" ? `Promoted to ${league.name}` : `Dropped to ${league.name}`}
+        </span>
+      )}
     </div>
   );
 }

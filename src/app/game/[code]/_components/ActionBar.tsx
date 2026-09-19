@@ -26,7 +26,7 @@ export function ActionBar({
       <button
         onClick={onPass}
         disabled={!yourTurn || passPending}
-        className="chunky-btn flex-1 flex flex-col items-center justify-center gap-0.5 bg-card py-2 text-foreground hover:bg-card disabled:pointer-events-none"
+        className="chunky-btn btn-card [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
         aria-label="Pass turn"
       >
         <SkipIcon className="w-4 h-4" />
@@ -35,7 +35,7 @@ export function ActionBar({
       <button
         onClick={onClear}
         disabled={!yourTurn || selectionLength === 0}
-        className="chunky-btn flex-1 flex flex-col items-center justify-center gap-0.5 bg-card py-2 text-foreground hover:bg-card disabled:pointer-events-none"
+        className="chunky-btn btn-card [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
         aria-label="Clear selection"
       >
         <BinIcon className="w-4 h-4" />
@@ -44,7 +44,7 @@ export function ActionBar({
       <button
         onClick={onBackspace}
         disabled={!yourTurn || selectionLength === 0}
-        className="chunky-btn flex-1 flex flex-col items-center justify-center gap-0.5 bg-card py-2 text-foreground hover:bg-card disabled:pointer-events-none"
+        className="chunky-btn btn-card [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
         aria-label="Remove last tile"
       >
         <Delete className="w-4 h-4" />
@@ -53,7 +53,7 @@ export function ActionBar({
       <button
         onClick={onSubmit}
         disabled={!yourTurn || selectionLength < 3 || submitPending}
-        className="chunky-btn flex-1 flex flex-col items-center justify-center gap-0.5 bg-primary py-2 text-primary-foreground disabled:pointer-events-none"
+        className="chunky-btn btn-primary [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
         aria-label="Submit word"
       >
         <svg

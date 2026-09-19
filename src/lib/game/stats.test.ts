@@ -7,9 +7,9 @@ const OPP_A = "player-opp-a";
 const OPP_B = "player-opp-b";
 
 const players: PlayerRow[] = [
-  { id: ME, session_id: "s-me", display_name: "Me" },
-  { id: OPP_A, session_id: "s-a", display_name: "Alice" },
-  { id: OPP_B, session_id: "s-b", display_name: "Bob" },
+  { id: ME, session_id: "s-me", username: "me" },
+  { id: OPP_A, session_id: "s-a", username: "alice" },
+  { id: OPP_B, session_id: "s-b", username: "bob" },
 ];
 
 function game(overrides: Partial<StatsGameInput> & { id: string }): StatsGameInput {
@@ -20,6 +20,8 @@ function game(overrides: Partial<StatsGameInput> & { id: string }): StatsGameInp
     status: "completed",
     winner_id: null,
     last_move_at: "2024-01-01T00:00:00.000Z",
+    p1_star_delta: null,
+    p2_star_delta: null,
     scores: { 1: 13, 2: 12 },
     ...overrides,
   };
@@ -46,7 +48,7 @@ describe("computeStats", () => {
     expect(stats.overview).toEqual({ wins: 1, losses: 0, draws: 0, total: 1 });
     expect(stats.recentGames[0]).toMatchObject({
       opponentId: OPP_A,
-      opponentName: "Alice",
+      opponentName: "alice",
       yourScore: 15,
       opponentScore: 10,
       result: "win",
@@ -67,7 +69,7 @@ describe("computeStats", () => {
     expect(stats.overview).toEqual({ wins: 0, losses: 1, draws: 0, total: 1 });
     expect(stats.recentGames[0]).toMatchObject({
       opponentId: OPP_A,
-      opponentName: "Alice",
+      opponentName: "alice",
       yourScore: 5,
       opponentScore: 20,
       result: "loss",

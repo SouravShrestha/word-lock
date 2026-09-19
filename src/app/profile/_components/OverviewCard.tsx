@@ -8,7 +8,7 @@ export function OverviewCard({
   winRate: number | null;
 }) {
   return (
-    <section className="neo p-4">
+    <section className="surface p-4">
       <h2 className="eyebrow text-xs text-muted-foreground mb-3">Overall record</h2>
       <div className="grid grid-cols-4 gap-2 text-center">
         <Stat label="Wins" value={overview.wins} accent="text-p2" />

@@ -22,12 +22,12 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={mounted && theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className="chunky-btn grid h-10 w-10 place-items-center bg-card text-foreground"
+      className="soft-icon-btn btn-surface h-9 w-9"
     >
       {mounted && theme === "dark" ? (
-        <Sun className="h-5 w-5" aria-hidden />
+        <Sun className="h-[1.1rem] w-[1.1rem]" aria-hidden />
       ) : (
-        <Moon className="h-5 w-5" aria-hidden />
+        <Moon className="h-[1.1rem] w-[1.1rem]" aria-hidden />
       )}
     </button>
   );

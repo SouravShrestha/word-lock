@@ -1,5 +1,14 @@
 // Server-only Word-lock game service. Holds all trusted game logic.
+//
+// Identity is never taken from a raw session id here. Every entry point receives
+// a `Caller` built by `resolveCaller` in the route handler, and resolves it via
+// `resolvePlayer`, so a logged-in player is identified by their verified account
+// rather than by whatever the request body claimed.
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
+import { UNNAMED_PLAYER } from "@/lib/account/names";
+import { resolvePlayer, type Caller } from "./identity.server";
+import { touchPlayStreak } from "./streak.server";
+import { computeStarOutcome } from "./stars.server";
 import { getDictionary, isWord } from "./dictionary.server";
 import {
   computeBoardState,
@@ -10,6 +19,7 @@ import {
   type PlayerSlot,
 } from "./engine";
 import { computeStats, MAX_RECENT_GAMES, type StatsGameInput } from "./stats";
+import type { GamePlayerRow, GameRow, MoveRow, PlayerRow } from "./rows";
 
 export const MAX_ACTIVE_GAMES = 5;
 export const TURN_LIMIT_MS = 24 * 60 * 60 * 1000;
@@ -24,63 +34,9 @@ function makeRoomCode(length = 5) {
   return out;
 }
 
-export interface PlayerRow {
-  id: string;
-  session_id: string;
-  display_name: string;
-}
-
-export interface GameRow {
-  id: string;
-  room_code: string;
-  grid: string;
-  player1_id: string;
-  player2_id: string | null;
-  current_turn_player_id: string | null;
-  status: "waiting" | "active" | "completed";
-  winner_id: string | null;
-  end_reason: string | null;
-  last_move_at: string;
-  created_at: string;
-}
-
-export interface MoveRow {
-  id: string;
-  game_id: string;
-  player_id: string;
-  word: string;
-  tile_indices: number[];
-  passed: boolean;
-  created_at: string;
-}
-
-export async function ensurePlayer(sessionId: string, displayName?: string): Promise<PlayerRow> {
-  const clean = (displayName ?? "").trim().slice(0, 24);
-  const { data: existing } = await getSupabaseAdmin()
-    .from("wl_players")
-    .select("id, session_id, display_name")
-    .eq("session_id", sessionId)
-    .maybeSingle();
-
-  if (existing) {
-    if (clean && clean !== existing.display_name) {
-      await getSupabaseAdmin()
-        .from("wl_players")
-        .update({ display_name: clean })
-        .eq("id", existing.id);
-      return { ...(existing as PlayerRow), display_name: clean };
-    }
-    return existing as PlayerRow;
-  }
-
-  const { data, error } = await getSupabaseAdmin()
-    .from("wl_players")
-    .insert({ session_id: sessionId, display_name: clean || "Player" })
-    .select("id, session_id, display_name")
-    .single();
-  if (error) throw new Error(error.message);
-  return data as PlayerRow;
-}
+// Re-exported so existing importers keep working; the definitions live in
+// `rows.ts` to avoid a cycle with `identity.server.ts`.
+export type { PlayerRow, PlayerAccountRow, GamePlayerRow, GameRow, MoveRow } from "./rows";
 
 function toEngineMoves(game: GameRow, moves: MoveRow[]): EngineMove[] {
   return moves.map((m) => ({
@@ -107,14 +63,16 @@ export async function loadGame(roomCode: string) {
       .order("created_at", { ascending: true }),
     getSupabaseAdmin()
       .from("wl_players")
-      .select("id, session_id, display_name")
+      // user_id comes along so the fetch route can identify a logged-in viewer
+      // without trusting the session id in the request body.
+      .select("id, session_id, username, user_id")
       .in("id", [game.player1_id, game.player2_id].filter(Boolean) as string[]),
   ]);
 
   return {
     game: game as GameRow,
     moves: (moves ?? []) as MoveRow[],
-    players: (players ?? []) as PlayerRow[],
+    players: (players ?? []) as GamePlayerRow[],
   };
 }
 
@@ -138,9 +96,15 @@ export function serializeGame(
     lastMoveAt: game.last_move_at,
     currentTurnPlayerId: game.current_turn_player_id,
     turnDeadline: new Date(new Date(game.last_move_at).getTime() + TURN_LIMIT_MS).toISOString(),
+    /*
+     * `name` is the account's username. It is nullable because a row can exist
+     * before a handle is claimed, and the UI falls back rather than rendering
+     * "null" — but in practice every player in a real game has one, since login
+     * and the username sheet both come first.
+     */
     players: {
-      one: p1 ? { id: p1.id, name: p1.display_name } : null,
-      two: p2 ? { id: p2.id, name: p2.display_name } : null,
+      one: p1 ? { id: p1.id, name: p1.username ?? UNNAMED_PLAYER } : null,
+      two: p2 ? { id: p2.id, name: p2.username ?? UNNAMED_PLAYER } : null,
     },
     viewerSlot: viewerId
       ? viewerId === game.player1_id
@@ -149,6 +113,16 @@ export function serializeGame(
           ? 2
           : null
       : null,
+    /*
+     * Star movement from this game, per slot. Null until the game completes, and
+     * null forever on an unranked game (one where either side was a guest) —
+     * which is exactly how the end-of-game screen decides whether to show a
+     * delta at all.
+     */
+    starDeltas: {
+      1: game.p1_star_delta,
+      2: game.p2_star_delta,
+    },
     owners: state.owners,
     locked: state.locked,
     scores: state.scores,
@@ -168,6 +142,8 @@ export function serializeGame(
 
 export type SerializedGame = ReturnType<typeof serializeGame>;
 
+export { findViewerId } from "./viewer";
+
 async function countActiveGames(playerId: string) {
   const { count } = await getSupabaseAdmin()
     .from("wl_games")
@@ -177,8 +153,8 @@ async function countActiveGames(playerId: string) {
   return count ?? 0;
 }
 
-export async function createGame(sessionId: string, displayName?: string) {
-  const player = await ensurePlayer(sessionId, displayName);
+export async function createGame(caller: Caller) {
+  const player = await resolvePlayer(caller);
   if ((await countActiveGames(player.id)) >= MAX_ACTIVE_GAMES) {
     throw new Error(
       `You already have ${MAX_ACTIVE_GAMES} games on the go. Finish one before starting another.`,
@@ -206,8 +182,8 @@ export async function createGame(sessionId: string, displayName?: string) {
   throw new Error("Couldn't allocate a room code. Try again.");
 }
 
-export async function joinGame(sessionId: string, roomCode: string, displayName?: string) {
-  const player = await ensurePlayer(sessionId, displayName);
+export async function joinGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
   if (!loaded) throw new Error("No game found with that code.");
   const { game } = loaded;
@@ -233,8 +209,8 @@ export async function joinGame(sessionId: string, roomCode: string, displayName?
   return { roomCode: game.room_code };
 }
 
-export async function startGame(sessionId: string, roomCode: string) {
-  const player = await ensurePlayer(sessionId);
+export async function startGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
   const { data: game } = await getSupabaseAdmin()
     .from("wl_games")
     .select("id, status, player1_id, player2_id")
@@ -259,8 +235,8 @@ export async function startGame(sessionId: string, roomCode: string) {
   return { ok: true };
 }
 
-export async function destroyGame(sessionId: string, roomCode: string) {
-  const player = await ensurePlayer(sessionId);
+export async function destroyGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
   const { data: game } = await getSupabaseAdmin()
     .from("wl_games")
     .select("id, status, player1_id")
@@ -275,8 +251,8 @@ export async function destroyGame(sessionId: string, roomCode: string) {
   return { ok: true };
 }
 
-export async function forfeitGame(sessionId: string, roomCode: string) {
-  const player = await ensurePlayer(sessionId);
+export async function forfeitGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
   const { data: game } = await getSupabaseAdmin()
     .from("wl_games")
     .select("id, status, player1_id, player2_id")
@@ -292,15 +268,30 @@ export async function forfeitGame(sessionId: string, roomCode: string) {
 
   const winnerId = isPlayer1 ? game.player2_id : game.player1_id;
 
-  await getSupabaseAdmin()
+  // A forfeit is a real result, so it moves stars like any other completion. The
+  // full row is needed for the star calculation, which the narrow select above
+  // does not provide.
+  const loaded = await loadGame(roomCode);
+  const { outcome, commit } = loaded
+    ? await computeStarOutcome(loaded.game, winnerId)
+    : { outcome: { p1Delta: null, p2Delta: null }, commit: async () => {} };
+
+  const { data: completed } = await getSupabaseAdmin()
     .from("wl_games")
     .update({
       status: "completed",
       winner_id: winnerId,
       end_reason: "forfeit",
       last_move_at: new Date().toISOString(),
+      p1_star_delta: outcome.p1Delta,
+      p2_star_delta: outcome.p2Delta,
     })
-    .eq("id", game.id);
+    .eq("id", game.id)
+    .neq("status", "completed")
+    .select("id")
+    .maybeSingle();
+
+  if (completed) await commit();
 
   return { ok: true };
 }
@@ -312,15 +303,30 @@ async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
   if (state.finished) {
     const winnerId =
       state.winnerSlot === 1 ? game.player1_id : state.winnerSlot === 2 ? game.player2_id : null;
-    await getSupabaseAdmin()
+
+    const { outcome, commit } = await computeStarOutcome(game, winnerId);
+
+    const { data: completed } = await getSupabaseAdmin()
       .from("wl_games")
       .update({
         status: "completed",
         winner_id: winnerId,
         end_reason: state.endReason,
         last_move_at: now,
+        p1_star_delta: outcome.p1Delta,
+        p2_star_delta: outcome.p2Delta,
       })
-      .eq("id", game.id);
+      .eq("id", game.id)
+      /*
+       * Only the request that actually flips the game to completed applies the
+       * stars. Two requests racing to finish the same game would otherwise each
+       * award a full delta.
+       */
+      .neq("status", "completed")
+      .select("id")
+      .maybeSingle();
+
+    if (completed) await commit();
     return;
   }
 
@@ -334,12 +340,12 @@ async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
 }
 
 export async function submitMove(
-  sessionId: string,
+  caller: Caller,
   roomCode: string,
   word: string,
   tileIndices: number[],
 ) {
-  const player = await ensurePlayer(sessionId);
+  const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
   if (!loaded) throw new Error("No game found with that code. ");
   const { game, moves } = loaded;
@@ -370,11 +376,12 @@ export async function submitMove(
   if (error) throw new Error(error.message);
 
   await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  await touchPlayStreak(player, caller.timezone);
   return { ok: true };
 }
 
-export async function passTurn(sessionId: string, roomCode: string) {
-  const player = await ensurePlayer(sessionId);
+export async function passTurn(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
   if (!loaded) throw new Error("No game found with that code. ");
   const { game, moves } = loaded;
@@ -390,11 +397,13 @@ export async function passTurn(sessionId: string, roomCode: string) {
   if (error) throw new Error(error.message);
 
   await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  // A pass is still a turn taken, so it counts toward the daily streak.
+  await touchPlayStreak(player, caller.timezone);
   return { ok: true };
 }
 
-export async function listGamesForSession(sessionId: string, displayName?: string) {
-  const player = await ensurePlayer(sessionId, displayName);
+export async function listGamesForSession(caller: Caller) {
+  const player = await resolvePlayer(caller);
   const { data: games } = await getSupabaseAdmin()
     .from("wl_games")
     .select("*")
@@ -416,7 +425,7 @@ export async function listGamesForSession(sessionId: string, displayName?: strin
       : Promise.resolve({ data: [] as MoveRow[] }),
     getSupabaseAdmin()
       .from("wl_players")
-      .select("id, session_id, display_name")
+      .select("id, session_id, username")
       .in("id", Array.from(playerIds)),
   ]);
 
@@ -428,7 +437,7 @@ export async function listGamesForSession(sessionId: string, displayName?: strin
   }
 
   return {
-    player: { id: player.id, name: player.display_name },
+    player: { id: player.id, name: player.username ?? UNNAMED_PLAYER },
     games: rows.map((game) => {
       const gameMoves = (byGame.get(game.id) ?? []).sort((a, b) =>
         a.created_at.localeCompare(b.created_at),
@@ -438,8 +447,8 @@ export async function listGamesForSession(sessionId: string, displayName?: strin
   };
 }
 
-export async function getPlayerStats(sessionId: string) {
-  const player = await ensurePlayer(sessionId);
+export async function getPlayerStats(caller: Caller) {
+  const player = await resolvePlayer(caller);
   const { data: games } = await getSupabaseAdmin()
     .from("wl_games")
     .select("*")
@@ -449,7 +458,7 @@ export async function getPlayerStats(sessionId: string) {
 
   const rows = (games ?? []) as GameRow[];
   // Only the most recent games need move history (for score computation) and
-  // opponent display names — overview counts are derived from winner_id alone.
+  // opponent names — overview counts are derived from winner_id alone.
   const recentRows = rows.slice(0, MAX_RECENT_GAMES);
   const recentIds = recentRows.map((g) => g.id);
   const playerIds = new Set<string>();
@@ -465,7 +474,7 @@ export async function getPlayerStats(sessionId: string) {
     playerIds.size
       ? getSupabaseAdmin()
           .from("wl_players")
-          .select("id, session_id, display_name")
+          .select("id, session_id, username")
           .in("id", Array.from(playerIds))
       : Promise.resolve({ data: [] as PlayerRow[] }),
   ]);
@@ -495,6 +504,8 @@ export async function getPlayerStats(sessionId: string) {
       status: game.status,
       winner_id: game.winner_id,
       last_move_at: game.last_move_at,
+      p1_star_delta: game.p1_star_delta,
+      p2_star_delta: game.p2_star_delta,
       scores,
     };
   });
@@ -541,8 +552,8 @@ export async function sweepExpiredTurns() {
  * Client-triggered timeout for a specific game.
  * Verifies the player is in the game, the game is active, and the current turn has expired.
  */
-export async function timeoutGame(sessionId: string, roomCode: string) {
-  const player = await ensurePlayer(sessionId);
+export async function timeoutGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
   if (!loaded) throw new Error("No game found with that code. ");
   const { game, moves } = loaded;
@@ -575,8 +586,8 @@ export async function timeoutGame(sessionId: string, roomCode: string) {
   return { ok: true };
 }
 
-export async function leaveLobby(sessionId: string, roomCode: string) {
-  const player = await ensurePlayer(sessionId);
+export async function leaveLobby(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
   const { data: game } = await getSupabaseAdmin()
     .from("wl_games")
     .select("id, status, player1_id, player2_id")

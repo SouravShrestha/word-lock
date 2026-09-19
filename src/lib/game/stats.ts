@@ -19,6 +19,9 @@ export interface StatsGameInput {
   status: "waiting" | "active" | "completed";
   winner_id: string | null;
   last_move_at: string;
+  /** Star movement per slot. Null on an unranked game, or before completion. */
+  p1_star_delta: number | null;
+  p2_star_delta: number | null;
   scores: { 1: number; 2: number };
 }
 
@@ -38,6 +41,11 @@ export interface RecentGameEntry {
   opponentScore: number;
   result: GameResult;
   completedAt: string;
+  /**
+   * Stars this game moved for the viewer, or null if it was unranked — which is
+   * how the row decides whether to show a delta rather than a misleading zero.
+   */
+  starDelta: number | null;
 }
 
 export interface PlayerStats {
@@ -75,7 +83,7 @@ export function computeStats(
 
     const opponentId = isPlayer1 ? game.player2_id : game.player1_id;
     const opponentName = opponentId
-      ? (playerById.get(opponentId)?.display_name ?? "Unknown")
+      ? (playerById.get(opponentId)?.username ?? "Unknown")
       : "Unknown";
 
     const yourScore = isPlayer1 ? game.scores[1] : game.scores[2];
@@ -104,6 +112,7 @@ export function computeStats(
       opponentScore,
       result,
       completedAt: game.last_move_at,
+      starDelta: isPlayer1 ? game.p1_star_delta : game.p2_star_delta,
     });
   }
 

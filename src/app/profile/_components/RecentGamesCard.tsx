@@ -10,7 +10,7 @@ export function RecentGamesCard({
   onSelect: (entry: RecentGameEntry) => void;
 }) {
   return (
-    <section className="neo p-4">
+    <section className="surface p-4">
       <h2 className="eyebrow text-xs text-muted-foreground mb-3">Recent games</h2>
       <ul className="flex flex-col gap-y-4">
         {recentGames.map((entry) => (
@@ -27,7 +27,18 @@ export function RecentGamesCard({
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-sm font-mono tabular-nums text-muted-foreground">
+                {/* Omitted entirely on an unranked game: no delta was recorded. */}
+                {entry.starDelta !== null && (
+                  <span
+                    className={`text-xs font-bold tabular-nums ${
+                      entry.starDelta > 0 ? "text-mint" : "text-muted-foreground"
+                    }`}
+                  >
+                    {entry.starDelta > 0 ? "+" : ""}
+                    {entry.starDelta}★
+                  </span>
+                )}
+                <span className="text-sm font-semibold tabular-nums text-muted-foreground">
                   {entry.yourScore}-{entry.opponentScore}
                 </span>
                 <ResultBadge result={entry.result} />

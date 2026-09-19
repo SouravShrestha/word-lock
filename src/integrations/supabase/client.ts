@@ -1,6 +1,17 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "./types";
 
+/**
+ * Browser Supabase client. Used for Realtime subscriptions and for all
+ * client-side auth calls (`signInWithOAuth`, `signInWithOtp`, `signOut`).
+ *
+ * Built with `createBrowserClient` from `@supabase/ssr` rather than plain
+ * `createClient` so the session lives in cookies instead of localStorage.
+ * That matters for two reasons: route handlers can then see who the caller is
+ * (localStorage is invisible to the server), and the PKCE code verifier is
+ * written to a cookie where `/auth/callback` can read it to complete the
+ * exchange. Session persistence and token refresh are on by default.
+ */
 function createSupabaseClient() {
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -13,13 +24,7 @@ function createSupabaseClient() {
     throw new Error(`Missing Supabase environment variable(s): ${missing.join(", ")}`);
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      storage: typeof window !== "undefined" ? localStorage : undefined,
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  });
+  return createBrowserClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 let _supabase: ReturnType<typeof createSupabaseClient> | undefined;

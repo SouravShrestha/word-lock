@@ -33,7 +33,14 @@ export function ScoreBar({
             p1Active ? "bg-p1-soft ring-2 ring-p1" : "bg-transparent"
           }`}
         >
-          <p className="text-xs font-bold text-p1 truncate max-w-full text-center leading-none mb-2">
+          {/*
+            Usernames run up to MAX_USERNAME_LENGTH, which is wider than this
+            column, so the name is clipped and the full value kept in `title`.
+          */}
+          <p
+            title={game.players.one?.name ?? undefined}
+            className="text-xs font-bold text-p1 truncate max-w-full text-center leading-none mb-2"
+          >
             {game.players.one?.name ?? "-"}
           </p>
           <p className="text-2xl font-bold font-display leading-none">{game.scores[1]}</p>
@@ -50,7 +57,7 @@ export function ScoreBar({
           <button
             onClick={onForfeit}
             disabled={!canForfeit}
-            className="chunky-btn flex items-center justify-center gap-1.5 bg-destructive text-destructive-foreground font-semibold text-xs px-3 py-1.5 disabled:bg-muted disabled:text-muted-foreground disabled:border-muted-foreground w-32"
+            className="chunky-btn btn-danger [--btn-lip:3px] flex items-center justify-center gap-1.5 font-semibold text-xs px-3 py-1.5 disabled:bg-muted disabled:text-muted-foreground w-32"
             aria-label="Quit game"
           >
             <QuitIcon className="w-3.5 h-3.5 shrink-0" />
@@ -64,7 +71,10 @@ export function ScoreBar({
             p2Active ? "bg-p2-soft ring-2 ring-p2" : "bg-transparent"
           }`}
         >
-          <p className="text-xs font-bold text-p2 truncate max-w-full text-center leading-none mb-2">
+          <p
+            title={game.players.two?.name ?? undefined}
+            className="text-xs font-bold text-p2 truncate max-w-full text-center leading-none mb-2"
+          >
             {game.players.two?.name ?? "-"}
           </p>
           <p className="text-2xl font-bold font-display leading-none">{game.scores[2]}</p>

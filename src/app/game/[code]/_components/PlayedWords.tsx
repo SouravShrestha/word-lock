@@ -6,7 +6,7 @@ export function PlayedWords({ game }: { game: any }) {
         {[...game.playedWords].reverse().map((entry: any, i: number) => (
           <li
             key={i}
-            className={`shrink-0 rounded-sm border-2 border-foreground px-2.5 py-1.5 text-xs font-bold ${
+            className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold ${
               entry.playerId === game.players.one?.id
                 ? "bg-p1-soft text-p1-deep"
                 : "bg-p2-soft text-p2-deep"

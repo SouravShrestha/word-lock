@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { loadGame, serializeGame } from "@/lib/game/service.server";
+import { findViewerId, loadGame, serializeGame } from "@/lib/game/service.server";
+import { resolveCaller, roomCodeSchema } from "@/lib/game/identity.server";
 
+// sessionId is optional here, unlike the mutation endpoints: this is the one
+// read path that serves spectators, who have no session of their own yet.
 const schema = z.object({
   sessionId: z.string().uuid().optional(),
-  roomCode: z.string().min(3).max(12),
+  roomCode: roomCodeSchema,
 });
 
 export async function POST(req: Request) {
@@ -20,9 +23,8 @@ export async function POST(req: Request) {
 
     if (!loaded) return NextResponse.json(null);
 
-    const viewerId = sessionId
-      ? (loaded.players.find((p) => p.session_id === sessionId)?.id ?? null)
-      : null;
+    const caller = await resolveCaller(req, { sessionId: sessionId ?? "" });
+    const viewerId = findViewerId(loaded.players, caller);
 
     const result = serializeGame(loaded.game, loaded.moves, loaded.players, viewerId);
     return NextResponse.json(result);

@@ -5,17 +5,35 @@ Word Lock is a real-time 2-player word territory game built on **Next.js 15 App 
 ## Key Architecture Decisions
 
 - **Server-authoritative game logic**: All state mutations go through `src/app/api/game/*/route.ts` route handlers. Clients never mutate game state directly — they call these endpoints and receive updates via Supabase Realtime.
+- **Identity has one seam**: `resolveCaller(request, body)` in `src/lib/game/identity.server.ts` builds a `Caller`, and `resolvePlayer(caller)` turns it into a `wl_players` row. A logged-in caller is identified by their **verified** `user_id` and the body's `sessionId` is ignored; only a guest falls back to it. Never resolve a player from a raw session id anywhere else.
+- **Login is mandatory (client-side)**: an account is required to play. `useAuth().isLoginRequired` is derived (`ready && !user`), and `AuthSheet` renders as a non-dismissable wall whenever it is true — there is no guest mode, no per-surface gating and no "open the login sheet" call anywhere. Note the **API routes still accept a guest `sessionId`**; the gate is UI-only so far. `wl_claim_player` (migration 005) still merges a pre-existing guest row into an account on first login.
 - **Server-only modules**: Files suffixed `.server.ts` (e.g. `src/lib/game/service.server.ts`, `src/lib/game/dictionary.server.ts`, `src/integrations/supabase/client.server.ts`) must **never** be imported in client components. They contain server-side secrets and node-only APIs.
 - **Game engine**: Core tile-claiming, locking, and scoring logic lives in `src/lib/game/engine.ts`. This is shared between server route handlers.
 - **Client API layer**: `src/lib/game/api.client.ts` is the only place client components should call API routes. Do not `fetch` game endpoints inline in components.
 - **Realtime**: `src/integrations/supabase/client.ts` sets up the Supabase browser client used for Realtime subscriptions inside `GameClient.tsx`.
-- **Session identity**: Player identity (name + session ID) is managed via `src/hooks/use-session.ts` using `localStorage`. There is no auth system.
+- **Session identity**: `src/hooks/use-session.ts` holds only the session ID in `localStorage`. It is not an identity — a logged-in caller is identified server-side by their verified `user_id`, and the session ID exists so a row can be created before sign-in and adopted by `wl_claim_player` after. It carries no name, and is reset on sign-out.
+- **Auth**: Supabase Auth with Google OAuth and magic links, cookie-based via `@supabase/ssr`. `src/middleware.ts` refreshes the session cookie, `src/app/auth/callback/route.ts` completes every sign-in, and `src/hooks/use-auth.ts` is the only place client components read auth state. `src/integrations/supabase/client.route.ts` provides the request-scoped auth client for route handlers.
+- **One name per player**: `username` is it — the name opponents see on the score bar, in the lobby and in match history, and the name the leaderboard ranks. Unique (case-insensitively), and settable **once**. Rules live in `src/lib/account/names.ts`. There used to be a separate editable `display_name`; migration 006 dropped it. A name never travels in a request payload: `callerSchema` carries only `sessionId` and `timezone`, and the only naming write in the app is `/api/account/username`. `serializeGame` maps `username` → `players.one/two.name`, falling back to `UNNAMED_PLAYER` since the column is nullable.
+- **Picking a username is mandatory too**: `UsernameSheet` blocks any logged-in account whose `username` is null, so login and naming are one two-step gate. Its only exit is backwards: a back arrow (plus a "Wrong account?" link) calls `signOut()`, which flips `isLoginRequired` and hands the screen to `AuthSheet`. Nothing navigates and nothing is destroyed — the account keeps its stars and games, so logging back in returns to the same sheet. A cross would be the wrong glyph here: there is no state to dismiss to.
+- **All login UI is a bottom sheet**: `src/components/AuthSheet.tsx` and `src/components/UsernameSheet.tsx` build on `src/components/BottomSheet.tsx`. Use its `zClassName` prop to stack sheets — a z-index via `className` moves only the panel and leaves the backdrop behind. Blocking sheets pass `dismissable={false}` (inert backdrop + Escape) and `showHandle={false}`.
+- **Stars, not Elo**: the ladder currency is `stars` (base 200, floor 0), and the maths lives in `src/lib/game/stars.ts`. It keeps Elo's logistic expected-score curve for opponent sensitivity but splits gain from loss (`BASE_GAIN 20` / `BASE_LOSS 14`, `SWING 16`, clamped to +4…+36 and −2…−30), so it is deliberately **not** zero-sum. That inflation is load-bearing: Elo is mean-preserving, so with everyone starting at the same number the upper league bands would be unreachable by construction. Migration 008 renamed `rating`/`peak_rating`/`rating_games` → `stars`/`peak_stars`/`star_games` and `pN_rating_delta` → `pN_star_delta`, and reset every account.
+- **Leagues are derived, never stored**: five bands in `src/lib/account/leagues.ts` (Bronze 0–399, Silver 400–899, Gold 900–1499, Platinum 1500–1999, Diamond 2000+). `leagueForStars` is the only way to get one, so the band and the star count can never disagree and demotion needs no bookkeeping. The module is pure and client-safe; the tier colours live with the artwork in `LeagueIcon.tsx`, not here.
+- **One writer for stars**: `computeStarOutcome` in `src/lib/game/stars.server.ts` keeps a compute/commit split. The deltas go into the same conditional `UPDATE ... .neq("status","completed")` that flips a game to completed, and `commit()` runs only if that update returned a row — that is the whole idempotency guard against two requests racing to finish a game. Only games where **both** players have a `user_id` are ranked; unranked games record null deltas.
+- **Leaderboard has two scopes**: `/api/account/leaderboard?scope=league|global`, top 100 each, no minimum-games gate. Which league the league scope shows is resolved server-side from the viewer's own stars — a caller cannot ask to be ranked in a band they are not in. Ranks are counted (`countAbove`) rather than read off the list, and the count mirrors the full three-part sort order (stars, then games, then account age); comparing stars alone would report every tied account as joint first.
+- **Confirmations**: `src/components/ConfirmDialog.tsx` is the shared "are you sure?" card, matching the in-game back-button warning in `src/components/Header.tsx`.
+- **Inline SVGs use per-instance ids**: any icon with a gradient or clip-path derives its ids from `useId()`. `LeagueIcon.tsx` has eleven gradients and a leaderboard renders a hundred copies of it, so this is not hypothetical there. Hardcoded ids break when the same icon renders twice — unmounting one copy leaves the others pointing at a removed gradient, so they paint unfilled until a repaint.
 
 ## Project Structure
 
 ```
 src/
 ├── app/
+│   ├── auth/callback/     # Completes Google + magic-link sign-in
+│   ├── api/account/       # Account endpoints
+│   │   ├── claim/         # Link account to guest row, merge history
+│   │   ├── summary/       # Username, stars, league, streak for the current caller
+│   │   ├── username/      # Claim a username (+ /check for availability)
+│   │   └── leaderboard/   # Top 100 by league or globally + viewer's ranks
 │   ├── api/game/          # Server-side game mutation endpoints
 │   │   ├── create/        # Create a new game lobby
 │   │   ├── join/          # Join a game by code
@@ -32,10 +50,14 @@ src/
 │   ├── game/[code]/       # Game page
 │   │   └── _components/   # GameClient, WaitingLobby, ActionBar, ScoreBar, etc.
 │   └── join/              # Join page
-├── components/            # Shared UI components (HowToPlay, Tile, Header, etc.)
-├── hooks/                 # use-session, use-mobile
-├── lib/game/              # Game engine, service, dictionary (server-only where marked)
-└── integrations/supabase/ # Supabase client (browser + server)
+├── components/            # Shared UI components (AuthSheet, BottomSheet, Tile, etc.)
+├── hooks/                 # use-session, use-auth, use-account, use-leaderboard, use-mobile
+├── lib/
+│   ├── account/           # Names, leagues, username/leaderboard services, timezone
+│   ├── auth/              # Redirect validation for the auth callback
+│   └── game/              # Engine, service, identity, stars, streak, dictionary
+├── middleware.ts          # Supabase session cookie refresh (edge runtime)
+└── integrations/supabase/ # Supabase clients (browser, service-role, request-scoped)
 ```
 
 ## Development Commands
@@ -52,5 +74,5 @@ npm run format    # Prettier
 
 - Tailwind CSS v4 for all styling — no inline styles.
 - `"use client"` directive is required for any component using hooks or browser APIs.
-- Keep game route handlers thin: validate input with Zod, delegate to `service.server.ts`, return updated state.
+- Keep game route handlers thin: validate input with Zod (extend `callerSchema`), call `resolveCaller`, delegate to `service.server.ts`, return updated state.
 - Tile grid is always 5×5 (25 tiles). Grid indices are 0–24, row-major order.

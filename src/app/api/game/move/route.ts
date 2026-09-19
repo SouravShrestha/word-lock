@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { submitMove } from "@/lib/game/service.server";
+import { callerSchema, resolveCaller, roomCodeSchema } from "@/lib/game/identity.server";
 
-const schema = z.object({
-  sessionId: z.string().uuid(),
-  roomCode: z.string().min(3).max(12),
+const schema = callerSchema.extend({
+  roomCode: roomCodeSchema,
   word: z.string().min(3).max(25),
   tileIndices: z.array(z.number().int().min(0).max(24)).min(3).max(25),
 });
@@ -17,8 +17,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
     }
 
+    const caller = await resolveCaller(req, parsed.data);
     const result = await submitMove(
-      parsed.data.sessionId,
+      caller,
       parsed.data.roomCode.toUpperCase(),
       parsed.data.word,
       parsed.data.tileIndices,

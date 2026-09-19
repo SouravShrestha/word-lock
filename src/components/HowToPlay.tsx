@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { BottomSheet } from "@/components/BottomSheet";
 import { CrossIcon } from "@/components/icons/CrossIcon";
+import { cn } from "@/lib/utils";
 
 const RULES: { title: string; body: string }[] = [
   {
@@ -14,7 +16,7 @@ const RULES: { title: string; body: string }[] = [
   },
   {
     title: "Lock tiles",
-    body: "A tile of yours surrounded on all sides by your own tiles is locked - your opponent can no longer steal it.",
+    body: "A tile of yours surrounded on all sides (non-diagonal) by your own tiles is locked - your opponent can no longer steal it.",
   },
   {
     title: "Win the board",
@@ -22,7 +24,12 @@ const RULES: { title: string; body: string }[] = [
   },
 ];
 
-export function HowToPlay() {
+/**
+ * Trigger + bottom sheet for the rules. The trigger renders inline so the
+ * calling screen controls placement; the sheet itself is portalled to the body
+ * by <BottomSheet />.
+ */
+export function HowToPlay({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -30,48 +37,37 @@ export function HowToPlay() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="chunky-btn absolute bottom-5 right-5 z-40 bg-primary px-4 py-2.5 text-sm text-primary-foreground"
+        className={cn("soft-btn btn-sun px-4 py-2 text-xs", className)}
       >
         How to play?
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/20 p-4 sm:items-center"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            role="dialog"
-            aria-label="How to play"
-            onClick={(e) => e.stopPropagation()}
-            className="neo w-full max-w-md p-6"
+      <BottomSheet open={open} onClose={() => setOpen(false)} label="How to play">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg">How to play</h2>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close"
+            className="soft-icon-btn btn-danger h-8 w-8"
           >
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-lg">How to play</h2>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="flex items-center transition-transform hover:-translate-x-px hover:-translate-y-px active:translate-x-0.5 active:translate-y-0.5"
-              >
-                <CrossIcon className="h-5 w-5 ml-0.5" />
-              </button>
-            </div>
-            <ol className="mt-8 flex flex-col gap-4">
-              {RULES.map((rule, i) => (
-                <li key={rule.title} className="flex gap-3">
-                  <span className="letter-tile mt-0.5 h-7 w-7 shrink-0 text-xs">{i + 1}</span>
-                  <div>
-                    <p className="text-sm font-bold">{rule.title}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                      {rule.body}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
+            <CrossIcon className="h-3.5 w-3.5" />
+          </button>
         </div>
-      )}
+        <ol className="mt-10 flex flex-col gap-4">
+          {RULES.map((rule, i) => (
+            <li key={rule.title} className="flex gap-3">
+              {/* Same extruded fill as the app's buttons, minus the press
+                  behaviour — it is a label, not a control. */}
+              <span className="soft-btn btn-sun mt-0.5 h-7 w-7 shrink-0 text-xs">{i + 1}</span>
+              <div>
+                <p className="text-sm font-bold">{rule.title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{rule.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </BottomSheet>
     </>
   );
 }

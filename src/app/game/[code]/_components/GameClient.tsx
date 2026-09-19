@@ -32,7 +32,7 @@ import { WordPreview } from "./WordPreview";
 
 export function GameClient({ code }: { code: string }) {
   const roomCode = code.toUpperCase();
-  const { sessionId, displayName, isNameSet, ready } = useSession();
+  const { sessionId, ready } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [selection, setSelection] = useState<number[]>([]);
@@ -59,6 +59,20 @@ export function GameClient({ code }: { code: string }) {
       return false;
     },
   });
+
+  /*
+   * Stars move server-side the moment a game completes, so the cached account
+   * summary and leaderboard are stale as soon as the final move lands. Both are
+   * refreshed here: the end-of-game screen works the player's previous league
+   * out from their current star count, and the star pill is waiting for them
+   * back in the lobby.
+   */
+  const isCompleted = game?.status === "completed";
+  useEffect(() => {
+    if (!isCompleted) return;
+    queryClient.invalidateQueries({ queryKey: ["account"] });
+    queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+  }, [isCompleted, queryClient]);
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
@@ -230,7 +244,7 @@ export function GameClient({ code }: { code: string }) {
   });
 
   const joinMutation = useMutation({
-    mutationFn: () => joinGameFn({ sessionId: sessionId!, roomCode, displayName }),
+    mutationFn: () => joinGameFn({ sessionId: sessionId!, roomCode }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
     onError: (error: Error) => toast.error(error.message),
   });
@@ -247,9 +261,15 @@ export function GameClient({ code }: { code: string }) {
     },
   });
 
-  if (!ready || isLoading || !isNameSet) {
+  /*
+   * No name gate here any more. The board used to be held back until a local
+   * display name existed, because joining carried that name up with it. Joining
+   * carries no name now, and the login wall plus the username sheet already sit
+   * above this screen until the player has one.
+   */
+  if (!ready || isLoading) {
     return (
-      <main className="dot-paper mx-auto h-dvh max-w-2xl px-5 py-8 flex items-center justify-center">
+      <main className="mx-auto h-dvh max-w-2xl px-5 py-8 flex items-center justify-center">
         <p className="text-foreground animate-pulse text-lg">Loading your board</p>
       </main>
     );
@@ -281,10 +301,7 @@ export function GameClient({ code }: { code: string }) {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-xl">No game with code {roomCode}</h2>
-            <Link
-              href="/"
-              className="chunky-btn mt-6 inline-block bg-primary px-5 py-2.5 text-primary-foreground"
-            >
+            <Link href="/" className="chunky-btn btn-primary mt-6 inline-block px-5 py-2.5">
               Back to lobby
             </Link>
           </div>
@@ -312,10 +329,11 @@ export function GameClient({ code }: { code: string }) {
   }
 
   if (game.status === "waiting") {
-    // Auto-join if we haven't been assigned a slot yet
+    // Auto-join if we haven't been assigned a slot yet. No longer waits on a
+    // local name: the join payload carries none, and the player's username is
+    // already on their row by the time they can reach a room link.
     if (
       isSpectator &&
-      isNameSet &&
       !joinMutation.isPending &&
       !joinMutation.isSuccess &&
       !joinMutation.isError
