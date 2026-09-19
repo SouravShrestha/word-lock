@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
+import { Rubik } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
 
@@ -13,12 +13,11 @@ import { UsernameSheet } from "@/components/UsernameSheet";
 import { AuthErrorNotice } from "@/components/AuthErrorNotice";
 import "./globals.css";
 
-// Poppins has no variable axis on Google Fonts, so the weights the UI uses are
-// listed explicitly.
-const poppins = Poppins({
+// Rubik is a variable font on Google Fonts, so no explicit weight list is
+// needed.
+const rubik = Rubik({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
+  variable: "--font-rubik",
   display: "swap",
 });
 
@@ -63,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en" suppressHydrationWarning className={poppins.variable}>
+    <html lang="en" suppressHydrationWarning className={rubik.variable}>
       <head>
         <script
           type="application/ld+json"

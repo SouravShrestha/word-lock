@@ -7,8 +7,11 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 import { HowToPlay } from "@/components/HowToPlay";
+import { HomeBackdrop } from "@/components/HomeBackdrop";
 import { Wordmark } from "@/components/Wordmark";
 import { SectionLabel } from "@/components/SectionLabel";
+import { PlayIcon } from "@/components/icons/PlayIcon";
+import { HeartIcon } from "@/components/icons/HeartIcon";
 import { BottomNav, NAV_SHELL, NAV_CONTENT_INSET } from "@/components/BottomNav";
 import { StreakPill, StarsPill } from "@/components/StatPills";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +73,8 @@ export function LobbyClient() {
 
   return (
     <main className={NAV_SHELL}>
+      <HomeBackdrop />
+
       <div className="flex items-center justify-between px-6 pt-5">
         <StreakPill />
         <StarsPill />
@@ -77,7 +82,7 @@ export function LobbyClient() {
 
       {/* Padding clears both the pinned footer row and the nav below it. */}
       <div
-        className={`flex flex-1 flex-col overflow-y-auto pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-24 ${hasGames ? "mt-10" : ""}`}
+        className={`flex flex-1 flex-col overflow-y-hidden pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-24 ${hasGames ? "mt-10" : ""}`}
       >
         {/*
           With nothing to continue, the wordmark + play buttons are the whole
@@ -88,15 +93,20 @@ export function LobbyClient() {
         >
           <Wordmark stacked />
 
-          <div className="mt-12 flex w-full max-w-sm flex-row gap-4 px-5">
+          <div className="mt-16 flex w-full max-w-sm flex-row gap-4 px-5">
             <button
               onClick={() => createMutation.mutate()}
               disabled={!ready || createMutation.isPending}
-              className="soft-btn btn-sky flex-1 px-4 py-3.5 text-base"
+              className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
             >
+              <PlayIcon className="h-3 w-3" />
               {createMutation.isPending ? "Creating…" : "New Game"}
             </button>
-            <Link href="/join" className="soft-btn btn-blush flex-1 px-4 py-3.5 text-base">
+            <Link
+              href="/join"
+              className="soft-btn btn-blush flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
+            >
+              <HeartIcon className="h-3 w-3" />
               Join
             </Link>
           </div>

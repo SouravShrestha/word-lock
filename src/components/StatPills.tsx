@@ -35,7 +35,7 @@ export function StreakPill() {
         className="stat-pill press text-sm text-[#FC9502]"
       >
         <StreakIcon className="h-6 w-6" />
-        <span className="-ml-1 pt-1 text-base tracking-wider">{value}</span>
+        <span className="-ml-1 pt-1 text-base">{value}</span>
       </button>
 
       <StreakSheet
@@ -67,7 +67,7 @@ export function StarsPill() {
       title={`${value} stars · ${leagueById(league).name}`}
     >
       <LeagueIcon league={league} className="h-8 w-9" />
-      <span className="text-base tracking-wider">{value}</span>
+      <span className="text-base">{value}</span>
     </span>
   );
 }

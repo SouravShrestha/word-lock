@@ -12,7 +12,7 @@ export function Wordmark({
   if (stacked) {
     return (
       <Link href="/" className="inline-flex" aria-label="Word-lock home">
-        <WordLockLogo className="h-auto w-[17rem] select-none sm:w-80" />
+        <WordLockLogo className="h-auto w-64 select-none sm:w-80" />
       </Link>
     );
   }

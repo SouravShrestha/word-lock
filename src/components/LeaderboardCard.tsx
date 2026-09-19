@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { LeagueIcon, LEAGUE_TEXT_CLASS } from "@/components/icons/LeagueIcon";
 import { QuestionMarkIcon } from "@/components/icons/QuestionMarkIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
@@ -99,6 +100,11 @@ const PROMOTION_SIZE = 3;
 function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: () => void }) {
   const band = leagueById(league);
   const index = LEAGUES.findIndex((tier) => tier.id === league);
+  const activeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [league]);
 
   return (
     <div className="px-5 pb-6 pt-8 border-b-2 border-border">
@@ -123,11 +129,16 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
 
       <div className="mt-5 flex items-center gap-4 overflow-x-auto -mx-5 px-5">
         {LEAGUES.map((tier, i) => (
-          <LeagueIcon
-            key={tier.id}
-            league={tier.id}
-            className={cn("h-24 w-24 shrink-0", i > index && "opacity-30 grayscale h-16 w-16")}
-          />
+          <div key={tier.id} ref={i === index ? activeRef : undefined} className="shrink-0">
+            <LeagueIcon
+              league={tier.id}
+              className={cn(
+                "h-24 w-24",
+                i != index && "opacity-80 h-16 w-16",
+                i > index && "grayscale opacity-30",
+              )}
+            />
+          </div>
         ))}
       </div>
     </div>
