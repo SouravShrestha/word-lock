@@ -65,6 +65,11 @@
   --color-grape: var(--grape);
   --color-on-accent: var(--on-accent);
   --color-hairline: var(--hairline);
+
+  /* In-game panel fill (grid tiles, word preview, played-words strip). Was
+   * written as `bg-card/30` at every call site; an alpha of the card colour
+   * resolves differently per theme, so the flattened result is a token now. */
+  --color-board: var(--board);
 }
 
 :root {
@@ -113,6 +118,11 @@
   --on-accent: #0f1419;
   --hairline: rgb(15 20 25 / 12%);
   --surface-hairline: rgb(15 20 25 / 12%);
+  /* Light `--card` equals `--background`, so the old `bg-card/30` resolved to
+   * the page background and the panels read as nothing. A step darker than the
+   * page, a step lighter than `--surface-2`, so the edge shows without the fill
+   * competing with the owned-tile tints. */
+  --board: oklch(0.955 0.022 95);
 
   /* Solid "lip" colours painted under each button fill. */
   --depth-sky: #3b6fe8;
@@ -146,6 +156,8 @@
   --on-accent: #0f1419;
   --hairline: #37464F;
   --surface-hairline: transparent;
+  /* #3e4852 at 30% over the #131F24 page background, flattened. */
+  --board: #202B32;
   --depth-surface: #2a3138;
   --depth-surface-2: #333c45;
   --accent: oklch(0.78 0.15 195);
@@ -219,15 +231,14 @@
 @utility tile-face {
   display: grid;
   place-items: center;
-  border-radius: 0.55rem;
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
   user-select: none;
   transition:
-    background-color 150ms ease,
-    transform 100ms ease;
+  background-color 150ms ease,
+  transform 100ms ease;
 }
 
 @utility wordmark {

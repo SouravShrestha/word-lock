@@ -2,25 +2,14 @@ import Link from "next/link";
 
 import { WordLockLogo } from "@/components/WordLockLogo";
 
-export function Wordmark({
-  size = "lg",
-  stacked = false,
-}: {
-  size?: "lg" | "sm";
-  stacked?: boolean;
-}) {
-  if (stacked) {
-    return (
-      <Link href="/" className="inline-flex" aria-label="Word-lock home">
-        <WordLockLogo className="h-auto w-64 select-none sm:w-80" />
-      </Link>
-    );
-  }
-
-  const text = size === "lg" ? "text-2xl" : "text-lg";
+/**
+ * The brand lockup, as a link home. Only the home screen renders it — the side
+ * nav at `lg` is navigation, not a masthead, so it leads with the tabs instead.
+ */
+export function Wordmark() {
   return (
-    <Link href="/" className={`wordmark inline-flex ${text}`} aria-label="Word-lock home">
-      Word<span className="text-sky"> lock</span>
+    <Link href="/" className="inline-flex" aria-label="Word-lock home">
+      <WordLockLogo className="h-auto w-64 select-none sm:w-80" />
     </Link>
   );
 }

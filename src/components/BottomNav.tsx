@@ -6,7 +6,6 @@ import { HomeNavIcon } from "@/components/icons/nav/HomeNavIcon";
 import { HistoryNavIcon } from "@/components/icons/nav/HistoryNavIcon";
 import { TrophyNavIcon } from "@/components/icons/nav/TrophyNavIcon";
 import { ProfileNavIcon } from "@/components/icons/nav/ProfileNavIcon";
-import { Wordmark } from "@/components/Wordmark";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -50,10 +49,6 @@ export function BottomNav() {
         "lg:border-t-0 lg:border-r-2 lg:px-4 lg:py-7",
       )}
     >
-      <div className="hidden px-3 pb-8 lg:block">
-        <Wordmark />
-      </div>
-
       <ul className="mx-auto flex max-w-sm items-stretch pb-[env(safe-area-inset-bottom)] lg:mx-0 lg:max-w-none lg:flex-col lg:gap-1 lg:pb-0">
         {TABS.map(({ href, label, Icon, iconClassName }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);

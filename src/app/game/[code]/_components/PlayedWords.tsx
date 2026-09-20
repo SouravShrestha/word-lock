@@ -1,15 +1,20 @@
+/**
+ * The words played so far, newest first, in the colour of whoever played them.
+ *
+ * The strip keeps its height when the board is still empty rather than
+ * unmounting: it sits between the scoreboard and the word preview, and a panel
+ * that appears on the first move would shunt the grid down under the player's
+ * thumb mid-game.
+ */
 export function PlayedWords({ game }: { game: any }) {
-  if (game.playedWords.length === 0) return null;
   return (
-    <div className="overflow-x-auto no-scrollbar">
-      <ul className="flex gap-1.5">
+    <div className="neo bg-board overflow-x-auto no-scrollbar rounded-none -mx-3 px-5 py-2 md:-mt-2">
+      <ul className="flex h-4 items-center gap-4">
         {[...game.playedWords].reverse().map((entry: any, i: number) => (
           <li
             key={i}
-            className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-bold ${
-              entry.playerId === game.players.one?.id
-                ? "bg-p1-soft text-p1-deep"
-                : "bg-p2-soft text-p2-deep"
+            className={`shrink-0 text-sm font-regular leading-none ${
+              entry.playerId === game.players.one?.id ? "text-p1" : "text-p2"
             }`}
           >
             {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}

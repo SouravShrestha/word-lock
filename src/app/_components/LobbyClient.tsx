@@ -88,7 +88,7 @@ export function LobbyClient() {
         <section
           className={`flex flex-col items-center ${hasGames ? "pb-8 pt-4" : "flex-1 justify-center pb-8"}`}
         >
-          <Wordmark stacked />
+          <Wordmark />
 
           <div className="mt-16 flex w-full max-w-sm flex-row gap-4 px-5">
             <button

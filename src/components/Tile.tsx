@@ -14,30 +14,28 @@ interface TileProps {
   disabled?: boolean;
 }
 
-const getOwnerStyles = (owner: TileOwner, locked: boolean, selected: boolean) => {
-  if (!selected) {
-    // Unselected - original styles unchanged
-    if (owner === 0) return "bg-neutral-tile text-foreground";
-    if (locked) {
-      return owner === 1 ? "bg-p1 text-tile-text" : "bg-p2 text-tile-text";
-    }
-    return owner === 1
-      ? "bg-p1-soft text-p1-deep dark:bg-p1-soft dark:text-p1"
-      : "bg-p2-soft text-p2-deep dark:bg-p2-soft dark:text-p2";
-  }
-
-  // Selected - always bg-primary, lift, then text depends on ownership
-  const lift = "-translate-y-0.5";
-  if (owner === 0) return `bg-primary text-primary-foreground ${lift}`;
-  if (owner === 1) return `bg-primary text-p1 ${lift}`;
-  return `bg-primary text-p2 ${lift}`;
+/*
+ * A tile's fill says who owns it, and never anything else. Locking used to
+ * swap the fill for the owner's vivid colour, which meant ownership was read
+ * from two different shades; now the fill is the owner's soft colour either way
+ * and the lock is the disc drawn on top. Selection overrides both with the
+ * accent, because a tile in the current word is a temporary thing.
+ */
+const getOwnerStyles = (owner: TileOwner, selected: boolean) => {
+  if (selected) return "bg-primary text-on-accent";
+  if (owner === 0) return "bg-board text-foreground";
+  // Light mode keeps the deep tint: the soft fill there is nearly white, so a
+  // white letter would vanish.
+  return owner === 1
+    ? "bg-p1-soft text-p1-deep dark:text-white"
+    : "bg-p2-soft text-p2-deep dark:text-white";
 };
 
-// Circle border is always the locking owner's vivid color, regardless of selection
-const getLockedCircleBorder = (owner: TileOwner) => {
-  if (owner === 1) return "border-p1";
-  if (owner === 2) return "border-p2";
-  return "border-current/50";
+/** The disc is the locking owner's vivid colour, selected or not. */
+const getLockedCircleFill = (owner: TileOwner) => {
+  if (owner === 1) return "bg-p1 text-white";
+  if (owner === 2) return "bg-p2 text-white";
+  return "bg-card/20";
 };
 
 export function Tile({
@@ -57,16 +55,16 @@ export function Tile({
       aria-pressed={selected}
       aria-label={`Letter ${letter}${locked ? ", locked" : ""}`}
       className={cn(
-        "tile-face relative aspect-square w-full text-[clamp(0.85rem,3.5vw,1.25rem)]",
-        getOwnerStyles(owner, locked, selected),
+        "tile-face relative aspect-square w-full text-[clamp(0.85rem,3.5vw,1.25rem)] border-r border-b border-border",
+        getOwnerStyles(owner, selected),
         disabled && "cursor-default",
       )}
     >
       {locked ? (
         <span
           className={cn(
-            "flex items-center justify-center w-[60%] aspect-square rounded-full border-2 bg-black/15",
-            getLockedCircleBorder(owner),
+            "flex items-center justify-center w-[62%] aspect-square rounded-full",
+            getLockedCircleFill(owner),
           )}
         >
           {letter}

@@ -407,6 +407,40 @@ export async function passTurn(caller: Caller, roomCode: string) {
   return { ok: true };
 }
 
+/**
+ * Broadcasts a reaction emoji to both players in a game.
+ *
+ * Purely ephemeral: nothing is written to `wl_games` or `wl_moves`, so a
+ * reaction never appears in history or survives a refresh. The only trust
+ * decision here is authorization — the caller must resolve to one of the two
+ * seats in a game that has actually started — since the emoji itself is
+ * already constrained to a fixed set by the route's schema.
+ */
+export async function sendReaction(caller: Caller, roomCode: string, emoji: string) {
+  const player = await resolvePlayer(caller);
+  const loaded = await loadGame(roomCode);
+  if (!loaded) throw new Error("No game found with that code.");
+  const { game } = loaded;
+
+  if (game.status !== "active") throw new Error("This game isn't active.");
+
+  const slot: PlayerSlot | null =
+    game.player1_id === player.id ? 1 : game.player2_id === player.id ? 2 : null;
+  if (!slot) throw new Error("You're not a player in this game.");
+
+  const channel = getSupabaseAdmin().channel(`game-${game.id}`);
+  try {
+    const result = await channel.httpSend("reaction", { emoji, slot });
+    if (!result.success) throw new Error(result.error ?? "Failed to send reaction.");
+  } finally {
+    // Never subscribed, so there is nothing to unsubscribe — just drop the
+    // client-side handle rather than leaking it for the life of the request.
+    await getSupabaseAdmin().removeChannel(channel);
+  }
+
+  return { ok: true };
+}
+
 export async function listGamesForSession(caller: Caller) {
   const player = await resolvePlayer(caller);
   const { data: games } = await getSupabaseAdmin()

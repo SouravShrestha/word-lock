@@ -35,7 +35,7 @@ export function AboutSheet({
   return (
     <BottomSheet open={open} onClose={onClose} label="About" zClassName={zClassName}>
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg">About</h2>
+        <h2 className="text-lg pl-2">About</h2>
         <button
           type="button"
           onClick={onClose}
@@ -46,19 +46,11 @@ export function AboutSheet({
         </button>
       </div>
 
-      <div className="mt-8 flex flex-col items-center gap-1 text-center">
-        <p className="wordmark text-2xl">
-          Word<span className="text-sky"> lock</span>
-        </p>
+      <div className="mt-8 flex flex-col items-start gap-1 text-center px-2">
         <p className="text-xs font-semibold text-muted-foreground">Version {APP_VERSION}</p>
       </div>
 
-      <p className="mx-auto mt-5 max-w-xs text-center text-sm leading-relaxed text-muted-foreground">
-        A two-player word territory game. Share a 5×5 grid, spell words to claim letters, and lock
-        down tiles your opponent can never take back.
-      </p>
-
-      <div className="mt-6">
+      <div className="mt-4">
         <SettingsGroup>
           <SettingsRow label="Made by" hint={AUTHOR_NAME} href={AUTHOR_URL} />
           <SettingsRow label="What's new" hint="Release notes" href={CHANGELOG_URL} />

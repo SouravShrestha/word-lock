@@ -101,9 +101,15 @@ export function starHistory(
 
   const first = readings[0];
   if (first.delta !== null) {
+    // Undoing the delta only recovers the true pre-game total when the result
+    // itself was not clamped at the floor. A loss that landed at MIN_STARS may
+    // have taken more than `delta` reflects, so `stars - delta` would overstate
+    // the baseline — the floor is what the player actually sat at.
+    const baseline =
+      first.stars <= MIN_STARS ? MIN_STARS : Math.max(MIN_STARS, first.stars - first.delta);
     points.push({
       t: new Date(new Date(first.t).getTime() - 1).toISOString(),
-      stars: Math.max(MIN_STARS, first.stars - first.delta),
+      stars: baseline,
     });
   }
 

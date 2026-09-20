@@ -117,6 +117,10 @@ export async function leaveLobbyFn(data: { sessionId: string; roomCode: string }
   return fetcher("leave", data);
 }
 
+export async function sendReactionFn(data: { sessionId: string; roomCode: string; emoji: string }) {
+  return fetcher("reaction", data);
+}
+
 export async function fetchProfileFn(data: { sessionId: string }) {
   return fetcher("profile", data);
 }

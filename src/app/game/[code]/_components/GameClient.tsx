@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -19,7 +19,9 @@ import {
   timeoutGameFn,
   startGameFn,
   leaveLobbyFn,
+  sendReactionFn,
 } from "@/lib/game/api.client";
+import type { ReactionEmoji } from "@/lib/game/reactions";
 import { Shell } from "./Shell";
 import { WaitingLobby } from "./WaitingLobby";
 import { ScoreBar } from "./ScoreBar";
@@ -29,6 +31,9 @@ import { PassConfirmDialog } from "./PassConfirmDialog";
 import { ForfeitConfirmDialog } from "./ForfeitConfirmDialog";
 import { PlayedWords } from "./PlayedWords";
 import { WordPreview } from "./WordPreview";
+import { GameBottomBar } from "./GameBottomBar";
+import { GameMenuSheet } from "./GameMenuSheet";
+import { EmojiReactionSheet } from "./EmojiReactionSheet";
 
 export function GameClient({ code }: { code: string }) {
   const roomCode = code.toUpperCase();
@@ -40,9 +45,40 @@ export function GameClient({ code }: { code: string }) {
   const [, setTick] = useState(0);
   const [showForfeitConfirm, setShowForfeitConfirm] = useState(false);
   const [showPassConfirm, setShowPassConfirm] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showReactions, setShowReactions] = useState(false);
   const [hostLeftCountdown, setHostLeftCountdown] = useState<number | null>(null);
+  /*
+   * The reaction currently on screen, keyed so a second reaction from the same
+   * slot before the fade-out timer fires still restarts the animation instead
+   * of being swallowed by React bailing out on an identical state update.
+   */
+  const [activeReaction, setActiveReaction] = useState<{
+    key: number;
+    emoji: string;
+    slot: 1 | 2;
+  } | null>(null);
+  const reactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /*
+   * Read inside the realtime callback to drop the echo of the viewer's own
+   * reaction. Held in a ref rather than closed over so the channel is not torn
+   * down and resubscribed when the viewer is assigned a seat.
+   */
+  const viewerSlotRef = useRef<number | null>(null);
   const isHostWaitingRef = useRef(false);
   const isNonHostWaitingRef = useRef(false);
+
+  /**
+   * Puts an emoji on screen for a beat, whoever it came from.
+   *
+   * Keyed by time so a second reaction landing before the timer fires restarts
+   * the animation rather than being swallowed as an identical state update.
+   */
+  const showReaction = useCallback((emoji: string, slot: 1 | 2) => {
+    if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
+    setActiveReaction({ key: Date.now(), emoji, slot });
+    reactionTimerRef.current = setTimeout(() => setActiveReaction(null), 2000);
+  }, []);
 
   const queryKey = useMemo(() => ["game", roomCode, sessionId], [roomCode, sessionId]);
   const { data: game, isLoading } = useQuery({
@@ -120,18 +156,32 @@ export function GameClient({ code }: { code: string }) {
           setHostLeftCountdown(5);
         },
       )
+      .on("broadcast", { event: "reaction" }, ({ payload }) => {
+        const emoji = payload?.emoji;
+        const slot = payload?.slot;
+        if (typeof emoji !== "string" || (slot !== 1 && slot !== 2)) return;
+        /*
+         * The sender already drew this one the instant it was tapped, so the
+         * round trip coming back would restart the animation a few hundred
+         * milliseconds in and read as a stutter.
+         */
+        if (slot === viewerSlotRef.current) return;
+        showReaction(emoji, slot);
+      })
       .subscribe((status, err) => {
         setIsRealtimeConnected(status === "SUBSCRIBED");
       });
 
     return () => {
       supabase.removeChannel(channel);
+      if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
     };
-  }, [game?.id, roomCode, sessionId, queryClient]);
+  }, [game?.id, roomCode, sessionId, queryClient, showReaction]);
 
   useEffect(() => {
     isHostWaitingRef.current = game?.status === "waiting" && game?.viewerSlot === 1;
     isNonHostWaitingRef.current = game?.status === "waiting" && game?.viewerSlot === 2;
+    viewerSlotRef.current = game?.viewerSlot ?? null;
   }, [game?.status, game?.viewerSlot]);
 
   // Countdown timer for host left
@@ -261,6 +311,29 @@ export function GameClient({ code }: { code: string }) {
     },
   });
 
+  /**
+   * Sends a reaction, drawing it locally first.
+   *
+   * Deliberately not a `useMutation`: a reaction is a throwaway gesture with
+   * nothing to invalidate, and every mutation in flight drives the global
+   * NProgress bar in `QueryProvider`. A progress bar across the top of the
+   * screen for an emoji would be louder than the emoji.
+   *
+   * So the request is fired and not awaited. The sender sees the emoji on the
+   * same tap, the opponent sees it when the broadcast reaches them, and a
+   * failure is reported after the fact rather than held up front — there is
+   * nothing to roll back either way.
+   */
+  const sendReaction = (emoji: ReactionEmoji) => {
+    setShowReactions(false);
+    const slot = game?.viewerSlot;
+    if (slot !== 1 && slot !== 2) return;
+    showReaction(emoji, slot);
+    sendReactionFn({ sessionId: sessionId!, roomCode, emoji }).catch((error: Error) =>
+      toast.error(error.message),
+    );
+  };
+
   /*
    * No name gate here any more. The board used to be held back until a local
    * display name existed, because joining carried that name up with it. Joining
@@ -376,27 +449,22 @@ export function GameClient({ code }: { code: string }) {
 
   return (
     <Shell>
-      <div className="flex flex-1 flex-col justify-between min-h-0">
+      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2">
+        <PlayedWords game={game} />
         <ScoreBar
           game={game}
           p1Active={p1IsActive && game.status === "active"}
           p2Active={p2IsActive && game.status === "active"}
-          yourTurn={yourTurn}
-          isSpectator={isSpectator}
-          viewerSlot={game.viewerSlot}
-          canForfeit={game.status === "active" && !isSpectator}
-          onForfeit={() => setShowForfeitConfirm(true)}
+          reaction={activeReaction}
         />
-
-        <PlayedWords game={game} />
 
         {game.status === "completed" && <GameOver game={game} onNew={() => router.push("/")} />}
 
-        <WordPreview letters={selection.map((i) => game.grid[i])} yourTurn={yourTurn} />
-
-        {/* Grid: constrained so tiles don't grow too large on wide screens */}
-        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 360px))" }}>
-          <div className="grid grid-cols-5 gap-1 w-full">
+        {/* Grid: constrained so tiles don't grow too large on wide screens. The
+            subtrahend is the combined height of everything else in this column,
+            so it moves whenever the panels above or below change size. */}
+        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 316px))" }}>
+          <div className="grid w-full grid-cols-5 gap-0 border-border border-t border-l">
             {game.grid.map((letter: string, index: number) => (
               <Tile
                 key={index}
@@ -412,18 +480,42 @@ export function GameClient({ code }: { code: string }) {
           </div>
         </div>
 
-        {game.status === "active" && !isSpectator && (
-          <ActionBar
-            yourTurn={yourTurn}
-            selectionLength={selection.length}
-            onPass={() => setShowPassConfirm(true)}
-            onClear={() => setSelection([])}
-            onBackspace={() => setSelection((prev) => prev.slice(0, -1))}
-            onSubmit={() => moveMutation.mutate()}
-            passPending={passMutation.isPending}
-            submitPending={moveMutation.isPending}
-          />
-        )}
+        <WordPreview letters={selection.map((i) => game.grid[i])} yourTurn={yourTurn} />
+
+        {/*
+          Always rendered, disabled when it is not the viewer's turn. Unmounting
+          it for a spectator or between turns would resize the grid underneath
+          the player, so the controls stay put and go quiet instead.
+        */}
+        <ActionBar
+          yourTurn={yourTurn && !isSpectator}
+          selectionLength={selection.length}
+          onPass={() => setShowPassConfirm(true)}
+          onClear={() => setSelection([])}
+          onBackspace={() => setSelection((prev) => prev.slice(0, -1))}
+          onSubmit={() => moveMutation.mutate()}
+          passPending={passMutation.isPending}
+          submitPending={moveMutation.isPending}
+        />
+
+        <GameBottomBar
+          onOpenMenu={() => setShowMenu(true)}
+          onOpenReactions={() => setShowReactions(true)}
+          canReact={game.status === "active" && !isSpectator}
+        />
+
+        <GameMenuSheet
+          open={showMenu}
+          onClose={() => setShowMenu(false)}
+          canForfeit={game.status === "active" && !isSpectator}
+          onForfeit={() => setShowForfeitConfirm(true)}
+        />
+
+        <EmojiReactionSheet
+          open={showReactions}
+          onClose={() => setShowReactions(false)}
+          onSelect={sendReaction}
+        />
 
         {showPassConfirm && (
           <PassConfirmDialog

@@ -213,7 +213,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             <SectionLabel>Support</SectionLabel>
             <SettingsGroup>
               <SettingsRow label="About" onClick={() => setNested("about")} />
-              <SettingsRow label="Contact us" href={supportMailto()} />
+              <SettingsRow label="Email us" href={supportMailto()} />
               {PRIVACY_URL ? <SettingsRow label="Privacy policy" href={PRIVACY_URL} /> : null}
               {TERMS_URL ? <SettingsRow label="Terms of service" href={TERMS_URL} /> : null}
               <SettingsRow label="Acknowledgements" onClick={() => setNested("credits")} />

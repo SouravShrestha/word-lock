@@ -1,6 +1,42 @@
+import type { ReactNode } from "react";
+
 import { SkipIcon } from "@/components/icons/SkipIcon";
 import { BinIcon } from "@/components/icons/BinIcon";
-import { Delete } from "@/components/icons";
+import { BackspaceIcon } from "@/components/icons/BackspaceIcon";
+import { EnterIcon } from "@/components/icons/EnterIcon";
+import { cn } from "@/lib/utils";
+
+/**
+ * A round tile-editing control. Icon only: the four sit in a fixed order the
+ * player learns once, and labels at this size would read as noise under a grid
+ * that is already dense with letters.
+ */
+function ActionButton({
+  label,
+  onClick,
+  disabled,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className={cn(
+        "press grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface-2 text-foreground",
+        "disabled:pointer-events-none disabled:opacity-35",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
 
 export function ActionBar({
   yourTurn,
@@ -22,53 +58,35 @@ export function ActionBar({
   submitPending: boolean;
 }) {
   return (
-    <div className="flex gap-1.5">
-      <button
-        onClick={onPass}
-        disabled={!yourTurn || passPending}
-        className="chunky-btn btn-card [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
-        aria-label="Pass turn"
-      >
-        <SkipIcon className="w-4 h-4" />
-        <span className="text-[0.55rem] font-semibold uppercase tracking-wide">Skip</span>
-      </button>
-      <button
+    <div className="flex items-center justify-around gap-4 px-4 py-2">
+      <ActionButton label="Pass turn" onClick={onPass} disabled={!yourTurn || passPending}>
+        <SkipIcon className="h-4 w-4 ml-0.5" />
+      </ActionButton>
+
+      <ActionButton
+        label="Clear selection"
         onClick={onClear}
         disabled={!yourTurn || selectionLength === 0}
-        className="chunky-btn btn-card [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
-        aria-label="Clear selection"
       >
-        <BinIcon className="w-4 h-4" />
-        <span className="text-[0.55rem] font-semibold uppercase tracking-wide">Clear</span>
-      </button>
-      <button
+        <BinIcon className="h-4 w-4" />
+      </ActionButton>
+
+      <ActionButton
+        label="Remove last tile"
         onClick={onBackspace}
         disabled={!yourTurn || selectionLength === 0}
-        className="chunky-btn btn-card [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
-        aria-label="Remove last tile"
       >
-        <Delete className="w-4 h-4" />
-        <span className="text-[0.55rem] font-semibold uppercase tracking-wide">Delete</span>
-      </button>
-      <button
+        <BackspaceIcon className="h-4 w-4" />
+      </ActionButton>
+
+      {/* Minimum word length is three letters, enforced again server-side. */}
+      <ActionButton
+        label="Submit word"
         onClick={onSubmit}
         disabled={!yourTurn || selectionLength < 3 || submitPending}
-        className="chunky-btn btn-primary [--btn-lip:3px] flex-1 flex flex-col items-center justify-center gap-0.5 py-2 disabled:pointer-events-none"
-        aria-label="Submit word"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-        >
-          <g>
-            <path d="M19 6.5c-.6 0-1 .4-1 1v4c0 .6-.4 1-1 1H7.4l1.3-1.3c.4-.4.4-1 0-1.4s-1-.4-1.4 0l-3 3c-.1.1-.2.2-.2.3-.1.2-.1.5 0 .8 0 .1.1.2.2.3l3 3c.4.4 1 .4 1.4 0s.4-1 0-1.4l-1.3-1.3H17c1.7 0 3-1.3 3-3v-4c0-.6-.5-1-1-1" />
-          </g>
-        </svg>
-        <span className="text-[0.55rem] font-semibold uppercase tracking-wide">Enter</span>
-      </button>
+        <EnterIcon className="h-4 w-4" />
+      </ActionButton>
     </div>
   );
 }
