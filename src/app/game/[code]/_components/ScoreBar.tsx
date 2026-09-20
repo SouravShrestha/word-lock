@@ -4,6 +4,18 @@ import { Avatar } from "@/components/Avatar";
 import { cn } from "@/lib/utils";
 
 /**
+ * Tile counts are padded to two digits so the number never changes width.
+ *
+ * A score going from 9 to 10 would otherwise widen its chip and shove the
+ * clock off centre mid-turn. Leading zeros are the scoreboard convention for
+ * exactly this reason, and the board is at most 25 tiles so two digits is
+ * always enough.
+ */
+function formatScore(score: number) {
+  return String(score).padStart(2, "0");
+}
+
+/**
  * One player: their face with their name under it, and the tile count beside.
  *
  * Two lines, not three — the grid below is capped by whatever is left of the
@@ -11,10 +23,15 @@ import { cn } from "@/lib/utils";
  * avatar's line because those are the two things read at a glance mid-turn; the
  * name is the slow-changing label and sits under the face it belongs to.
  *
- * Player two is mirrored, avatar on the outside, so the two faces sit at the
- * screen's edges and both scores read inward toward the clock. Same reason a
- * scoreboard puts the teams on opposite sides: the symmetry is what says these
- * are two halves of one thing.
+ * The chip on the right is mirrored, avatar on the outside, so the two faces sit
+ * at the screen's edges and both scores read inward toward the clock. Same
+ * reason a scoreboard puts the teams on opposite sides: the symmetry is what
+ * says these are two halves of one thing.
+ *
+ * `slot` and `mirrored` are separate on purpose. Colour belongs to the seat —
+ * player one is always `p1` on both screens, so a tile's colour on the grid and
+ * a player's ring here can never disagree — while the side is the viewer's own
+ * point of view, and the viewer is always on the left.
  *
  * The avatar carries a ring in the player's own colour so the two sides are
  * told apart by more than position, and the whole chip dims when it is not that
@@ -26,20 +43,23 @@ function PlayerChip({
   score,
   active,
   slot,
+  mirrored,
   reaction,
 }: {
   player: { name: string; avatar: string } | null;
   score: number;
   active: boolean;
   slot: 1 | 2;
-  /** A reaction just sent by this player, or null when none is showing. */
+  /** Lay the chip out right-to-left, so its avatar sits on the screen's edge. */
+  mirrored: boolean;
+  /** A reaction sent by this player, or null when none is showing. */
   reaction?: { key: number; emoji: string } | null;
 }) {
   const ring = slot === 1 ? "ring-p1" : "ring-p2";
   const scoreColor = slot === 1 ? "text-p1" : "text-p2";
 
   return (
-    <div className={cn("flex min-w-0 flex-1 items-center gap-2", slot === 2 && "flex-row-reverse")}>
+    <div className={cn("flex min-w-0 flex-1 items-center gap-2", mirrored && "flex-row-reverse")}>
       {/*
         Avatar and name are one column so the name centres on the face rather
         than on the chip: the face is what the eye lands on, and a label drifting
@@ -82,7 +102,7 @@ function PlayerChip({
           active ? scoreColor : "text-muted-foreground",
         )}
       >
-        {score}
+        {formatScore(score)}
       </p>
     </div>
   );
@@ -90,6 +110,12 @@ function PlayerChip({
 
 /**
  * The board's top panel: both players and how long the current turn has left.
+ *
+ * The viewer is always the left chip and their opponent always the right one, so
+ * "my score" is the same glance on both screens. Only the order is relative —
+ * the seat colours stay fixed, so the left chip is `p1` for one player and `p2`
+ * for the other, matching the tiles each of them owns on the grid below. A
+ * spectator gets the seat order, player one first.
  *
  * Nothing actionable lives here. Leaving, the menu and quitting for real are
  * all in the bottom bar, so the panel next to the scores cannot be mistaken for
@@ -100,25 +126,37 @@ export function ScoreBar({
   p1Active,
   p2Active,
   reaction,
+  scores,
 }: {
   game: any;
   p1Active: boolean;
   p2Active: boolean;
-  /** The most recent reaction broadcast, or null when none is showing. */
+  /** The most recent reaction, with the slot that sent it, or null. */
   reaction?: { key: number; emoji: string; slot: 1 | 2 } | null;
+  /**
+   * Tile counts to show instead of the live ones, used while a past turn is
+   * being reviewed. The scores have to come from the same board the grid is
+   * drawing or the panel would be counting tiles that are not on screen.
+   */
+  scores?: { 1: number; 2: number };
 }) {
   const timerLabel = game.status === "active" ? timeLeftLabel(game.turnDeadline) : null;
 
+  const nearSlot: 1 | 2 = game.viewerSlot === 2 ? 2 : 1;
+  const farSlot: 1 | 2 = nearSlot === 1 ? 2 : 1;
+
+  const chipFor = (slot: 1 | 2) => ({
+    slot,
+    player: slot === 1 ? game.players.one : game.players.two,
+    score: (scores ?? game.scores)[slot],
+    active: slot === 1 ? p1Active : p2Active,
+    reaction: reaction?.slot === slot ? reaction : null,
+  });
+
   return (
-    <div className="neo px-3 pt-2 pb-2 bg-transparent">
+    <div className="neo px-2 pt-2 pb-2 bg-transparent">
       <div className="flex items-center gap-2">
-        <PlayerChip
-          player={game.players.one}
-          score={game.scores[1]}
-          active={p1Active}
-          slot={1}
-          reaction={reaction?.slot === 1 ? reaction : null}
-        />
+        <PlayerChip {...chipFor(nearSlot)} mirrored={false} />
 
         {/*
           Centre: the turn clock. shrink-0 because "Game over" is the widest
@@ -132,13 +170,7 @@ export function ScoreBar({
           </p>
         </div>
 
-        <PlayerChip
-          player={game.players.two}
-          score={game.scores[2]}
-          active={p2Active}
-          slot={2}
-          reaction={reaction?.slot === 2 ? reaction : null}
-        />
+        <PlayerChip {...chipFor(farSlot)} mirrored />
       </div>
     </div>
   );

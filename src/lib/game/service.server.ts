@@ -131,11 +131,18 @@ export function serializeGame(
     playedWords: moves
       .filter((m) => !m.passed)
       .map((m) => ({ word: m.word, playerId: m.player_id })),
+    /*
+     * Every move in order, tiles included. `playedWords` above is the readable
+     * strip; this is the replayable record — the client re-runs `computeBoardState`
+     * over a prefix of it to draw the board as it stood at an earlier turn, which
+     * is only possible because the tiles travel with the word.
+     */
     history: moves.map((m) => ({
       id: m.id,
       word: m.word,
       passed: m.passed,
       playerId: m.player_id,
+      tileIndices: m.tile_indices ?? [],
       createdAt: m.created_at,
     })),
   };

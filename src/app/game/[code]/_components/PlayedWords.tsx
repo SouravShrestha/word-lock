@@ -8,8 +8,12 @@
  */
 export function PlayedWords({ game }: { game: any }) {
   return (
-    <div className="neo bg-board overflow-x-auto no-scrollbar rounded-none -mx-3 px-5 py-2 md:-mt-2">
-      <ul className="flex h-4 items-center gap-4">
+    <div className="neo bg-board overflow-x-auto no-scrollbar rounded-none -mx-3 py-2 md:-mt-2">
+      {/* The inline padding lives on the scrolling flex list, not the scroll
+          container: padding-right on an overflow-x box is not part of the
+          scrollable area in every engine, so the last word ends up flush
+          against the edge once the strip is scrolled to the end. */}
+      <ul className="flex h-4 items-center gap-7 px-5 w-max">
         {[...game.playedWords].reverse().map((entry: any, i: number) => (
           <li
             key={i}

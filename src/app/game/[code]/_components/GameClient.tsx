@@ -22,6 +22,8 @@ import {
   sendReactionFn,
 } from "@/lib/game/api.client";
 import type { ReactionEmoji } from "@/lib/game/reactions";
+import type { HistoryMove } from "@/lib/game/review";
+import { useMoveReview } from "@/hooks/use-move-review";
 import { Shell } from "./Shell";
 import { WaitingLobby } from "./WaitingLobby";
 import { ScoreBar } from "./ScoreBar";
@@ -32,6 +34,7 @@ import { ForfeitConfirmDialog } from "./ForfeitConfirmDialog";
 import { PlayedWords } from "./PlayedWords";
 import { WordPreview } from "./WordPreview";
 import { GameBottomBar } from "./GameBottomBar";
+import { ReviewBar } from "./ReviewBar";
 import { GameMenuSheet } from "./GameMenuSheet";
 import { EmojiReactionSheet } from "./EmojiReactionSheet";
 
@@ -49,9 +52,12 @@ export function GameClient({ code }: { code: string }) {
   const [showReactions, setShowReactions] = useState(false);
   const [hostLeftCountdown, setHostLeftCountdown] = useState<number | null>(null);
   /*
-   * The reaction currently on screen, keyed so a second reaction from the same
-   * slot before the fade-out timer fires still restarts the animation instead
-   * of being swallowed by React bailing out on an identical state update.
+   * The reaction currently on screen, with the slot it belongs to — a reaction
+   * lands on the face of the player who sent it, so both screens show the same
+   * emoji over the same avatar and the gesture reads as that player speaking.
+   * Keyed so a second reaction before the fade-out timer fires still restarts
+   * the animation instead of being swallowed by React bailing out on an
+   * identical state update.
    */
   const [activeReaction, setActiveReaction] = useState<{
     key: number;
@@ -69,14 +75,16 @@ export function GameClient({ code }: { code: string }) {
   const isNonHostWaitingRef = useRef(false);
 
   /**
-   * Puts an emoji on screen for a beat, whoever it came from.
+   * Puts an emoji on a player's face for a beat.
+   *
+   * `senderSlot` is the seat that sent it, which is the face it appears on.
    *
    * Keyed by time so a second reaction landing before the timer fires restarts
    * the animation rather than being swallowed as an identical state update.
    */
-  const showReaction = useCallback((emoji: string, slot: 1 | 2) => {
+  const showReaction = useCallback((emoji: string, senderSlot: 1 | 2) => {
     if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
-    setActiveReaction({ key: Date.now(), emoji, slot });
+    setActiveReaction({ key: Date.now(), emoji, slot: senderSlot });
     reactionTimerRef.current = setTimeout(() => setActiveReaction(null), 2000);
   }, []);
 
@@ -94,6 +102,19 @@ export function GameClient({ code }: { code: string }) {
       }
       return false;
     },
+  });
+
+  /*
+   * Move review. Memoised on the query data so the hook's replay is not redone
+   * on every render — the 1s tick driving the turn clock re-renders this
+   * component constantly, and `?? []` would hand it a fresh array each time.
+   */
+  const historyMoves = useMemo<HistoryMove[]>(() => game?.history ?? [], [game?.history]);
+  const gridLetters = useMemo<string[]>(() => game?.grid ?? [], [game?.grid]);
+  const review = useMoveReview({
+    grid: gridLetters,
+    moves: historyMoves,
+    playerOneId: game?.players.one?.id ?? null,
   });
 
   /*
@@ -166,6 +187,7 @@ export function GameClient({ code }: { code: string }) {
          * milliseconds in and read as a stutter.
          */
         if (slot === viewerSlotRef.current) return;
+        // The payload carries the sender's seat, which is the face it lands on.
         showReaction(emoji, slot);
       })
       .subscribe((status, err) => {
@@ -391,11 +413,18 @@ export function GameClient({ code }: { code: string }) {
         : null;
   const isSpectator = game.viewerSlot === null;
   const yourTurn = !!viewerId && viewerId === game.currentTurnPlayerId && game.status === "active";
+  /*
+   * A past turn is a read-only view: the board it shows is not the one a move
+   * would land on, so the grid takes no taps and the action bar goes quiet until
+   * the player returns to live. The turn itself is not given up — the selection
+   * they had is still there when they come back.
+   */
+  const canPlay = yourTurn && !review.isReviewing;
   const shareUrl =
     typeof window !== "undefined" ? `${window.location.origin}/game/${roomCode}` : "";
 
   function toggleTile(index: number) {
-    if (!yourTurn) return;
+    if (!canPlay) return;
     setSelection((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
@@ -456,6 +485,7 @@ export function GameClient({ code }: { code: string }) {
           p1Active={p1IsActive && game.status === "active"}
           p2Active={p2IsActive && game.status === "active"}
           reaction={activeReaction}
+          scores={review.frame?.state.scores}
         />
 
         {game.status === "completed" && <GameOver game={game} onNew={() => router.push("/")} />}
@@ -465,22 +495,47 @@ export function GameClient({ code }: { code: string }) {
             so it moves whenever the panels above or below change size. */}
         <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 316px))" }}>
           <div className="grid w-full grid-cols-5 gap-0 border-border border-t border-l">
-            {game.grid.map((letter: string, index: number) => (
-              <Tile
-                key={index}
-                letter={letter}
-                owner={game.owners[index] as TileOwner}
-                locked={game.locked[index]}
-                selected={selection.includes(index)}
-                order={selection.includes(index) ? selection.indexOf(index) + 1 : null}
-                disabled={!yourTurn}
-                onClick={() => toggleTile(index)}
-              />
-            ))}
+            {game.grid.map((letter: string, index: number) => {
+              /*
+               * While a past turn is on screen the owners and locks come from the
+               * replayed frame, and the highlight is the word that turn played
+               * rather than the viewer's selection — the accent means "the word
+               * in question" in both modes.
+               */
+              const owners = review.frame?.state.owners ?? game.owners;
+              const locked = review.frame?.state.locked ?? game.locked;
+              const highlighted = review.frame
+                ? review.frame.claimed.indexOf(index)
+                : selection.indexOf(index);
+
+              return (
+                <Tile
+                  key={index}
+                  letter={letter}
+                  owner={owners[index] as TileOwner}
+                  locked={locked[index]}
+                  selected={highlighted !== -1}
+                  order={highlighted !== -1 ? highlighted + 1 : null}
+                  disabled={!canPlay}
+                  onClick={() => toggleTile(index)}
+                />
+              );
+            })}
           </div>
         </div>
 
-        <WordPreview letters={selection.map((i) => game.grid[i])} yourTurn={yourTurn} />
+        {/* One seat, two occupants: the review panel takes the preview's place and
+            its exact height, so walking the history never resizes the grid. */}
+        {review.frame ? (
+          <ReviewBar
+            frame={review.frame}
+            moveCount={review.moveCount}
+            isPlayerOne={review.frame.move.playerId === game.players.one?.id}
+            onLive={review.goLive}
+          />
+        ) : (
+          <WordPreview letters={selection.map((i) => game.grid[i])} yourTurn={yourTurn} />
+        )}
 
         {/*
           Always rendered, disabled when it is not the viewer's turn. Unmounting
@@ -488,7 +543,7 @@ export function GameClient({ code }: { code: string }) {
           the player, so the controls stay put and go quiet instead.
         */}
         <ActionBar
-          yourTurn={yourTurn && !isSpectator}
+          yourTurn={canPlay && !isSpectator}
           selectionLength={selection.length}
           onPass={() => setShowPassConfirm(true)}
           onClear={() => setSelection([])}
@@ -502,6 +557,10 @@ export function GameClient({ code }: { code: string }) {
           onOpenMenu={() => setShowMenu(true)}
           onOpenReactions={() => setShowReactions(true)}
           canReact={game.status === "active" && !isSpectator}
+          onPrevMove={review.stepBack}
+          onNextMove={review.stepForward}
+          canPrevMove={review.canStepBack}
+          canNextMove={review.canStepForward}
         />
 
         <GameMenuSheet

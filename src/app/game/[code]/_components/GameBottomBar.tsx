@@ -49,21 +49,30 @@ function BarButton({
  * this is a plain exit behind a confirmation. Giving up for real is still
  * behind the menu.
  *
- * The two steppers are drawn because the bar reads as a bar with these seats,
- * but they have no behaviour agreed yet and are shipped disabled rather than
- * guessing at one — a control that does something unexpected is worse than one
- * that is visibly not ready. Reactions are the one seat that does have a job:
- * it opens the emoji picker.
+ * The two steppers walk the board back through the move history. They are
+ * read-only: while a past turn is on screen the board takes no taps and the
+ * action bar is quiet, so stepping back can never be mistaken for undoing.
+ * Reactions sit between them and the menu, and open the emoji picker.
  */
 export function GameBottomBar({
   onOpenMenu,
   onOpenReactions,
   canReact,
+  onPrevMove,
+  onNextMove,
+  canPrevMove,
+  canNextMove,
 }: {
   onOpenMenu: () => void;
   onOpenReactions: () => void;
   /** False for a spectator, who has no seat to react from. */
   canReact: boolean;
+  onPrevMove: () => void;
+  onNextMove: () => void;
+  /** False on an empty board, and once the first move is showing. */
+  canPrevMove: boolean;
+  /** False on the live board, which is as far forward as there is. */
+  canNextMove: boolean;
 }) {
   const router = useRouter();
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -82,12 +91,11 @@ export function GameBottomBar({
         <SmileyFaceIcon className="h-6 w-6" />
       </BarButton>
 
-      {/* TODO: step through the move history — no behaviour defined yet. */}
-      <BarButton label="Previous move" disabled>
+      <BarButton label="Previous move" onClick={onPrevMove} disabled={!canPrevMove}>
         <PrevIcon className="h-4 w-4" />
       </BarButton>
 
-      <BarButton label="Next move" disabled>
+      <BarButton label="Next move" onClick={onNextMove} disabled={!canNextMove}>
         <NextIcon className="h-4 w-4" />
       </BarButton>
 
