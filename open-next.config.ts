@@ -1,4 +1,4 @@
-import cache from "@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache";
+import cache from "@opennextjs/cloudflare/kvCache";
 
 const config = {
   default: {
