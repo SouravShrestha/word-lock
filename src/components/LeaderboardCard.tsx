@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { LeagueIcon, LEAGUE_TEXT_CLASS } from "@/components/icons/LeagueIcon";
 import { QuestionMarkIcon } from "@/components/icons/QuestionMarkIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
+import { LeaderboardSkeleton } from "@/components/LeaderboardSkeleton";
 import { useAccount } from "@/hooks/use-account";
 import { useLeaderboard } from "@/hooks/use-leaderboard";
 import { LEAGUES, leagueById, type LeagueId } from "@/lib/account/leagues";
@@ -38,7 +39,7 @@ export function LeaderboardCard({ onOpenGuide }: { onOpenGuide: () => void }) {
 
       <div className="flex flex-col gap-4 px-5 pt-5">
         {isLoading ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">Loading…</p>
+          <LeaderboardSkeleton />
         ) : entries.length === 0 ? (
           <EmptyState league={league} />
         ) : (
@@ -160,14 +161,7 @@ function ZoneDivider({ kind }: { kind: "promotion" | "demotion" }) {
 }
 
 function EmptyState({ league }: { league: LeagueId }) {
-  return (
-    <div className="surface p-6 text-center">
-      <p className="font-display text-lg font-bold">Nobody is ranked yet</p>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {leagueById(league).name} is empty. Win a game to put your name in it.
-      </p>
-    </div>
-  );
+  return <></>;
 }
 
 function Row({

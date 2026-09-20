@@ -36,9 +36,9 @@ export function HomeBackdrop() {
 
       {/* Rotated letter tiles floating in the corners, matching the tile-face
        * look used in-game (rounded square, bold centered glyph). */}
-      <TileGhost letter="A" className="-left-2 top-24 -rotate-12 text-p2" />
+      {/* <TileGhost letter="A" className="-left-2 top-24 -rotate-12 text-p2" />
       <TileGhost letter="E" className="-right-2 top-64 rotate-6 text-mint" />
-      <TileGhost letter="S" className="right-4 bottom-40 rotate-12 text-p1" />
+      <TileGhost letter="S" className="right-4 bottom-40 rotate-12 text-p1" /> */}
 
       {/* Small dashed scribbles scattered around, like hand-drawn accents
        * near the tiles rather than one continuous line. */}

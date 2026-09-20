@@ -64,10 +64,7 @@ export function LobbyClient() {
   }, [ready, queryClient, sessionId]);
 
   const games = useMemo(() => data?.games ?? [], [data?.games]);
-  const activeGames = useMemo(
-    () => games.filter((g: any) => g.status === "active" || g.status === "waiting"),
-    [games],
-  );
+  const activeGames = useMemo(() => games.filter((g: any) => g.status === "active"), [games]);
 
   const hasGames = activeGames.length > 0;
 
@@ -100,7 +97,7 @@ export function LobbyClient() {
               className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
             >
               <PlayIcon className="h-3 w-3" />
-              {createMutation.isPending ? "Creating…" : "New Game"}
+              {createMutation.isPending ? "Creating" : "New Game"}
             </button>
             <Link
               href="/join"
@@ -202,7 +199,7 @@ function GameCard({ game, idx, totalGames }: { game: any; idx: number; totalGame
         <div className="flex min-w-0 flex-col gap-0.5">
           <p className="truncate text-sm font-bold leading-tight">
             <span className="mr-1 text-xs leading-tight text-muted-foreground">vs</span>
-            {game.status === "waiting" ? "Waiting…" : (opponent?.name ?? "?")}
+            {opponent?.name ?? "?"}
           </p>
           <p className="text-[0.7rem] font-semibold tracking-[0.12em] text-muted-foreground">
             #{game.roomCode}
@@ -219,7 +216,7 @@ function GameCard({ game, idx, totalGames }: { game: any; idx: number; totalGame
           <span
             className={`text-[0.65rem] font-bold tracking-wide ${yourTurn ? "text-sun" : "text-muted-foreground"}`}
           >
-            {game.status === "waiting" ? "Waiting" : yourTurn ? "Your turn" : "Their turn"}
+            {yourTurn ? "Your turn" : "Their turn"}
           </span>
           {game.status === "active" && game.turnDeadline && (
             <span className="text-[0.65rem] font-semibold tabular-nums text-muted-foreground">

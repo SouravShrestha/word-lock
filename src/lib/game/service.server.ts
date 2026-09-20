@@ -65,7 +65,7 @@ export async function loadGame(roomCode: string) {
       .from("wl_players")
       // user_id comes along so the fetch route can identify a logged-in viewer
       // without trusting the session id in the request body.
-      .select("id, session_id, username, user_id")
+      .select("id, session_id, username, avatar, user_id")
       .in("id", [game.player1_id, game.player2_id].filter(Boolean) as string[]),
   ]);
 
@@ -103,8 +103,8 @@ export function serializeGame(
      * and the username sheet both come first.
      */
     players: {
-      one: p1 ? { id: p1.id, name: p1.username ?? UNNAMED_PLAYER } : null,
-      two: p2 ? { id: p2.id, name: p2.username ?? UNNAMED_PLAYER } : null,
+      one: p1 ? { id: p1.id, name: p1.username ?? UNNAMED_PLAYER, avatar: p1.avatar } : null,
+      two: p2 ? { id: p2.id, name: p2.username ?? UNNAMED_PLAYER, avatar: p2.avatar } : null,
     },
     viewerSlot: viewerId
       ? viewerId === game.player1_id
@@ -425,7 +425,7 @@ export async function listGamesForSession(caller: Caller) {
       : Promise.resolve({ data: [] as MoveRow[] }),
     getSupabaseAdmin()
       .from("wl_players")
-      .select("id, session_id, username")
+      .select("id, session_id, username, avatar")
       .in("id", Array.from(playerIds)),
   ]);
 
@@ -474,7 +474,7 @@ export async function getPlayerStats(caller: Caller) {
     playerIds.size
       ? getSupabaseAdmin()
           .from("wl_players")
-          .select("id, session_id, username")
+          .select("id, session_id, username, avatar")
           .in("id", Array.from(playerIds))
       : Promise.resolve({ data: [] as PlayerRow[] }),
   ]);

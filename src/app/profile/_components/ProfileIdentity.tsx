@@ -1,22 +1,45 @@
 "use client";
 
-import { AvatarPandaIcon } from "@/components/icons/AvatarPandaIcon";
+import { useState } from "react";
+
+import { Avatar } from "@/components/Avatar";
+import { PencilIcon } from "@/components/icons/PencilIcon";
+import { AvatarSheet } from "./AvatarSheet";
 
 /**
  * Who you are, at the top of the profile.
  *
- * Read-only by design. This used to be an inline editor for a short in-game name
- * that sat alongside the username; that name is gone, and the username it
- * replaced it with is claimable exactly once. Rendering an edit affordance for a
- * field the server will refuse to change is worse than not offering one, so the
- * permanence is stated instead.
+ * The avatar is the one editable thing here. The username is not: it is claimable
+ * exactly once, and rendering an edit affordance for a field the server will
+ * refuse to change is worse than not offering one, so the permanence is stated
+ * instead. That asymmetry is the reason the pencil sits on the picture rather
+ * than on the block as a whole.
  */
-export function ProfileIdentity({ username }: { username?: string | null }) {
+export function ProfileIdentity({
+  username,
+  avatar,
+}: {
+  username?: string | null;
+  avatar?: string | null;
+}) {
+  const [picking, setPicking] = useState(false);
+
   return (
     <section className="flex flex-col items-center gap-2 py-2">
-      <div className="grid h-18 w-18 shrink-0 place-items-center rounded-full">
-        <AvatarPandaIcon className="w-12 h-12 text-foreground" />
-      </div>
+      <button
+        type="button"
+        onClick={() => setPicking(true)}
+        aria-label="Change your avatar"
+        className="press relative rounded-full"
+      >
+        <Avatar avatar={avatar} className="h-18 w-18" />
+        <span
+          aria-hidden
+          className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full bg-sky text-background"
+        >
+          <PencilIcon className="h-3 w-3" />
+        </span>
+      </button>
 
       <p
         className="max-w-full truncate px-3 text-center font-display text-lg font-bold"
@@ -28,6 +51,8 @@ export function ProfileIdentity({ username }: { username?: string | null }) {
       <p className="text-xs font-semibold text-muted-foreground">
         This is how other players see you
       </p>
+
+      <AvatarSheet open={picking} onClose={() => setPicking(false)} current={avatar} />
     </section>
   );
 }

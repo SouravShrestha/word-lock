@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Check, Copy } from "@/components/icons";
-import { AvatarPandaIcon } from "@/components/icons/AvatarPandaIcon";
-import { AvatarMonkeyIcon } from "@/components/icons/AvatarMonkeyIcon";
+import { Avatar } from "@/components/Avatar";
 import { InviteIcon } from "@/components/icons/InviteIcon";
 import { BackButton } from "@/components/BackButton";
 import { SectionLabel } from "@/components/SectionLabel";
@@ -69,7 +68,7 @@ export function WaitingLobby({
         <BackButton onClick={() => setShowConfirm(true)} label="Exit lobby" />
       </div>
 
-      <div className="flex flex-1 flex-col overflow-y-auto">
+      <div className="flex flex-1 flex-col overflow-y-auto justify-center">
         <div className="flex flex-col items-center gap-10 px-5 py-10">
           {/* Room code */}
           {isHost ? (
@@ -90,28 +89,36 @@ export function WaitingLobby({
           )}
 
           {/* Players */}
-          <div className="flex w-full max-w-xs items-start justify-between px-4">
+          <div className="flex w-full max-w-xs items-start justify-between px-4 my-3">
             <PlayerSlot name={game.players.one?.name ?? "You"}>
-              <AvatarPandaIcon className="h-9 w-9" />
+              <Avatar avatar={game.players.one?.avatar} className="h-16 w-16" />
             </PlayerSlot>
 
             <span className="pt-7 text-sm font-bold text-muted-foreground">vs</span>
 
             {opponentJoined ? (
               <PlayerSlot name={game.players.two.name}>
-                <AvatarMonkeyIcon className="h-9 w-9" />
+                <Avatar avatar={game.players.two?.avatar} className="h-16 w-16" />
               </PlayerSlot>
             ) : isHost ? (
               <button onClick={handleShare} className="flex flex-col items-center gap-2.5">
-                <span className="surface press grid h-16 w-16 place-items-center">
+                <span className="press border-border border-2 rounded-full grid h-18 w-18 place-items-center">
                   <InviteIcon className="h-5 w-5" />
                 </span>
                 <span className="max-w-20 truncate text-center text-xs font-bold">Share link</span>
               </button>
             ) : (
               <div className="flex flex-col items-center gap-2.5">
+                {/*
+                  Empty seat. A ghosted ring rather than a ghosted face: there is
+                  nobody to have a face yet, and showing someone's avatar at 20%
+                  would read as a player who is already here.
+                */}
                 <span className="grid h-16 w-16 place-items-center rounded-[0.9rem] bg-surface/40">
-                  <AvatarMonkeyIcon className="h-9 w-9 opacity-20" />
+                  <span
+                    aria-hidden
+                    className="h-11 w-11 rounded-full border-2 border-dashed border-muted-foreground/30"
+                  />
                 </span>
                 <span className="invisible text-xs">·</span>
               </div>
@@ -125,7 +132,7 @@ export function WaitingLobby({
                 {joinError ? (
                   <span className="text-destructive">{joinError}</span>
                 ) : (
-                  <span className="animate-pulse">Joining game…</span>
+                  <span className="animate-pulse">Joining game</span>
                 )}
               </p>
             ) : isHost ? (
@@ -135,29 +142,22 @@ export function WaitingLobby({
                   disabled={!opponentJoined || starting}
                   className="soft-btn btn-blush w-[65%] py-3.5 text-base"
                 >
-                  {starting ? "Starting…" : "Start Game"}
+                  {starting ? "Game is starting" : "Start Game"}
                 </button>
                 {!opponentJoined && (
-                  <p className="animate-pulse text-xs font-bold text-muted-foreground">
+                  <p className="animate-pulse text-xs font-bold text-muted-foreground mt-4">
                     Waiting for opponent
                   </p>
                 )}
                 {startError && <p className="text-xs text-destructive">{startError}</p>}
               </>
             ) : (
-              <p className="animate-pulse py-4 text-sm font-semibold text-muted-foreground">
+              <p className="animate-pulse py-4 text-sm font-semibold text-muted-foreground mt-4">
                 {opponentJoined ? "Waiting for host to start" : "Waiting for opponent"}
               </p>
             )}
           </div>
         </div>
-
-        {isHost && !opponentJoined && (
-          <section className="pb-6 pt-2">
-            <SectionLabel className="pl-5">Invite friends</SectionLabel>
-            <InviteFriends shareUrl={shareUrl} roomCode={roomCode} />
-          </section>
-        )}
       </div>
 
       {showConfirm && (
@@ -196,7 +196,9 @@ export function WaitingLobby({
 function PlayerSlot({ name, children }: { name: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-2.5">
-      <span className="surface grid h-16 w-16 place-items-center">{children}</span>
+      <span className="border-border border-2 rounded-full grid h-18 w-18 place-items-center">
+        {children}
+      </span>
       <span title={name} className="max-w-20 truncate text-center text-xs font-bold">
         {name}
       </span>

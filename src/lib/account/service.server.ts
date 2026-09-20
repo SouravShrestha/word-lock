@@ -8,6 +8,7 @@
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { resolvePlayer, type Caller } from "@/lib/game/identity.server";
 import { USERNAME_ERROR_COPY, normalizeUsername, validateUsername } from "./names";
+import { isAvatarId, normalizeAvatarId } from "./avatars";
 import { leagueForStars, type LeagueId } from "./leagues";
 
 /** Postgres unique-violation. Raised by the unique index on `lower(username)`. */
@@ -22,6 +23,8 @@ export interface AccountSummary {
   username: string | null;
   /** True once a username exists, since it cannot be changed afterwards. */
   usernameLocked: boolean;
+  /** Chosen avatar id, e.g. `avatar_01`. Always set — the column is defaulted. */
+  avatar: string;
   stars: number;
   /** Highest star count ever reached. Never decreases. */
   peakStars: number;
@@ -48,6 +51,7 @@ export async function getAccountSummary(caller: Caller): Promise<AccountSummary>
     playerId: player.id,
     username: player.username,
     usernameLocked: player.username !== null,
+    avatar: normalizeAvatarId(player.avatar),
     stars: player.stars,
     peakStars: player.peak_stars,
     starGames: player.star_games,
@@ -127,4 +131,43 @@ export async function setUsername(caller: Caller, raw: string): Promise<{ userna
   if (!data?.username) throw new Error(ALREADY_SET_MESSAGE);
 
   return { username: data.username };
+}
+
+/**
+ * Changes the caller's avatar.
+ *
+ * Unlike the username this is freely changeable — it is a picture, not an
+ * identity, so nothing downstream depends on it being stable and there is no
+ * once-only filter to enforce. A plain update is the whole write.
+ *
+ * The id is validated against the set this build knows about rather than trusted
+ * from the body: the column's CHECK only guarantees the shape, so `avatar_99`
+ * would otherwise be storable and would render as a broken image for everyone
+ * who saw this player.
+ *
+ * Logged-in callers only. A guest row is replaced the moment its browser forgets
+ * the session id, so letting one dress up would be a setting with nowhere to live.
+ */
+export async function setAvatar(caller: Caller, avatar: string): Promise<{ avatar: string }> {
+  if (!caller.userId) {
+    throw new Error("Log in to change your avatar.");
+  }
+
+  if (!isAvatarId(avatar)) {
+    throw new Error("That avatar doesn't exist.");
+  }
+
+  const player = await resolvePlayer(caller);
+
+  const { data, error } = await getSupabaseAdmin()
+    .from("wl_players")
+    .update({ avatar })
+    .eq("id", player.id)
+    .select("avatar")
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Couldn't save your avatar. Try again.");
+
+  return { avatar: data.avatar };
 }

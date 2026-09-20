@@ -12,11 +12,16 @@
  *
  * `username` is the only name a player has, and it is nullable: guests never set
  * one, and an account has none until the username sheet is answered.
+ *
+ * `avatar` is not nullable — every row has one from the moment it is created, so
+ * no surface needs a "no picture" branch. It is an id like `avatar_01`, resolved
+ * to a URL by `avatarUrl` in `lib/account/avatars.ts`.
  */
 export interface PlayerRow {
   id: string;
   session_id: string;
   username: string | null;
+  avatar: string;
 }
 
 /**

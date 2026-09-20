@@ -5,7 +5,7 @@ import { LossFaceIcon } from "@/components/icons/LossFaceIcon";
 import { WinFaceIcon } from "@/components/icons/WinFaceIcon";
 import type { GameResult, RecentGameEntry } from "@/lib/game/stats";
 import { cn } from "@/lib/utils";
-import { MatchAvatar } from "./MatchAvatar";
+import { Avatar } from "@/components/Avatar";
 
 /**
  * One finished game.
@@ -32,7 +32,7 @@ export function MatchRow({
       onClick={() => onSelect(entry)}
       className="press flex w-full items-center gap-3.5 px-5 py-3.5 text-left mt-1.5"
     >
-      <MatchAvatar seed={entry.opponentId ?? entry.opponentName} />
+      <Avatar avatar={entry.opponentAvatar} />
 
       <span className="min-w-0 flex-1">
         <span className="font-display block truncate text-base font-medium">

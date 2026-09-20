@@ -37,6 +37,11 @@ export interface RecentGameEntry {
   roomCode: string;
   opponentId: string | null;
   opponentName: string;
+  /**
+   * The opponent's chosen avatar id. Null only when the opponent row could not
+   * be found at all, which the row renders as the default face.
+   */
+  opponentAvatar: string | null;
   yourScore: number;
   opponentScore: number;
   result: GameResult;
@@ -82,9 +87,9 @@ export function computeStats(
     if (!isPlayer1 && !isPlayer2) continue;
 
     const opponentId = isPlayer1 ? game.player2_id : game.player1_id;
-    const opponentName = opponentId
-      ? (playerById.get(opponentId)?.username ?? "Unknown")
-      : "Unknown";
+    const opponent = opponentId ? playerById.get(opponentId) : undefined;
+    const opponentName = opponent?.username ?? "Unknown";
+    const opponentAvatar = opponent?.avatar ?? null;
 
     const yourScore = isPlayer1 ? game.scores[1] : game.scores[2];
     const opponentScore = isPlayer1 ? game.scores[2] : game.scores[1];
@@ -108,6 +113,7 @@ export function computeStats(
       roomCode: game.room_code,
       opponentId,
       opponentName,
+      opponentAvatar,
       yourScore,
       opponentScore,
       result,

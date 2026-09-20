@@ -49,6 +49,10 @@ export async function setUsernameFn(data: { sessionId: string; username: string 
   return post("/api/account/username", data);
 }
 
+export async function setAvatarFn(data: { sessionId: string; avatar: string }) {
+  return post("/api/account/avatar", data);
+}
+
 export async function fetchLeaderboardFn(): Promise<LeaderboardView> {
   const response = await fetch("/api/account/leaderboard");
   if (!response.ok) throw new Error(`HTTP error ${response.status}`);

@@ -400,6 +400,7 @@ export type Database = {
       };
       wl_players: {
         Row: {
+          avatar: string;
           best_play_streak: number;
           created_at: string;
           id: string;
@@ -414,6 +415,7 @@ export type Database = {
           username: string | null;
         };
         Insert: {
+          avatar?: string;
           best_play_streak?: number;
           created_at?: string;
           id?: string;
@@ -428,6 +430,7 @@ export type Database = {
           username?: string | null;
         };
         Update: {
+          avatar?: string;
           best_play_streak?: number;
           created_at?: string;
           id?: string;

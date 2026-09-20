@@ -67,7 +67,7 @@ export function StarsPill() {
       title={`${value} stars · ${leagueById(league).name}`}
     >
       <LeagueIcon league={league} className="h-8 w-9" />
-      <span className="text-base">{value}</span>
+      <span className="text-base -ml-1">{value}</span>
     </span>
   );
 }

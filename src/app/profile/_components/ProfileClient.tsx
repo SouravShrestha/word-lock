@@ -45,7 +45,7 @@ export function ProfileClient() {
 
       <div className={`flex flex-1 flex-col overflow-y-auto px-5 ${BOTTOM_NAV_SPACER}`}>
         <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
-          <ProfileIdentity username={account?.username} />
+          <ProfileIdentity username={account?.username} avatar={account?.avatar} />
 
           <AccountCard />
 

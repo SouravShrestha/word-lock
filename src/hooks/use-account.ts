@@ -13,6 +13,8 @@ export interface AccountSummary {
   /** The player's only name. Null until they have claimed one. */
   username: string | null;
   usernameLocked: boolean;
+  /** Chosen avatar id, e.g. `avatar_01`. Always set. */
+  avatar: string;
   stars: number;
   peakStars: number;
   starGames: number;
