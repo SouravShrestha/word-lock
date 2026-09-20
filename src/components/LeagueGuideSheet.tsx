@@ -10,9 +10,18 @@ import { cn } from "@/lib/utils";
  * Reference sheet listing every league band with its icon and star range, so a
  * player can see the whole ladder rather than just the band they are in.
  */
-export function LeagueGuideSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function LeagueGuideSheet({
+  open,
+  onClose,
+  zClassName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  /** Pass a higher level when opening this from inside another sheet. */
+  zClassName?: string;
+}) {
   return (
-    <BottomSheet open={open} onClose={onClose} label="League tiers">
+    <BottomSheet open={open} onClose={onClose} label="League tiers" zClassName={zClassName}>
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-bold">League tiers</h2>
         <button

@@ -11,7 +11,7 @@ export function RecentGamesCard({
 }) {
   return (
     <section className="surface p-4">
-      <h2 className="eyebrow text-xs text-muted-foreground mb-3">Recent games</h2>
+      {/* Heading lives with the section in ProfileClient, alongside the others. */}
       <ul className="flex flex-col gap-y-4">
         {recentGames.map((entry) => (
           <li key={entry.gameId}>

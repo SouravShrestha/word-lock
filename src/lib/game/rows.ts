@@ -42,6 +42,12 @@ export interface GamePlayerRow extends PlayerRow {
  * streak.
  */
 export interface PlayerAccountRow extends PlayerRow {
+  /**
+   * When the row was created. For an account this is when they first played,
+   * not when they signed up — `wl_claim_player` adopts the guest row rather than
+   * making a new one, so the original date survives sign-in.
+   */
+  created_at: string;
   user_id: string | null;
   /** Ladder currency. The player's league is derived from this, never stored. */
   stars: number;
@@ -71,6 +77,15 @@ export interface GameRow {
   /** Star change applied when the game completed. Null means unranked. */
   p1_star_delta: number | null;
   p2_star_delta: number | null;
+  /**
+   * Star count each player held immediately after this game, after the floor was
+   * applied. What the profile's star curve is drawn from — the delta alone can't
+   * be replayed, since a clamped loss records more than it took.
+   *
+   * Null on an unranked game, and on any game completed before migration 010.
+   */
+  p1_stars_after: number | null;
+  p2_stars_after: number | null;
 }
 
 export interface MoveRow {

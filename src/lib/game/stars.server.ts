@@ -16,13 +16,37 @@ interface RatedRow {
 export interface StarOutcome {
   p1Delta: number | null;
   p2Delta: number | null;
+  /**
+   * Star counts the two players end this game on, after the floor is applied.
+   * Recorded on the game row so the profile's star curve can read what the
+   * ladder actually held rather than replaying deltas — a loss clamped at
+   * MIN_STARS records more than it took, so a replay drifts.
+   *
+   * Null exactly when the matching delta is null: an unranked game moves nobody.
+   */
+  p1StarsAfter: number | null;
+  p2StarsAfter: number | null;
 }
 
-const UNRANKED: StarOutcome = { p1Delta: null, p2Delta: null };
+/**
+ * The "nothing moved" outcome. Exported because a caller that cannot even load
+ * the game has to write the same nulls, and spelling them out at each call site
+ * is how a new field gets missed.
+ */
+export const UNRANKED_OUTCOME: StarOutcome = {
+  p1Delta: null,
+  p2Delta: null,
+  p1StarsAfter: null,
+  p2StarsAfter: null,
+};
 
-/** Writes a player's new star count, raising their peak if this is a new high. */
-async function updateStars(player: RatedRow, delta: number): Promise<void> {
-  const stars = applyDelta(player.stars, delta);
+/**
+ * Writes a player's new star count, raising their peak if this is a new high.
+ *
+ * Takes the already-clamped total rather than recomputing it, so the value
+ * written here and the one recorded on the game row cannot disagree.
+ */
+async function updateStars(player: RatedRow, stars: number): Promise<void> {
   await getSupabaseAdmin()
     .from("wl_players")
     .update({
@@ -48,7 +72,7 @@ export async function computeStarOutcome(
   game: GameRow,
   winnerId: string | null,
 ): Promise<{ outcome: StarOutcome; commit: () => Promise<void> }> {
-  if (!game.player2_id) return { outcome: UNRANKED, commit: async () => {} };
+  if (!game.player2_id) return { outcome: UNRANKED_OUTCOME, commit: async () => {} };
 
   const { data } = await getSupabaseAdmin()
     .from("wl_players")
@@ -59,18 +83,29 @@ export async function computeStarOutcome(
   const p1 = rows.find((r) => r.id === game.player1_id);
   const p2 = rows.find((r) => r.id === game.player2_id);
 
-  if (!p1 || !p2) return { outcome: UNRANKED, commit: async () => {} };
+  if (!p1 || !p2) return { outcome: UNRANKED_OUTCOME, commit: async () => {} };
 
   // Both sides need a real account for the result to move the ladder.
-  if (!p1.user_id || !p2.user_id) return { outcome: UNRANKED, commit: async () => {} };
+  if (!p1.user_id || !p2.user_id) return { outcome: UNRANKED_OUTCOME, commit: async () => {} };
 
   const { deltaA, deltaB } = starDeltas(p1.stars, p2.stars, scoreForPlayerA(p1.id, winnerId));
 
+  // Resolved here, in the compute half, so the totals travel into the same
+  // UPDATE that marks the game completed. Working them out inside `commit`
+  // instead would record a snapshot the game row never saw.
+  const starsAfterA = applyDelta(p1.stars, deltaA);
+  const starsAfterB = applyDelta(p2.stars, deltaB);
+
   return {
-    outcome: { p1Delta: deltaA, p2Delta: deltaB },
+    outcome: {
+      p1Delta: deltaA,
+      p2Delta: deltaB,
+      p1StarsAfter: starsAfterA,
+      p2StarsAfter: starsAfterB,
+    },
     // Called only once the game has actually been flipped to completed.
     commit: async () => {
-      await Promise.all([updateStars(p1, deltaA), updateStars(p2, deltaB)]);
+      await Promise.all([updateStars(p1, starsAfterA), updateStars(p2, starsAfterB)]);
     },
   };
 }

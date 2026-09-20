@@ -8,7 +8,7 @@ import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { UNNAMED_PLAYER } from "@/lib/account/names";
 import { resolvePlayer, type Caller } from "./identity.server";
 import { touchPlayStreak } from "./streak.server";
-import { computeStarOutcome } from "./stars.server";
+import { computeStarOutcome, UNRANKED_OUTCOME } from "./stars.server";
 import { getDictionary, isWord } from "./dictionary.server";
 import {
   computeBoardState,
@@ -18,7 +18,8 @@ import {
   type EngineMove,
   type PlayerSlot,
 } from "./engine";
-import { computeStats, MAX_RECENT_GAMES, type StatsGameInput } from "./stats";
+import { computeStats, MAX_HISTORY_GAMES, type PlayerStats, type StatsGameInput } from "./stats";
+import { starHistory } from "./star-history";
 import type { GamePlayerRow, GameRow, MoveRow, PlayerRow } from "./rows";
 
 export const MAX_ACTIVE_GAMES = 5;
@@ -274,7 +275,7 @@ export async function forfeitGame(caller: Caller, roomCode: string) {
   const loaded = await loadGame(roomCode);
   const { outcome, commit } = loaded
     ? await computeStarOutcome(loaded.game, winnerId)
-    : { outcome: { p1Delta: null, p2Delta: null }, commit: async () => {} };
+    : { outcome: UNRANKED_OUTCOME, commit: async () => {} };
 
   const { data: completed } = await getSupabaseAdmin()
     .from("wl_games")
@@ -285,6 +286,8 @@ export async function forfeitGame(caller: Caller, roomCode: string) {
       last_move_at: new Date().toISOString(),
       p1_star_delta: outcome.p1Delta,
       p2_star_delta: outcome.p2Delta,
+      p1_stars_after: outcome.p1StarsAfter,
+      p2_stars_after: outcome.p2StarsAfter,
     })
     .eq("id", game.id)
     .neq("status", "completed")
@@ -315,6 +318,8 @@ async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
         last_move_at: now,
         p1_star_delta: outcome.p1Delta,
         p2_star_delta: outcome.p2Delta,
+        p1_stars_after: outcome.p1StarsAfter,
+        p2_stars_after: outcome.p2StarsAfter,
       })
       .eq("id", game.id)
       /*
@@ -447,7 +452,16 @@ export async function listGamesForSession(caller: Caller) {
   };
 }
 
-export async function getPlayerStats(caller: Caller) {
+/**
+ * Everything the profile and history screens read: the win/loss record, a page
+ * of finished games, and the star curve.
+ *
+ * All three come off one query. Every completed game is fetched because the
+ * record counts them all and the curve is drawn across all of them — but only
+ * the {@link MAX_HISTORY_GAMES} newest need move history (to compute final board
+ * scores) and opponent names, which are by far the expensive parts.
+ */
+export async function getPlayerStats(caller: Caller): Promise<PlayerStats> {
   const player = await resolvePlayer(caller);
   const { data: games } = await getSupabaseAdmin()
     .from("wl_games")
@@ -457,9 +471,7 @@ export async function getPlayerStats(caller: Caller) {
     .order("last_move_at", { ascending: false });
 
   const rows = (games ?? []) as GameRow[];
-  // Only the most recent games need move history (for score computation) and
-  // opponent names — overview counts are derived from winner_id alone.
-  const recentRows = rows.slice(0, MAX_RECENT_GAMES);
+  const recentRows = rows.slice(0, MAX_HISTORY_GAMES);
   const recentIds = recentRows.map((g) => g.id);
   const playerIds = new Set<string>();
   recentRows.forEach((g) => {
@@ -506,11 +518,18 @@ export async function getPlayerStats(caller: Caller) {
       last_move_at: game.last_move_at,
       p1_star_delta: game.p1_star_delta,
       p2_star_delta: game.p2_star_delta,
+      p1_stars_after: game.p1_stars_after,
+      p2_stars_after: game.p2_stars_after,
       scores,
     };
   });
 
-  return computeStats(player.id, statsGames, people_);
+  return {
+    ...computeStats(player.id, statsGames, people_),
+    // Built from every row, not just the page of history, and anchored on the
+    // player's live star total so the line ends where the headline says it does.
+    starHistory: starHistory(player.id, statsGames, player.stars, new Date()),
+  };
 }
 
 /** Auto-passes any active game whose current turn has run past 24 hours. */

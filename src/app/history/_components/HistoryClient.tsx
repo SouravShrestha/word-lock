@@ -56,7 +56,7 @@ export function HistoryClient() {
             ) : (
               /* Full-bleed rows: the negative margin cancels the page gutter so a
                  row's press area runs edge to edge, as it does on the leaderboard. */
-              <ul className="-mx-5 mt-3 flex flex-col pt-1">
+              <ul className="-mx-5 mt-3 flex flex-col pt-1 pb-8">
                 {games.map((entry) => (
                   <li key={entry.gameId}>
                     <MatchRow entry={entry} onSelect={setSelected} />

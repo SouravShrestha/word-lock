@@ -190,7 +190,7 @@ function GameCard({ game, idx, totalGames }: { game: any; idx: number; totalGame
 
   return (
     <li
-      className={`w-60 shrink-0 snap-start ${idx === 0 ? "pl-5" : "pl-2"} ${idx === totalGames - 1 ? "pr-5" : "pr-2"}`}
+      className={`w-60 shrink-0 snap-start ${idx === 0 ? "pl-5" : "pl-2.5"} ${idx === totalGames - 1 ? "pr-5" : "pr-2.5"}`}
     >
       <Link
         href={`/game/${game.roomCode}`}

@@ -18,9 +18,12 @@ import { AvatarSheet } from "./AvatarSheet";
 export function ProfileIdentity({
   username,
   avatar,
+  joinedAt,
 }: {
   username?: string | null;
   avatar?: string | null;
+  /** ISO timestamp from the account summary. Absent while it is still loading. */
+  joinedAt?: string | null;
 }) {
   const [picking, setPicking] = useState(false);
 
@@ -48,8 +51,13 @@ export function ProfileIdentity({
         {username ? `@${username}` : "…"}
       </p>
 
+      {/*
+        Just the year. The exact date is not something a player needs, and a
+        full one next to the name reads like a record rather than a profile.
+        Nothing is shown until the summary lands, so the block does not jump.
+      */}
       <p className="text-xs font-semibold text-muted-foreground">
-        This is how other players see you
+        {joinedAt ? `Joined ${new Date(joinedAt).getFullYear()}` : "\u00A0"}
       </p>
 
       <AvatarSheet open={picking} onClose={() => setPicking(false)} current={avatar} />

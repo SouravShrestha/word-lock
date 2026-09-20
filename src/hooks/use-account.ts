@@ -15,6 +15,12 @@ export interface AccountSummary {
   usernameLocked: boolean;
   /** Chosen avatar id, e.g. `avatar_01`. Always set. */
   avatar: string;
+  /**
+   * ISO timestamp of when the player row was created. Signing in adopts an
+   * existing guest row, so this is when they first turned up rather than when
+   * they made an account.
+   */
+  joinedAt: string;
   stars: number;
   peakStars: number;
   starGames: number;

@@ -25,6 +25,12 @@ export interface AccountSummary {
   usernameLocked: boolean;
   /** Chosen avatar id, e.g. `avatar_01`. Always set — the column is defaulted. */
   avatar: string;
+  /**
+   * ISO timestamp of when this player row was created, for the "Joined" line on
+   * the profile. Signing in adopts an existing guest row, so this is the date
+   * they first turned up rather than the date they made an account.
+   */
+  joinedAt: string;
   stars: number;
   /** Highest star count ever reached. Never decreases. */
   peakStars: number;
@@ -52,6 +58,7 @@ export async function getAccountSummary(caller: Caller): Promise<AccountSummary>
     username: player.username,
     usernameLocked: player.username !== null,
     avatar: normalizeAvatarId(player.avatar),
+    joinedAt: player.created_at,
     stars: player.stars,
     peakStars: player.peak_stars,
     starGames: player.star_games,

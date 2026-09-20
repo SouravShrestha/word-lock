@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { cn } from "@/lib/utils";
+
 /**
  * The app's one "are you sure?" surface, matching the back-button warning used
  * on the game screens: a centred card over a dimmed backdrop, cancel on the
@@ -20,6 +22,7 @@ export function ConfirmDialog({
   onCancel,
   isPending = false,
   pendingLabel,
+  zClassName = "z-50",
 }: {
   open: boolean;
   title: string;
@@ -31,6 +34,11 @@ export function ConfirmDialog({
   isPending?: boolean;
   /** Shown on the confirm button while `isPending`. */
   pendingLabel?: string;
+  /**
+   * Stacking level. Raise it when the dialog interrupts something that is
+   * already floating, such as a bottom sheet.
+   */
+  zClassName?: string;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -48,7 +56,7 @@ export function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6"
+      className={cn("fixed inset-0 flex items-center justify-center bg-black/60 px-6", zClassName)}
     >
       <div className="surface flex w-full max-w-xs flex-col gap-4 p-6">
         <div className="text-center">

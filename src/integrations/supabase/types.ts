@@ -275,7 +275,9 @@ export type Database = {
           id: string;
           last_move_at: string;
           p1_star_delta: number | null;
+          p1_stars_after: number | null;
           p2_star_delta: number | null;
+          p2_stars_after: number | null;
           player1_id: string;
           player2_id: string | null;
           rematch_game_id: string | null;
@@ -291,7 +293,9 @@ export type Database = {
           id?: string;
           last_move_at?: string;
           p1_star_delta?: number | null;
+          p1_stars_after?: number | null;
           p2_star_delta?: number | null;
+          p2_stars_after?: number | null;
           player1_id: string;
           player2_id?: string | null;
           rematch_game_id?: string | null;
@@ -307,7 +311,9 @@ export type Database = {
           id?: string;
           last_move_at?: string;
           p1_star_delta?: number | null;
+          p1_stars_after?: number | null;
           p2_star_delta?: number | null;
+          p2_stars_after?: number | null;
           player1_id?: string;
           player2_id?: string | null;
           rematch_game_id?: string | null;

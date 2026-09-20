@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeStats, MAX_RECENT_GAMES, type StatsGameInput } from "./stats";
+import { computeStats, MAX_HISTORY_GAMES, type StatsGameInput } from "./stats";
 import type { PlayerRow } from "./service.server";
 
 const ME = "player-me";
@@ -22,6 +22,8 @@ function game(overrides: Partial<StatsGameInput> & { id: string }): StatsGameInp
     last_move_at: "2024-01-01T00:00:00.000Z",
     p1_star_delta: null,
     p2_star_delta: null,
+    p1_stars_after: null,
+    p2_stars_after: null,
     scores: { 1: 13, 2: 12 },
     ...overrides,
   };
@@ -94,8 +96,9 @@ describe("computeStats", () => {
     expect(stats.recentGames.map((h) => h.gameId)).toEqual(["g2", "g3", "g1"]);
   });
 
-  it("caps recent games at MAX_RECENT_GAMES, but keeps overview counts for all games", () => {
-    const games = Array.from({ length: MAX_RECENT_GAMES + 3 }, (_, i) =>
+  it("caps the returned list at MAX_HISTORY_GAMES, but keeps overview counts for all games", () => {
+    const total = MAX_HISTORY_GAMES + 3;
+    const games = Array.from({ length: total }, (_, i) =>
       game({
         id: `g${i}`,
         last_move_at: new Date(2024, 0, i + 1).toISOString(),
@@ -103,10 +106,11 @@ describe("computeStats", () => {
       }),
     );
     const stats = computeStats(ME, games, players);
-    expect(stats.overview.total).toBe(MAX_RECENT_GAMES + 3);
-    expect(stats.recentGames).toHaveLength(MAX_RECENT_GAMES);
-    // Most recent games (highest date) are kept.
-    expect(stats.recentGames.map((h) => h.gameId)).toEqual(["g7", "g6", "g5", "g4", "g3"]);
+    expect(stats.overview.total).toBe(total);
+    expect(stats.recentGames).toHaveLength(MAX_HISTORY_GAMES);
+    // Most recent games (highest date) are kept, newest first.
+    expect(stats.recentGames[0].gameId).toBe(`g${total - 1}`);
+    expect(stats.recentGames.at(-1)!.gameId).toBe(`g${total - MAX_HISTORY_GAMES}`);
   });
 
   it("ignores games the player is not part of", () => {

@@ -22,7 +22,7 @@ import type { PlayerAccountRow } from "./rows";
 
 /** Columns every caller of `resolvePlayer` needs. */
 const PLAYER_COLUMNS =
-  "id, session_id, user_id, username, avatar, stars, peak_stars, star_games, play_streak, best_play_streak, last_played_on, timezone";
+  "id, session_id, created_at, user_id, username, avatar, stars, peak_stars, star_games, play_streak, best_play_streak, last_played_on, timezone";
 
 /**
  * Who is making this request. Built once per request by `resolveCaller` and
