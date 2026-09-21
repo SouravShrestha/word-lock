@@ -91,7 +91,7 @@ export function LobbyClient() {
           <Wordmark />
 
           <div className="mt-16 flex w-full max-w-sm flex-row gap-4 px-5">
-            <button
+            <button type="button"
               onClick={() => createMutation.mutate()}
               disabled={!ready || createMutation.isPending}
               className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"

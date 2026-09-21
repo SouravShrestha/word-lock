@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/http/errors";
+import { applyCookies } from "@/integrations/supabase/client.route";
 import { startGame } from "@/lib/game/service.server";
 import { callerSchema, resolveCaller, roomCodeSchema } from "@/lib/game/identity.server";
 
@@ -14,8 +16,8 @@ export async function POST(req: Request) {
 
     const caller = await resolveCaller(req, parsed.data);
     const result = await startGame(caller, parsed.data.roomCode.toUpperCase());
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+    return applyCookies(req, NextResponse.json(result));
+  } catch (error) {
+    return applyCookies(req, toErrorResponse(error, "api/game/start"));
   }
 }

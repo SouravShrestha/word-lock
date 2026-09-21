@@ -7,6 +7,7 @@
  * check and the claim.
  */
 import { NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/http/errors";
 
 import { checkUsernameAvailable } from "@/lib/account/service.server";
 import { MAX_USERNAME_LENGTH } from "@/lib/account/names";
@@ -21,7 +22,7 @@ export async function GET(req: Request) {
 
     const result = await checkUsernameAvailable(raw);
     return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+  } catch (error) {
+    return toErrorResponse(error, "api/account/username/check");
   }
 }

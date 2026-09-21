@@ -6,6 +6,7 @@
  * `lib/game/service.server.ts`.
  */
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
+import { PublicError } from "@/lib/http/errors";
 import { resolvePlayer, type Caller } from "@/lib/game/identity.server";
 import { USERNAME_ERROR_COPY, normalizeUsername, validateUsername } from "./names";
 import { isAvatarId, normalizeAvatarId } from "./avatars";
@@ -110,15 +111,15 @@ export async function checkUsernameAvailable(
  */
 export async function setUsername(caller: Caller, raw: string): Promise<{ username: string }> {
   if (!caller.userId) {
-    throw new Error("Log in to pick a username.");
+    throw new PublicError("Log in to pick a username.");
   }
 
   const normalized = normalizeUsername(raw);
   const invalid = validateUsername(normalized);
-  if (invalid) throw new Error(USERNAME_ERROR_COPY[invalid]);
+  if (invalid) throw new PublicError(USERNAME_ERROR_COPY[invalid]);
 
   const player = await resolvePlayer(caller);
-  if (player.username) throw new Error(ALREADY_SET_MESSAGE);
+  if (player.username) throw new PublicError(ALREADY_SET_MESSAGE);
 
   const { data, error } = await getSupabaseAdmin()
     .from("wl_players")
@@ -129,13 +130,13 @@ export async function setUsername(caller: Caller, raw: string): Promise<{ userna
     .maybeSingle();
 
   if (error) {
-    if (error.code === UNIQUE_VIOLATION) throw new Error(TAKEN_MESSAGE);
+    if (error.code === UNIQUE_VIOLATION) throw new PublicError(TAKEN_MESSAGE);
     throw new Error(error.message);
   }
 
   // No row came back: the filter excluded it, meaning a username was set
   // between resolving the player and this write.
-  if (!data?.username) throw new Error(ALREADY_SET_MESSAGE);
+  if (!data?.username) throw new PublicError(ALREADY_SET_MESSAGE);
 
   return { username: data.username };
 }
@@ -157,11 +158,11 @@ export async function setUsername(caller: Caller, raw: string): Promise<{ userna
  */
 export async function setAvatar(caller: Caller, avatar: string): Promise<{ avatar: string }> {
   if (!caller.userId) {
-    throw new Error("Log in to change your avatar.");
+    throw new PublicError("Log in to change your avatar.");
   }
 
   if (!isAvatarId(avatar)) {
-    throw new Error("That avatar doesn't exist.");
+    throw new PublicError("That avatar doesn't exist.");
   }
 
   const player = await resolvePlayer(caller);
@@ -174,7 +175,7 @@ export async function setAvatar(caller: Caller, avatar: string): Promise<{ avata
     .maybeSingle();
 
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Couldn't save your avatar. Try again.");
+  if (!data) throw new PublicError("Couldn't save your avatar. Try again.");
 
   return { avatar: data.avatar };
 }

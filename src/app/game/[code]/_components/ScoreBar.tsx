@@ -1,7 +1,41 @@
+import { useEffect, useState } from "react";
+
 import { timeLeftLabel } from "@/lib/game/format";
 import { ClockIcon } from "@/components/icons/ClockIcon";
 import { Avatar } from "@/components/Avatar";
 import { cn } from "@/lib/utils";
+
+/**
+ * The turn countdown, ticking on its own.
+ *
+ * This used to be a `setInterval` in `GameClient` that forced its entire
+ * ~600-line tree to re-render every second just so this one label could
+ * recompute `timeLeftLabel`. Owning the tick here instead means only this
+ * leaf re-renders, and only while there is actually a countdown running —
+ * the interval is torn down (not just left ticking uselessly) the moment the
+ * game isn't `active`, which also covers `waiting` and `completed` without a
+ * separate branch.
+ */
+function TurnClock({ deadline, status }: { deadline: string | null; status: string }) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (status !== "active") return;
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [status]);
+
+  const timerLabel = status === "active" ? timeLeftLabel(deadline) : null;
+
+  return (
+    <div className="flex shrink-0 flex-col items-center gap-1.5">
+      <ClockIcon className="h-4 w-4 text-foreground" />
+      <p className="font-display text-xs font-medium tabular-nums tracking-wide leading-none">
+        {timerLabel ?? (status === "completed" ? "Game over" : "-")}
+      </p>
+    </div>
+  );
+}
 
 /**
  * Tile counts are padded to two digits so the number never changes width.
@@ -140,8 +174,6 @@ export function ScoreBar({
    */
   scores?: { 1: number; 2: number };
 }) {
-  const timerLabel = game.status === "active" ? timeLeftLabel(game.turnDeadline) : null;
-
   const nearSlot: 1 | 2 = game.viewerSlot === 2 ? 2 : 1;
   const farSlot: 1 | 2 = nearSlot === 1 ? 2 : 1;
 
@@ -163,12 +195,7 @@ export function ScoreBar({
           thing it ever says and wrapping it would make the panel taller than
           the two chips beside it.
         */}
-        <div className="flex shrink-0 flex-col items-center gap-1.5">
-          <ClockIcon className="h-4 w-4 text-foreground" />
-          <p className="font-display text-xs font-medium tabular-nums tracking-wide leading-none">
-            {timerLabel ?? (game.status === "completed" ? "Game over" : "-")}
-          </p>
-        </div>
+        <TurnClock deadline={game.turnDeadline} status={game.status} />
 
         <PlayerChip {...chipFor(farSlot)} mirrored />
       </div>

@@ -17,14 +17,14 @@ export function ForfeitConfirmDialog({
           </p>
         </div>
         <div className="flex gap-3">
-          <button
+          <button type="button"
             onClick={onCancel}
             disabled={isPending}
             className="chunky-btn btn-surface-2 flex-1 py-3"
           >
             Stay
           </button>
-          <button
+          <button type="button"
             onClick={onConfirm}
             disabled={isPending}
             className="chunky-btn btn-danger flex-1 py-3"

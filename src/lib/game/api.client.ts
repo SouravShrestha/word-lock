@@ -5,6 +5,24 @@
 import { browserTimezone } from "@/lib/account/timezone";
 import type { LeaderboardView } from "@/hooks/use-leaderboard";
 
+/**
+ * An API error that carries the response's HTTP status.
+ *
+ * Plain `Error` gave TanStack Query nothing to decide a retry on, so a
+ * deliberate 4xx from the server (a validation failure, "it's not your turn
+ * yet") got retried exactly like a transient 5xx would. `QueryProvider`'s
+ * default `retry` predicate reads `status` off this to tell the two apart.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 async function post(path: string, data: any): Promise<any> {
   const response = await fetch(path, {
     method: "POST",
@@ -14,7 +32,7 @@ async function post(path: string, data: any): Promise<any> {
 
   if (!response.ok) {
     const errorData = (await response.json().catch(() => ({}))) as any;
-    throw new Error(errorData.error || `HTTP error ${response.status}`);
+    throw new ApiError(errorData.error || `HTTP error ${response.status}`, response.status);
   }
 
   return response.json();
@@ -55,7 +73,7 @@ export async function setAvatarFn(data: { sessionId: string; avatar: string }) {
 
 export async function fetchLeaderboardFn(): Promise<LeaderboardView> {
   const response = await fetch("/api/account/leaderboard");
-  if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+  if (!response.ok) throw new ApiError(`HTTP error ${response.status}`, response.status);
   return response.json();
 }
 
@@ -64,7 +82,7 @@ export async function checkUsernameFn(
   username: string,
 ): Promise<{ available: boolean; reason?: string }> {
   const response = await fetch(`/api/account/username/check?u=${encodeURIComponent(username)}`);
-  if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+  if (!response.ok) throw new ApiError(`HTTP error ${response.status}`, response.status);
   return response.json();
 }
 

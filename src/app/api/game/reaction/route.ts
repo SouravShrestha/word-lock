@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/http/errors";
+import { applyCookies } from "@/integrations/supabase/client.route";
 import { z } from "zod";
 
 import { sendReaction } from "@/lib/game/service.server";
@@ -24,8 +26,8 @@ export async function POST(req: Request) {
       parsed.data.roomCode.toUpperCase(),
       parsed.data.emoji,
     );
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+    return applyCookies(req, NextResponse.json(result));
+  } catch (error) {
+    return applyCookies(req, toErrorResponse(error, "api/game/reaction"));
   }
 }

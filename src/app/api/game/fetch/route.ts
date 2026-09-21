@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/http/errors";
+import { applyCookies } from "@/integrations/supabase/client.route";
 import { z } from "zod";
 import { findViewerId, loadGame, serializeGame } from "@/lib/game/service.server";
 import { resolveCaller, roomCodeSchema } from "@/lib/game/identity.server";
@@ -27,8 +29,8 @@ export async function POST(req: Request) {
     const viewerId = findViewerId(loaded.players, caller);
 
     const result = serializeGame(loaded.game, loaded.moves, loaded.players, viewerId);
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+    return applyCookies(req, NextResponse.json(result));
+  } catch (error) {
+    return applyCookies(req, toErrorResponse(error, "api/game/fetch"));
   }
 }

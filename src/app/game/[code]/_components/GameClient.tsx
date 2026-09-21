@@ -38,6 +38,20 @@ import { ReviewBar } from "./ReviewBar";
 import { GameMenuSheet } from "./GameMenuSheet";
 import { EmojiReactionSheet } from "./EmojiReactionSheet";
 
+/**
+ * Debounces the "destroy the lobby I was hosting" beacon across a transient
+ * unmount — a StrictMode double-invoke or a quick back-navigation that lands
+ * right back on the same room shouldn't tear down a game the player never
+ * actually left.
+ *
+ * Module-level rather than component state on purpose: the whole point is to
+ * survive this component unmounting, which local state cannot do. Previously
+ * this lived on `window as any`, an untyped global any script on the page
+ * could stomp on; a module-level `Map` gets the same cross-mount lifetime
+ * without leaking onto `window` at all.
+ */
+const pendingDestroyTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 export function GameClient({ code }: { code: string }) {
   const roomCode = code.toUpperCase();
   const { sessionId, ready } = useSession();
@@ -45,7 +59,6 @@ export function GameClient({ code }: { code: string }) {
   const router = useRouter();
   const [selection, setSelection] = useState<number[]>([]);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
-  const [, setTick] = useState(0);
   const [showForfeitConfirm, setShowForfeitConfirm] = useState(false);
   const [showPassConfirm, setShowPassConfirm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -106,8 +119,9 @@ export function GameClient({ code }: { code: string }) {
 
   /*
    * Move review. Memoised on the query data so the hook's replay is not redone
-   * on every render — the 1s tick driving the turn clock re-renders this
-   * component constantly, and `?? []` would hand it a fresh array each time.
+   * on every render — this component re-renders often (mutations, the
+   * realtime subscription, tile selection), and `?? []` would hand it a fresh
+   * array each time.
    */
   const historyMoves = useMemo<HistoryMove[]>(() => game?.history ?? [], [game?.history]);
   const gridLetters = useMemo<string[]>(() => game?.grid ?? [], [game?.grid]);
@@ -130,11 +144,6 @@ export function GameClient({ code }: { code: string }) {
     queryClient.invalidateQueries({ queryKey: ["account"] });
     queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
   }, [isCompleted, queryClient]);
-
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(id);
-  }, []);
 
   useEffect(() => {
     if (!game?.id) return;
@@ -244,16 +253,22 @@ export function GameClient({ code }: { code: string }) {
   }, [game?.turnDeadline, game?.status, queryClient, queryKey, sessionId, roomCode]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const win = window as any;
-      win.pendingDestroys = win.pendingDestroys || {};
-      if (win.pendingDestroys[roomCode]) {
-        clearTimeout(win.pendingDestroys[roomCode]);
-        delete win.pendingDestroys[roomCode];
-      }
+    const pending = pendingDestroyTimers.get(roomCode);
+    if (pending) {
+      clearTimeout(pending);
+      pendingDestroyTimers.delete(roomCode);
     }
 
-    const handleBeforeUnload = () => {
+    /*
+     * `beforeunload` alone misses real departures on iOS Safari — it is
+     * unreliable there for tab close, swipe-away and backgrounding, which is
+     * exactly how this game gets left on a phone. `pagehide` fires
+     * consistently across desktop and mobile for all of those, so both
+     * listeners call the same handler; a real close firing the beacon twice
+     * is harmless since `destroy`/`leave` are both idempotent no-ops on a
+     * second call.
+     */
+    const handleUnload = () => {
       if (isHostWaitingRef.current && sessionId) {
         navigator.sendBeacon("/api/game/destroy", JSON.stringify({ roomCode, sessionId }));
       }
@@ -261,23 +276,25 @@ export function GameClient({ code }: { code: string }) {
         navigator.sendBeacon("/api/game/leave", JSON.stringify({ roomCode, sessionId }));
       }
     };
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", handleUnload);
+    window.addEventListener("pagehide", handleUnload);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleUnload);
+      window.removeEventListener("pagehide", handleUnload);
       if (isHostWaitingRef.current && sessionId) {
-        if (typeof window !== "undefined") {
-          const win = window as any;
-          win.pendingDestroys = win.pendingDestroys || {};
-          win.pendingDestroys[roomCode] = setTimeout(() => {
+        pendingDestroyTimers.set(
+          roomCode,
+          setTimeout(() => {
+            pendingDestroyTimers.delete(roomCode);
             fetch("/api/game/destroy", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ roomCode, sessionId }),
               keepalive: true,
             }).catch(() => {});
-          }, 300);
-        }
+          }, 300),
+        );
       }
       if (isNonHostWaitingRef.current && sessionId) {
         fetch("/api/game/leave", {

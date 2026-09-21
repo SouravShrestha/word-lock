@@ -5,6 +5,7 @@
 // `resolvePlayer`, so a logged-in player is identified by their verified account
 // rather than by whatever the request body claimed.
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
+import { PublicError } from "@/lib/http/errors";
 import { UNNAMED_PLAYER } from "@/lib/account/names";
 import { resolvePlayer, type Caller } from "./identity.server";
 import { touchPlayStreak } from "./streak.server";
@@ -164,7 +165,7 @@ async function countActiveGames(playerId: string) {
 export async function createGame(caller: Caller) {
   const player = await resolvePlayer(caller);
   if ((await countActiveGames(player.id)) >= MAX_ACTIVE_GAMES) {
-    throw new Error(
+    throw new PublicError(
       `You already have ${MAX_ACTIVE_GAMES} games on the go. Finish one before starting another.`,
     );
   }
@@ -187,22 +188,22 @@ export async function createGame(caller: Caller) {
     if (data) return { roomCode: data.room_code };
     if (error && !error.message.includes("duplicate")) throw new Error(error.message);
   }
-  throw new Error("Couldn't allocate a room code. Try again.");
+  throw new PublicError("Couldn't allocate a room code. Try again.");
 }
 
 export async function joinGame(caller: Caller, roomCode: string) {
   const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
-  if (!loaded) throw new Error("No game found with that code.");
+  if (!loaded) throw new PublicError("No game found with that code.");
   const { game } = loaded;
 
   if (game.player1_id === player.id || game.player2_id === player.id) {
     return { roomCode: game.room_code };
   }
-  if (game.player2_id) throw new Error("That game is already full.");
-  if (game.status === "completed") throw new Error("That game is already finished.");
+  if (game.player2_id) throw new PublicError("That game is already full.");
+  if (game.status === "completed") throw new PublicError("That game is already finished.");
   if ((await countActiveGames(player.id)) >= MAX_ACTIVE_GAMES) {
-    throw new Error(
+    throw new PublicError(
       `You already have ${MAX_ACTIVE_GAMES} games on the go. Finish one before joining another.`,
     );
   }
@@ -225,10 +226,10 @@ export async function startGame(caller: Caller, roomCode: string) {
     .eq("room_code", roomCode.toUpperCase())
     .maybeSingle();
 
-  if (!game) throw new Error("Game not found.");
-  if (game.player1_id !== player.id) throw new Error("Only the host can start the game.");
-  if (game.status !== "waiting") throw new Error("Game is not in the waiting state.");
-  if (!game.player2_id) throw new Error("Waiting for an opponent to join.");
+  if (!game) throw new PublicError("Game not found.");
+  if (game.player1_id !== player.id) throw new PublicError("Only the host can start the game.");
+  if (game.status !== "waiting") throw new PublicError("Game is not in the waiting state.");
+  if (!game.player2_id) throw new PublicError("Waiting for an opponent to join.");
 
   const { error } = await getSupabaseAdmin()
     .from("wl_games")
@@ -267,12 +268,12 @@ export async function forfeitGame(caller: Caller, roomCode: string) {
     .eq("room_code", roomCode.toUpperCase())
     .maybeSingle();
 
-  if (!game) throw new Error("Game not found.");
-  if (game.status !== "active") throw new Error("This game isn't active.");
+  if (!game) throw new PublicError("Game not found.");
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
 
   const isPlayer1 = game.player1_id === player.id;
   const isPlayer2 = game.player2_id === player.id;
-  if (!isPlayer1 && !isPlayer2) throw new Error("You are not a participant in this game.");
+  if (!isPlayer1 && !isPlayer2) throw new PublicError("You are not a participant in this game.");
 
   const winnerId = isPlayer1 ? game.player2_id : game.player1_id;
 
@@ -304,6 +305,36 @@ export async function forfeitGame(caller: Caller, roomCode: string) {
   if (completed) await commit();
 
   return { ok: true };
+}
+
+/**
+ * Atomically claims the current turn before a move is recorded.
+ *
+ * `validateMove`/the checks above only *read* `current_turn_player_id` —
+ * nothing stopped two requests that both read the same turn from also both
+ * inserting a move for it, letting a player (or a client retry, or the sweep
+ * cron racing a live request) take two turns in a row. This closes that gap
+ * without a schema change: `last_move_at` already changes on every turn, so
+ * using it as an optimistic-lock version stamp — the update only matches rows
+ * that still have the exact timestamp this caller loaded — means only the
+ * first of two racing writers can ever claim the turn. The loser sees no row
+ * come back and stops before touching `wl_moves`.
+ */
+async function claimTurn(game: GameRow, expectedPlayerId: string): Promise<string> {
+  const claimedAt = new Date().toISOString();
+  const { data, error } = await getSupabaseAdmin()
+    .from("wl_games")
+    .update({ last_move_at: claimedAt })
+    .eq("id", game.id)
+    .eq("current_turn_player_id", expectedPlayerId)
+    .eq("last_move_at", game.last_move_at)
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new PublicError("Someone else already took this turn. Refresh and try again.");
+  }
+  return claimedAt;
 }
 
 async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
@@ -359,7 +390,7 @@ export async function submitMove(
 ) {
   const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
-  if (!loaded) throw new Error("No game found with that code. ");
+  if (!loaded) throw new PublicError("No game found with that code. ");
   const { game, moves } = loaded;
 
   const state = computeBoardState(game.grid.split(""), toEngineMoves(game, moves));
@@ -372,7 +403,9 @@ export async function submitMove(
     gameActive: game.status === "active",
     isWord,
   });
-  if (rejection) throw new Error(MOVE_REJECTION_MESSAGES[rejection]);
+  if (rejection) throw new PublicError(MOVE_REJECTION_MESSAGES[rejection]);
+
+  await claimTurn(game, player.id);
 
   const { data: inserted, error } = await getSupabaseAdmin()
     .from("wl_moves")
@@ -395,11 +428,13 @@ export async function submitMove(
 export async function passTurn(caller: Caller, roomCode: string) {
   const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
-  if (!loaded) throw new Error("No game found with that code. ");
+  if (!loaded) throw new PublicError("No game found with that code. ");
   const { game, moves } = loaded;
 
-  if (game.status !== "active") throw new Error("This game isn't active.");
-  if (game.current_turn_player_id !== player.id) throw new Error("It's not your turn yet.");
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
+  if (game.current_turn_player_id !== player.id) throw new PublicError("It's not your turn yet.");
+
+  await claimTurn(game, player.id);
 
   const { data: inserted, error } = await getSupabaseAdmin()
     .from("wl_moves")
@@ -426,19 +461,22 @@ export async function passTurn(caller: Caller, roomCode: string) {
 export async function sendReaction(caller: Caller, roomCode: string, emoji: string) {
   const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
-  if (!loaded) throw new Error("No game found with that code.");
+  if (!loaded) throw new PublicError("No game found with that code.");
   const { game } = loaded;
 
-  if (game.status !== "active") throw new Error("This game isn't active.");
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
 
   const slot: PlayerSlot | null =
     game.player1_id === player.id ? 1 : game.player2_id === player.id ? 2 : null;
-  if (!slot) throw new Error("You're not a player in this game.");
+  if (!slot) throw new PublicError("You're not a player in this game.");
 
   const channel = getSupabaseAdmin().channel(`game-${game.id}`);
   try {
     const result = await channel.httpSend("reaction", { emoji, slot });
-    if (!result.success) throw new Error(result.error ?? "Failed to send reaction.");
+    if (!result.success) {
+      console.error("[sendReaction] broadcast failed:", result.error);
+      throw new PublicError("Failed to send reaction.");
+    }
   } finally {
     // Never subscribed, so there is nothing to unsubscribe — just drop the
     // client-side handle rather than leaking it for the life of the request.
@@ -506,7 +544,17 @@ export async function getPlayerStats(caller: Caller): Promise<PlayerStats> {
   const player = await resolvePlayer(caller);
   const { data: games } = await getSupabaseAdmin()
     .from("wl_games")
-    .select("*")
+    /*
+     * Every completed game is fetched (see the doc comment above), so this
+     * list is unbounded by a heavy player's game count — all the more reason
+     * not to pull the whole row. `end_reason` and `current_turn_player_id`
+     * are meaningless on a completed game and never read by `computeStats`/
+     * `starHistory` anyway; `grid` is kept because the recent-games branch
+     * below needs it to replay final scores.
+     */
+    .select(
+      "id, room_code, grid, player1_id, player2_id, status, winner_id, last_move_at, p1_star_delta, p2_star_delta, p1_stars_after, p2_stars_after",
+    )
     .eq("status", "completed")
     .or(`player1_id.eq.${player.id},player2_id.eq.${player.id}`)
     .order("last_move_at", { ascending: false });
@@ -573,6 +621,59 @@ export async function getPlayerStats(caller: Caller): Promise<PlayerStats> {
   };
 }
 
+/*
+ * Caps a single sweep invocation two ways:
+ *  - SWEEP_BATCH_LIMIT bounds how many stale games one cron firing will touch,
+ *    so a large backlog drains over a few 30-minute cycles instead of risking
+ *    the Worker's per-invocation CPU/subrequest ceiling in one run.
+ *  - SWEEP_CONCURRENCY bounds how many of those run at once. Each game is
+ *    3-4 sequential round trips (claim, load moves, insert, advance) that
+ *    cannot be parallelised *within* a game, but nothing ties one game's
+ *    sweep to another's, so running the previous version's for-loop fully
+ *    sequentially — one game's four round trips finishing before the next
+ *    game's first one even starts — bought no correctness, only latency.
+ */
+const SWEEP_BATCH_LIMIT = 50;
+const SWEEP_CONCURRENCY = 5;
+
+/**
+ * Auto-passes one expired turn. Returns whether it actually did — `false`
+ * covers both "nothing to do" and "lost the race to claim the turn", which
+ * `sweepExpiredTurns` only needs a count of, not which one happened.
+ */
+async function sweepOneGame(game: GameRow): Promise<boolean> {
+  if (!game.current_turn_player_id) return false;
+
+  // A client tab timing out the same turn (see `timeoutGame`) can race this
+  // job. Losing the claim just means someone else already handled it.
+  try {
+    await claimTurn(game, game.current_turn_player_id);
+  } catch {
+    return false;
+  }
+
+  const { data: moves } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .select("*")
+    .eq("game_id", game.id)
+    .order("created_at", { ascending: true });
+  const { data: inserted } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .insert({
+      game_id: game.id,
+      player_id: game.current_turn_player_id,
+      word: "",
+      tile_indices: [],
+      passed: true,
+    })
+    .select("*")
+    .single();
+  if (!inserted) return false;
+
+  await finishOrAdvance(game, [...((moves ?? []) as MoveRow[]), inserted as MoveRow]);
+  return true;
+}
+
 /** Auto-passes any active game whose current turn has run past 24 hours. */
 export async function sweepExpiredTurns() {
   const cutoff = new Date(Date.now() - TURN_LIMIT_MS).toISOString();
@@ -580,31 +681,18 @@ export async function sweepExpiredTurns() {
     .from("wl_games")
     .select("*")
     .eq("status", "active")
-    .lt("last_move_at", cutoff);
+    .lt("last_move_at", cutoff)
+    .limit(SWEEP_BATCH_LIMIT);
 
+  const rows = (games ?? []) as GameRow[];
   let swept = 0;
-  for (const game of (games ?? []) as GameRow[]) {
-    if (!game.current_turn_player_id) continue;
-    const { data: moves } = await getSupabaseAdmin()
-      .from("wl_moves")
-      .select("*")
-      .eq("game_id", game.id)
-      .order("created_at", { ascending: true });
-    const { data: inserted } = await getSupabaseAdmin()
-      .from("wl_moves")
-      .insert({
-        game_id: game.id,
-        player_id: game.current_turn_player_id,
-        word: "",
-        tile_indices: [],
-        passed: true,
-      })
-      .select("*")
-      .single();
-    if (!inserted) continue;
-    await finishOrAdvance(game, [...((moves ?? []) as MoveRow[]), inserted as MoveRow]);
-    swept++;
+
+  for (let i = 0; i < rows.length; i += SWEEP_CONCURRENCY) {
+    const batch = rows.slice(i, i + SWEEP_CONCURRENCY);
+    const results = await Promise.all(batch.map(sweepOneGame));
+    swept += results.filter(Boolean).length;
   }
+
   return { swept };
 }
 
@@ -615,18 +703,30 @@ export async function sweepExpiredTurns() {
 export async function timeoutGame(caller: Caller, roomCode: string) {
   const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
-  if (!loaded) throw new Error("No game found with that code. ");
+  if (!loaded) throw new PublicError("No game found with that code. ");
   const { game, moves } = loaded;
 
-  if (game.status !== "active") throw new Error("This game isn't active.");
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
   if (game.player1_id !== player.id && game.player2_id !== player.id) {
-    throw new Error("You are not a participant in this game.");
+    throw new PublicError("You are not a participant in this game.");
   }
-  if (!game.current_turn_player_id) throw new Error("No active turn.");
+  if (!game.current_turn_player_id) throw new PublicError("No active turn.");
 
   const msLeft =
     new Date(new Date(game.last_move_at).getTime() + TURN_LIMIT_MS).getTime() - Date.now();
-  if (msLeft > 0) throw new Error("Turn has not expired yet.");
+  if (msLeft > 0) throw new PublicError("Turn has not expired yet.");
+
+  try {
+    await claimTurn(game, game.current_turn_player_id);
+  } catch {
+    /*
+     * Any client with the tab open can call this, and the sweep cron polls
+     * the same expired turns — so losing this race just means someone else
+     * (another tab, or the cron) already advanced the turn. That is the
+     * outcome this call wanted anyway, so it is a success, not an error.
+     */
+    return { ok: true };
+  }
 
   const { data: inserted, error } = await getSupabaseAdmin()
     .from("wl_moves")

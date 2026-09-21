@@ -10,9 +10,10 @@
  * every `SIGNED_IN` event and on page load.
  */
 import { NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/http/errors";
 import { z } from "zod";
 
-import { getVerifiedUser } from "@/integrations/supabase/client.route";
+import { applyCookies, getVerifiedUser } from "@/integrations/supabase/client.route";
 import { claimGuestHistory } from "@/lib/game/identity.server";
 
 const schema = z.object({
@@ -36,12 +37,12 @@ export async function POST(req: Request) {
      */
     const user = await getVerifiedUser(req);
     if (!user) {
-      return NextResponse.json({ error: "Not logged in" }, { status: 401 });
+      return applyCookies(req, NextResponse.json({ error: "Not logged in" }, { status: 401 }));
     }
 
     const playerId = await claimGuestHistory(user.id, parsed.data.sessionId);
-    return NextResponse.json({ playerId });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+    return applyCookies(req, NextResponse.json({ playerId }));
+  } catch (error) {
+    return applyCookies(req, toErrorResponse(error, "api/account/claim"));
   }
 }

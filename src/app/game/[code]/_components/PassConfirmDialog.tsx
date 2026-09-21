@@ -17,14 +17,14 @@ export function PassConfirmDialog({
           </p>
         </div>
         <div className="flex gap-3">
-          <button
+          <button type="button"
             onClick={onCancel}
             disabled={isPending}
             className="chunky-btn btn-surface-2 flex-1 py-3"
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={onConfirm}
             disabled={isPending}
             className="chunky-btn btn-primary flex-1 py-3"

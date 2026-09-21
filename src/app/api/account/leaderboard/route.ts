@@ -9,16 +9,20 @@
  * star count, so a caller cannot ask to be ranked inside a band they are not in.
  */
 import { NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/http/errors";
 
-import { getVerifiedUser } from "@/integrations/supabase/client.route";
+import { applyCookies, getVerifiedUser } from "@/integrations/supabase/client.route";
 import { getLeaderboard } from "@/lib/account/leaderboard.server";
 
 export async function GET(req: Request) {
   try {
     const user = await getVerifiedUser(req);
     const result = await getLeaderboard(user?.id ?? null);
-    return NextResponse.json(result, { headers: { "Cache-Control": "no-store" } });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+    return applyCookies(
+      req,
+      NextResponse.json(result, { headers: { "Cache-Control": "no-store" } }),
+    );
+  } catch (error) {
+    return applyCookies(req, toErrorResponse(error, "api/account/leaderboard"));
   }
 }

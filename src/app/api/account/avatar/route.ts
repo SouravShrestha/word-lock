@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { toErrorResponse } from "@/lib/http/errors";
+import { applyCookies } from "@/integrations/supabase/client.route";
 import { z } from "zod";
 
 import { setAvatar } from "@/lib/account/service.server";
@@ -20,8 +22,8 @@ export async function POST(req: Request) {
 
     const caller = await resolveCaller(req, parsed.data);
     const result = await setAvatar(caller, parsed.data.avatar);
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+    return applyCookies(req, NextResponse.json(result));
+  } catch (error) {
+    return applyCookies(req, toErrorResponse(error, "api/account/avatar"));
   }
 }
