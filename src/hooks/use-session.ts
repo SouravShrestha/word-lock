@@ -3,10 +3,13 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 const SESSION_KEY = "word-lock.session-id";
-const NAME_KEY = "word-lock.display-name";
-const NAME_SET_KEY = "word-lock.name-set";
 
-const FUN_NAMES = ["WordFox", "TileFox", "GridFox", "WordWiz", "Lexicon"];
+/**
+ * Keys this hook used to own, back when the in-game name was a separate thing
+ * kept in localStorage. The name is the account's `username` now, so these are
+ * cleared on sight to stop a stale value sitting in storage forever.
+ */
+const LEGACY_NAME_KEYS = ["word-lock.display-name", "word-lock.name-set"];
 
 function generateId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -19,58 +22,66 @@ function generateId(): string {
   });
 }
 
+/**
+ * The browser's session id.
+ *
+ * This is not an identity. A logged-in caller is identified server-side by their
+ * verified `user_id`; the session id only exists so a row can be created before
+ * sign-in and adopted by `wl_claim_player` afterwards. It carries no name — the
+ * account's `username` is the one name a player has.
+ */
 interface SessionContextValue {
   sessionId: string | null;
-  displayName: string;
-  isNameSet: boolean;
   ready: boolean;
-  setDisplayName: (name: string, markAsSet?: boolean) => void;
+  /** Discards the current guest identity and mints a fresh one. */
+  resetSession: () => void;
 }
 
 export const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function useSessionState(): SessionContextValue {
-  const [sessionId, setSessionId] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return window.localStorage.getItem(SESSION_KEY);
-  });
-  const [displayName, setDisplayNameState] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    return window.localStorage.getItem(NAME_KEY) ?? "";
-  });
-  const [isNameSet, setIsNameSet] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(NAME_SET_KEY) === "1";
-  });
+  /*
+   * This deliberately starts null rather than reading localStorage in the
+   * useState initialiser. On the server the initialiser can only return null,
+   * so a client initialiser that returns a stored id produces a hydration
+   * mismatch — and React does not repair mismatched DOM *attributes* during
+   * hydration, it keeps whatever the server emitted. That left server-rendered
+   * `disabled` attributes (e.g. the New game button, gated on `ready`) stuck on
+   * after a refresh. Reading storage in an effect instead means the first
+   * client render matches the server, and the follow-up state update is a real
+   * re-render that does patch attributes.
+   */
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only runs once on mount to create missing values
-    let id = sessionId;
+    let id = window.localStorage.getItem(SESSION_KEY);
     if (!id) {
       id = generateId();
       window.localStorage.setItem(SESSION_KEY, id);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSessionId(id);
     }
-    if (!displayName) {
-      const name = FUN_NAMES[Math.floor(Math.random() * FUN_NAMES.length)];
-      window.localStorage.setItem(NAME_KEY, name);
 
-      setDisplayNameState(name);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    LEGACY_NAME_KEYS.forEach((key) => window.localStorage.removeItem(key));
 
-  const setDisplayName = useCallback((name: string, markAsSet = true) => {
-    const clean = name.replace(/\s+/g, "").slice(0, 7);
-    window.localStorage.setItem(NAME_KEY, clean);
-    setDisplayNameState(clean);
-    if (markAsSet) {
-      window.localStorage.setItem(NAME_SET_KEY, "1");
-      setIsNameSet(true);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSessionId(id);
   }, []);
 
-  return { sessionId, displayName, setDisplayName, isNameSet, ready: sessionId !== null };
+  /**
+   * Called on sign-out. Mints a brand new guest identity rather than restoring
+   * the one used before logging in, so the games played while signed in are not
+   * left reachable by the next person to use the browser.
+   */
+  const resetSession = useCallback(() => {
+    const id = generateId();
+    window.localStorage.setItem(SESSION_KEY, id);
+    setSessionId(id);
+  }, []);
+
+  return {
+    sessionId,
+    ready: sessionId !== null,
+    resetSession,
+  };
 }
 
 export function useSession(): SessionContextValue {

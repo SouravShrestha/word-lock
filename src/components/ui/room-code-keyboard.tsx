@@ -161,11 +161,13 @@ function LetterKey({
         `
         flex-1 h-12 flex items-center justify-center
         rounded-lg select-none touch-manipulation
-        bg-card border-2 border-ink
-        text-foreground font-bold text-lg
+        bg-surface text-foreground font-bold text-lg
+        shadow-[0_3px_0_0_var(--depth-surface)]
         transition-all duration-75
       `,
-        isActive ? "translate-y-[2px] bg-muted/80" : "active:translate-y-[2px] active:bg-muted/80",
+        isActive
+          ? "translate-y-[2px] shadow-[0_1px_0_0_var(--depth-surface)]"
+          : "active:translate-y-[2px] active:shadow-[0_1px_0_0_var(--depth-surface)]",
       )}
     >
       {char}
@@ -214,11 +216,13 @@ function ActionKey({
         `
         flex-[1.5] h-12 flex items-center justify-center
         rounded-lg select-none touch-manipulation
-        bg-muted border-2 border-ink
-        text-foreground
+        bg-surface-2 text-foreground
+        shadow-[0_3px_0_0_var(--depth-surface-2)]
         transition-all duration-75
       `,
-        isActive ? "translate-y-[2px] bg-muted/80" : "active:translate-y-[2px] active:bg-muted/80",
+        isActive
+          ? "translate-y-[2px] shadow-[0_1px_0_0_var(--depth-surface-2)]"
+          : "active:translate-y-[2px] active:shadow-[0_1px_0_0_var(--depth-surface-2)]",
       )}
     >
       {children}

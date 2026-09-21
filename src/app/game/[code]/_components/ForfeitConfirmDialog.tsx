@@ -18,16 +18,18 @@ export function ForfeitConfirmDialog({
         </div>
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="chunky-btn flex-1 bg-card py-3 text-foreground"
+            className="chunky-btn btn-surface-2 flex-1 py-3"
           >
             Stay
           </button>
           <button
+            type="button"
             onClick={onConfirm}
             disabled={isPending}
-            className="chunky-btn flex-1 bg-destructive py-3 text-destructive-foreground"
+            className="chunky-btn btn-danger flex-1 py-3"
           >
             {isPending ? "Leaving…" : "Leave"}
           </button>

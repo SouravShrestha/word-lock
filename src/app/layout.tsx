@@ -1,25 +1,22 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, DM_Sans } from "next/font/google";
+import { Rubik } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
 
 import { QueryProvider } from "@/components/QueryProvider";
 import { TopLoader } from "@/components/TopLoader";
-import { UsernamePrompt } from "@/components/UsernamePrompt";
 import { SessionProvider } from "@/components/SessionProvider";
+import { AuthProvider } from "@/components/AuthProvider";
+import { AuthGate } from "@/components/AuthGate";
+import { AuthErrorNotice } from "@/components/AuthErrorNotice";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+// Rubik is a variable font on Google Fonts, so no explicit weight list is
+// needed.
+const rubik = Rubik({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-dm-sans",
+  variable: "--font-rubik",
   display: "swap",
 });
 
@@ -28,7 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#18181b" },
+    { media: "(prefers-color-scheme: dark)", color: "#1b2026" },
   ],
 };
 
@@ -64,11 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${dmSans.variable}`}
-    >
+    <html lang="en" suppressHydrationWarning className={rubik.variable}>
       <head>
         <script
           type="application/ld+json"
@@ -80,8 +73,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SessionProvider>
-              {children}
-              <UsernamePrompt />
+              <AuthProvider>
+                {children}
+                <AuthGate />
+                {/* Reads search params, so it needs a Suspense boundary. */}
+                <Suspense fallback={null}>
+                  <AuthErrorNotice />
+                </Suspense>
+              </AuthProvider>
             </SessionProvider>
             <Toaster position="top-center" richColors />
           </ThemeProvider>

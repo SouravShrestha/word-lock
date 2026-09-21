@@ -2,9 +2,29 @@
  * Client-side API wrappers for interacting with Next.js Route Handlers.
  * These replace the previous TanStack Server Functions.
  */
+import { browserTimezone } from "@/lib/account/timezone";
+import type { LeaderboardView } from "@/hooks/use-leaderboard";
 
-async function fetcher(endpoint: string, data: any): Promise<any> {
-  const response = await fetch(`/api/game/${endpoint}`, {
+/**
+ * An API error that carries the response's HTTP status.
+ *
+ * Plain `Error` gave TanStack Query nothing to decide a retry on, so a
+ * deliberate 4xx from the server (a validation failure, "it's not your turn
+ * yet") got retried exactly like a transient 5xx would. `QueryProvider`'s
+ * default `retry` predicate reads `status` off this to tell the two apart.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+async function post(path: string, data: any): Promise<any> {
+  const response = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -12,25 +32,69 @@ async function fetcher(endpoint: string, data: any): Promise<any> {
 
   if (!response.ok) {
     const errorData = (await response.json().catch(() => ({}))) as any;
-    throw new Error(errorData.error || `HTTP error ${response.status}`);
+    throw new ApiError(errorData.error || `HTTP error ${response.status}`, response.status);
   }
 
   return response.json();
 }
 
-export async function fetchLobby(data: { sessionId: string; displayName?: string }) {
+/**
+ * Calls a game endpoint, attaching the browser's timezone.
+ *
+ * Added here rather than at each call site so every action carries it: the
+ * server needs a timezone to decide where the player's local day ends for
+ * streak purposes, and it is the same answer for every request.
+ */
+async function fetcher(endpoint: string, data: any): Promise<any> {
+  return post(`/api/game/${endpoint}`, { timezone: browserTimezone(), ...data });
+}
+
+/**
+ * Attaches the account link to a sign-in, absorbing this browser's guest games.
+ *
+ * The auth session travels as a cookie, so nothing about the account is passed
+ * in the body — only the guest session id, which the server cannot see.
+ */
+export async function claimAccountFn(data: { sessionId: string }) {
+  return post("/api/account/claim", data);
+}
+
+export async function fetchAccountFn(data: { sessionId: string; timezone?: string }) {
+  return post("/api/account/summary", data);
+}
+
+export async function setUsernameFn(data: { sessionId: string; username: string }) {
+  return post("/api/account/username", data);
+}
+
+export async function setAvatarFn(data: { sessionId: string; avatar: string }) {
+  return post("/api/account/avatar", data);
+}
+
+export async function fetchLeaderboardFn(): Promise<LeaderboardView> {
+  const response = await fetch("/api/account/leaderboard");
+  if (!response.ok) throw new ApiError(`HTTP error ${response.status}`, response.status);
+  return response.json();
+}
+
+/** Availability check for the username picker. Advisory only. */
+export async function checkUsernameFn(
+  username: string,
+): Promise<{ available: boolean; reason?: string }> {
+  const response = await fetch(`/api/account/username/check?u=${encodeURIComponent(username)}`);
+  if (!response.ok) throw new ApiError(`HTTP error ${response.status}`, response.status);
+  return response.json();
+}
+
+export async function fetchLobby(data: { sessionId: string }) {
   return fetcher("lobby", data);
 }
 
-export async function createGameFn(data: { sessionId: string; displayName?: string }) {
+export async function createGameFn(data: { sessionId: string }) {
   return fetcher("create", data);
 }
 
-export async function joinGameFn(data: {
-  sessionId: string;
-  displayName?: string;
-  roomCode: string;
-}) {
+export async function joinGameFn(data: { sessionId: string; roomCode: string }) {
   return fetcher("join", data);
 }
 
@@ -69,6 +133,10 @@ export async function timeoutGameFn(data: { sessionId: string; roomCode: string 
 
 export async function leaveLobbyFn(data: { sessionId: string; roomCode: string }) {
   return fetcher("leave", data);
+}
+
+export async function sendReactionFn(data: { sessionId: string; roomCode: string; emoji: string }) {
+  return fetcher("reaction", data);
 }
 
 export async function fetchProfileFn(data: { sessionId: string }) {

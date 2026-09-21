@@ -40,6 +40,113 @@ export type Database = {
           },
         ];
       };
+      nmr_rooms: {
+        Row: {
+          code: string;
+          created_at: string;
+          current_round: number;
+          guest_id: string | null;
+          guest_score: number;
+          host_id: string;
+          host_score: number;
+          id: string;
+          phase: string;
+          pool_size: number;
+          target_score: number;
+          turn_timer: number;
+          winner: string | null;
+        };
+        Insert: {
+          code: string;
+          created_at?: string;
+          current_round?: number;
+          guest_id?: string | null;
+          guest_score?: number;
+          host_id: string;
+          host_score?: number;
+          id?: string;
+          phase?: string;
+          pool_size?: number;
+          target_score?: number;
+          turn_timer?: number;
+          winner?: string | null;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          current_round?: number;
+          guest_id?: string | null;
+          guest_score?: number;
+          host_id?: string;
+          host_score?: number;
+          id?: string;
+          phase?: string;
+          pool_size?: number;
+          target_score?: number;
+          turn_timer?: number;
+          winner?: string | null;
+        };
+        Relationships: [];
+      };
+      nmr_rounds: {
+        Row: {
+          created_at: string;
+          guest_move: string | null;
+          guest_pool_paper: number;
+          guest_pool_rock: number;
+          guest_pool_scissors: number;
+          host_move: string | null;
+          host_pool_paper: number;
+          host_pool_rock: number;
+          host_pool_scissors: number;
+          id: string;
+          outcome: string | null;
+          resolved_at: string | null;
+          room_id: string;
+          round_number: number;
+        };
+        Insert: {
+          created_at?: string;
+          guest_move?: string | null;
+          guest_pool_paper?: number;
+          guest_pool_rock?: number;
+          guest_pool_scissors?: number;
+          host_move?: string | null;
+          host_pool_paper?: number;
+          host_pool_rock?: number;
+          host_pool_scissors?: number;
+          id?: string;
+          outcome?: string | null;
+          resolved_at?: string | null;
+          room_id: string;
+          round_number: number;
+        };
+        Update: {
+          created_at?: string;
+          guest_move?: string | null;
+          guest_pool_paper?: number;
+          guest_pool_rock?: number;
+          guest_pool_scissors?: number;
+          host_move?: string | null;
+          host_pool_paper?: number;
+          host_pool_rock?: number;
+          host_pool_scissors?: number;
+          id?: string;
+          outcome?: string | null;
+          resolved_at?: string | null;
+          room_id?: string;
+          round_number?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "nmr_rounds_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "nmr_rooms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       sessions: {
         Row: {
           code: string;
@@ -167,8 +274,13 @@ export type Database = {
           grid: string;
           id: string;
           last_move_at: string;
+          p1_star_delta: number | null;
+          p1_stars_after: number | null;
+          p2_star_delta: number | null;
+          p2_stars_after: number | null;
           player1_id: string;
           player2_id: string | null;
+          rematch_game_id: string | null;
           room_code: string;
           status: Database["public"]["Enums"]["wl_game_status"];
           winner_id: string | null;
@@ -180,8 +292,13 @@ export type Database = {
           grid: string;
           id?: string;
           last_move_at?: string;
+          p1_star_delta?: number | null;
+          p1_stars_after?: number | null;
+          p2_star_delta?: number | null;
+          p2_stars_after?: number | null;
           player1_id: string;
           player2_id?: string | null;
+          rematch_game_id?: string | null;
           room_code: string;
           status?: Database["public"]["Enums"]["wl_game_status"];
           winner_id?: string | null;
@@ -193,8 +310,13 @@ export type Database = {
           grid?: string;
           id?: string;
           last_move_at?: string;
+          p1_star_delta?: number | null;
+          p1_stars_after?: number | null;
+          p2_star_delta?: number | null;
+          p2_stars_after?: number | null;
           player1_id?: string;
           player2_id?: string | null;
+          rematch_game_id?: string | null;
           room_code?: string;
           status?: Database["public"]["Enums"]["wl_game_status"];
           winner_id?: string | null;
@@ -219,6 +341,13 @@ export type Database = {
             columns: ["player2_id"];
             isOneToOne: false;
             referencedRelation: "wl_players";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "wl_games_rematch_game_id_fkey";
+            columns: ["rematch_game_id"];
+            isOneToOne: false;
+            referencedRelation: "wl_games";
             referencedColumns: ["id"];
           },
           {
@@ -277,22 +406,49 @@ export type Database = {
       };
       wl_players: {
         Row: {
+          avatar: string;
+          best_play_streak: number;
           created_at: string;
-          display_name: string;
           id: string;
+          last_played_on: string | null;
+          peak_stars: number;
+          play_streak: number;
           session_id: string;
+          star_games: number;
+          stars: number;
+          timezone: string | null;
+          user_id: string | null;
+          username: string | null;
         };
         Insert: {
+          avatar?: string;
+          best_play_streak?: number;
           created_at?: string;
-          display_name: string;
           id?: string;
+          last_played_on?: string | null;
+          peak_stars?: number;
+          play_streak?: number;
           session_id: string;
+          star_games?: number;
+          stars?: number;
+          timezone?: string | null;
+          user_id?: string | null;
+          username?: string | null;
         };
         Update: {
+          avatar?: string;
+          best_play_streak?: number;
           created_at?: string;
-          display_name?: string;
           id?: string;
+          last_played_on?: string | null;
+          peak_stars?: number;
+          play_streak?: number;
           session_id?: string;
+          star_games?: number;
+          stars?: number;
+          timezone?: string | null;
+          user_id?: string | null;
+          username?: string | null;
         };
         Relationships: [];
       };
@@ -301,7 +457,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      wl_claim_player: {
+        Args: { p_session_id: string; p_user_id: string };
+        Returns: string;
+      };
     };
     Enums: {
       wl_game_status: "waiting" | "active" | "completed";

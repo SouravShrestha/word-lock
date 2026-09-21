@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { Header } from "@/components/Header";
 
+import { BackButton } from "@/components/BackButton";
+import { SectionLabel } from "@/components/SectionLabel";
 import { useSession } from "@/hooks/use-session";
 import { joinGameFn } from "@/lib/game/api.client";
 import { RoomCodeKeyboard } from "@/components/ui/room-code-keyboard";
@@ -12,13 +13,16 @@ import { RoomCodeKeyboard } from "@/components/ui/room-code-keyboard";
 const CODE_LENGTH = 5;
 
 export function JoinClient() {
-  const { sessionId, displayName, ready } = useSession();
+  const { sessionId, ready } = useSession();
   const router = useRouter();
   const [joinCode, setJoinCode] = useState("");
 
   const joinMutation = useMutation({
     mutationFn: () =>
-      joinGameFn({ sessionId: sessionId!, displayName, roomCode: joinCode.trim().toUpperCase() }),
+      joinGameFn({
+        sessionId: sessionId!,
+        roomCode: joinCode.trim().toUpperCase(),
+      }),
     onSuccess: ({ roomCode }) => router.push(`/game/${roomCode}`),
   });
 
@@ -41,60 +45,52 @@ export function JoinClient() {
   };
 
   return (
-    <main className="dot-paper mx-auto h-[100dvh] overflow-hidden max-w-2xl px-5 py-6 flex flex-col relative">
-      <Header />
+    <main className="relative mx-auto flex h-[100dvh] max-w-2xl flex-col overflow-hidden">
+      <div className="px-5 pt-5">
+        <BackButton />
+      </div>
 
-      <div className="flex-1 flex flex-col max-w-sm mx-auto w-full">
-        <div className="flex-1 flex flex-col pt-4">
-          <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-6 text-center">
-            Room code
-          </p>
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col overflow-hidden px-5">
+        <SectionLabel className="mt-8">Join a room</SectionLabel>
 
-          <div className="flex gap-2 w-full max-w-[280px] mx-auto mb-8">
-            {Array.from({ length: 5 }, (_, i) => {
-              const char = joinCode[i];
-              const isCursor = i === joinCode.length;
-              return (
-                <div
-                  key={i}
-                  className={`
-                    flex-1 h-14 flex items-center justify-center
-                    text-2xl font-display font-bold border-2 transition-colors rounded-lg
-                    ${char ? "border-ink text-foreground" : ""}
-                    ${!char && isCursor ? "border-ink" : ""}
-                    ${!char && !isCursor ? "border-ink/20" : ""}
-                  `}
-                >
-                  {char ??
-                    (isCursor ? (
-                      <span className="w-[2px] h-6 bg-foreground animate-pulse" />
-                    ) : null)}
-                </div>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={!ready || joinMutation.isPending || joinCode.length < 5}
-            className="chunky-btn w-full bg-primary py-4 text-lg text-primary-foreground"
-          >
-            {joinMutation.isPending ? "Joining…" : "Let's go!"}
-          </button>
-
-          {joinMutation.error && (
-            <p className="text-center text-sm font-semibold text-destructive mt-4">
-              {joinMutation.error.message}
-            </p>
-          )}
+        <div className="mx-auto mb-8 mt-8 flex w-full max-w-[300px] gap-2.5">
+          {Array.from({ length: CODE_LENGTH }, (_, i) => {
+            const char = joinCode[i];
+            const isCursor = i === joinCode.length;
+            return (
+              <div
+                key={i}
+                className={`surface flex h-12 flex-1 items-center justify-center font-display text-xl font-bold transition-shadow ${
+                  isCursor ? "ring-2 ring-sky" : ""
+                }`}
+              >
+                {char ?? null}
+              </div>
+            );
+          })}
         </div>
 
-        <div className="-mx-3 mt-auto">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={!ready || joinMutation.isPending || joinCode.length < CODE_LENGTH}
+          className="soft-btn btn-sky mx-auto w-full max-w-[240px] py-3.5 text-base"
+        >
+          {joinMutation.isPending ? "Joining" : "Let's go!"}
+        </button>
+
+        {joinMutation.error && (
+          <p className="mt-4 text-center text-sm font-semibold text-destructive">
+            {joinMutation.error.message}
+          </p>
+        )}
+
+        <div className="-mx-2 mt-auto">
           <RoomCodeKeyboard
             onKey={handleKey}
             onBackspace={handleBackspace}
             onEnter={handleSubmit}
-            showNumbers={true}
+            showNumbers
           />
         </div>
       </div>

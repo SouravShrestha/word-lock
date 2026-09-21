@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import { toErrorResponse } from "@/lib/http/errors";
+import { applyCookies } from "@/integrations/supabase/client.route";
 import { createGame } from "@/lib/game/service.server";
+import { callerSchema, resolveCaller } from "@/lib/game/identity.server";
 
-const schema = z.object({
-  sessionId: z.string().uuid(),
-  displayName: z.string().max(24).optional(),
-});
+const schema = callerSchema;
 
 export async function POST(req: Request) {
   try {
@@ -15,9 +14,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
     }
 
-    const result = await createGame(parsed.data.sessionId, parsed.data.displayName);
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 400 });
+    const caller = await resolveCaller(req, parsed.data);
+    const result = await createGame(caller);
+    return applyCookies(req, NextResponse.json(result));
+  } catch (error) {
+    return applyCookies(req, toErrorResponse(error, "api/game/create"));
   }
 }

@@ -2,18 +2,36 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "@/components/Header";
+
+import { BottomNav, BOTTOM_NAV_SPACER, NAV_SHELL } from "@/components/BottomNav";
+import { SettingsIcon } from "@/components/icons/SettingsIcon";
+import { SectionLabel } from "@/components/SectionLabel";
+import { StreakPill, StarsPill } from "@/components/StatPills";
 import { useSession } from "@/hooks/use-session";
+import { useAccount } from "@/hooks/use-account";
 import { fetchProfileFn } from "@/lib/game/api.client";
-import type { PlayerStats, RecentGameEntry } from "@/lib/game/stats";
-import { NameEditor } from "./NameEditor";
+
+import { MAX_RECENT_GAMES, type PlayerStats, type RecentGameEntry } from "@/lib/game/stats";
+import { ProfileIdentity } from "./ProfileIdentity";
+import { SettingsSheet } from "./SettingsSheet";
 import { OverviewCard } from "./OverviewCard";
+import { StatisticsCard } from "./StatisticsCard";
 import { RecentGamesCard } from "./RecentGamesCard";
 import { GameDetailPopup } from "./GameDetailPopup";
 
+/**
+ * The profile: who you are, where you stand, and how you got there.
+ *
+ * Two labelled sections under the identity block. Overview is the standings a
+ * player checks at a glance and comes from the account summary, so it renders as
+ * soon as that lands. Statistics is the history — the star curve and the record —
+ * and waits on the profile query, which is the slower of the two.
+ */
 export function ProfileClient() {
-  const { sessionId, displayName, setDisplayName, ready } = useSession();
+  const { sessionId, ready } = useSession();
+  const { data: account } = useAccount();
   const [selectedEntry, setSelectedEntry] = useState<RecentGameEntry | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { data, isLoading } = useQuery<PlayerStats>({
     queryKey: ["profile", sessionId],
@@ -22,30 +40,53 @@ export function ProfileClient() {
   });
 
   const overview = data?.overview;
-  const winRate =
-    overview && overview.total > 0 ? Math.round((overview.wins / overview.total) * 100) : null;
+  const loading = !ready || isLoading;
 
   return (
-    <main className="dot-paper mx-auto h-[100dvh] overflow-y-auto max-w-2xl px-5 py-6 flex flex-col relative">
-      <Header />
+    <main className={NAV_SHELL}>
+      <div className={`flex flex-1 flex-col overflow-y-auto px-5 ${BOTTOM_NAV_SPACER}`}>
+        <div className="flex items-center justify-end gap-3 pt-5">
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+            className="soft-icon-btn btn-surface h-9 w-9"
+          >
+            <SettingsIcon className="h-[1.1rem] w-[1.1rem]" />
+          </button>
+        </div>
 
-      <div className="w-full max-w-sm mx-auto flex flex-col gap-6 pb-10">
-        <NameEditor value={displayName} onChange={setDisplayName} />
+        <div className="mx-auto flex w-full max-w-sm flex-col gap-6">
+          <ProfileIdentity
+            username={account?.username}
+            avatar={account?.avatar}
+            joinedAt={account?.joinedAt}
+          />
 
-        {!ready || isLoading ? (
-          <p className="text-center text-sm text-muted-foreground mt-4">Loading…</p>
-        ) : overview && overview.total > 0 ? (
-          <>
-            <OverviewCard overview={overview} winRate={winRate} />
-            <RecentGamesCard recentGames={data!.recentGames} onSelect={setSelectedEntry} />
-          </>
-        ) : (
-          <div className="neo p-6 text-center">
-            <p className="font-display font-bold text-lg">No games finished yet</p>
-            <p className="text-sm text-muted-foreground mt-1">Go play one!</p>
-          </div>
-        )}
+          <section className="flex flex-col gap-3">
+            <SectionLabel>Overview</SectionLabel>
+            <OverviewCard />
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <SectionLabel>Statistics</SectionLabel>
+            {loading ? (
+              <div className="surface h-10 animate-pulse rounded-sm" />
+            ) : overview && overview.total > 0 ? (
+              <StatisticsCard starHistory={data!.starHistory} overview={overview} />
+            ) : (
+              <div className="surface p-6 text-center">
+                <p className="font-display text-lg font-bold">No games finished yet</p>
+                <p className="mt-1 text-sm text-muted-foreground">Go play one!</p>
+              </div>
+            )}
+          </section>
+        </div>
       </div>
+
+      <BottomNav />
+
+      <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       {selectedEntry && (
         <GameDetailPopup

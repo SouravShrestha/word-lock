@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeStats, MAX_RECENT_GAMES, type StatsGameInput } from "./stats";
+import { computeStats, MAX_HISTORY_GAMES, type StatsGameInput } from "./stats";
 import type { PlayerRow } from "./service.server";
 
 const ME = "player-me";
@@ -7,9 +7,9 @@ const OPP_A = "player-opp-a";
 const OPP_B = "player-opp-b";
 
 const players: PlayerRow[] = [
-  { id: ME, session_id: "s-me", display_name: "Me" },
-  { id: OPP_A, session_id: "s-a", display_name: "Alice" },
-  { id: OPP_B, session_id: "s-b", display_name: "Bob" },
+  { id: ME, session_id: "s-me", username: "me", avatar: "avatar_01" },
+  { id: OPP_A, session_id: "s-a", username: "alice", avatar: "avatar_03" },
+  { id: OPP_B, session_id: "s-b", username: "bob", avatar: "avatar_02" },
 ];
 
 function game(overrides: Partial<StatsGameInput> & { id: string }): StatsGameInput {
@@ -20,6 +20,10 @@ function game(overrides: Partial<StatsGameInput> & { id: string }): StatsGameInp
     status: "completed",
     winner_id: null,
     last_move_at: "2024-01-01T00:00:00.000Z",
+    p1_star_delta: null,
+    p2_star_delta: null,
+    p1_stars_after: null,
+    p2_stars_after: null,
     scores: { 1: 13, 2: 12 },
     ...overrides,
   };
@@ -46,7 +50,8 @@ describe("computeStats", () => {
     expect(stats.overview).toEqual({ wins: 1, losses: 0, draws: 0, total: 1 });
     expect(stats.recentGames[0]).toMatchObject({
       opponentId: OPP_A,
-      opponentName: "Alice",
+      opponentName: "alice",
+      opponentAvatar: "avatar_03",
       yourScore: 15,
       opponentScore: 10,
       result: "win",
@@ -67,7 +72,7 @@ describe("computeStats", () => {
     expect(stats.overview).toEqual({ wins: 0, losses: 1, draws: 0, total: 1 });
     expect(stats.recentGames[0]).toMatchObject({
       opponentId: OPP_A,
-      opponentName: "Alice",
+      opponentName: "alice",
       yourScore: 5,
       opponentScore: 20,
       result: "loss",
@@ -91,8 +96,9 @@ describe("computeStats", () => {
     expect(stats.recentGames.map((h) => h.gameId)).toEqual(["g2", "g3", "g1"]);
   });
 
-  it("caps recent games at MAX_RECENT_GAMES, but keeps overview counts for all games", () => {
-    const games = Array.from({ length: MAX_RECENT_GAMES + 3 }, (_, i) =>
+  it("caps the returned list at MAX_HISTORY_GAMES, but keeps overview counts for all games", () => {
+    const total = MAX_HISTORY_GAMES + 3;
+    const games = Array.from({ length: total }, (_, i) =>
       game({
         id: `g${i}`,
         last_move_at: new Date(2024, 0, i + 1).toISOString(),
@@ -100,10 +106,11 @@ describe("computeStats", () => {
       }),
     );
     const stats = computeStats(ME, games, players);
-    expect(stats.overview.total).toBe(MAX_RECENT_GAMES + 3);
-    expect(stats.recentGames).toHaveLength(MAX_RECENT_GAMES);
-    // Most recent games (highest date) are kept.
-    expect(stats.recentGames.map((h) => h.gameId)).toEqual(["g7", "g6", "g5", "g4", "g3"]);
+    expect(stats.overview.total).toBe(total);
+    expect(stats.recentGames).toHaveLength(MAX_HISTORY_GAMES);
+    // Most recent games (highest date) are kept, newest first.
+    expect(stats.recentGames[0].gameId).toBe(`g${total - 1}`);
+    expect(stats.recentGames.at(-1)!.gameId).toBe(`g${total - MAX_HISTORY_GAMES}`);
   });
 
   it("ignores games the player is not part of", () => {
@@ -122,5 +129,6 @@ describe("computeStats", () => {
     const games = [game({ id: "g1", player1_id: ME, player2_id: "ghost-id", winner_id: ME })];
     const stats = computeStats(ME, games, players);
     expect(stats.recentGames[0].opponentName).toBe("Unknown");
+    expect(stats.recentGames[0].opponentAvatar).toBeNull();
   });
 });

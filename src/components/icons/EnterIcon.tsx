@@ -1,0 +1,25 @@
+import type { SVGProps } from "react";
+
+/**
+ * Return-key glyph from `assets/svgs/enter.svg`, used on the submit-word
+ * control in `ActionBar`.
+ */
+export function EnterIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 18 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden
+      {...props}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4.98474 15.6206C4.6253 15.6206 4.28611 15.4814 4.03298 15.2257L0.392983 11.5882C-0.130994 11.0617 -0.130994 10.2087 0.392983 9.68218L4.03298 6.04472C4.87336 5.2018 6.32886 5.79412 6.32886 6.99648C6.32886 7.35593 6.18963 7.69512 5.93651 7.94825L4.59492 9.28983H13.3127C14.4113 9.28983 15.3048 8.39629 15.3048 7.29771V1.34665C15.3048 0.604978 15.9073 0 16.6515 0C17.3931 0 17.9956 0.604978 17.9956 1.34665V7.29771C17.9956 9.87962 15.8946 11.9806 13.3127 11.9806H4.59492L5.93651 13.3222C6.77689 14.1626 6.1871 15.6206 4.98474 15.6206Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
