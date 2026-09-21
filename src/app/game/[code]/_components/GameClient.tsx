@@ -10,6 +10,7 @@ import { Tile, type TileOwner } from "@/components/Tile";
 import { useSession } from "@/hooks/use-session";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  createGameFn,
   fetchGameFn,
   joinGameFn,
   passTurnFn,
@@ -350,6 +351,19 @@ export function GameClient({ code }: { code: string }) {
     },
   });
 
+  /*
+   * Rematch. This opens a fresh room and drops the player into its lobby, from
+   * where the same invite link goes back to the same opponent — it does not seat
+   * them automatically, because there is nothing on a finished game's channel
+   * that would tell the other side a new room exists. The finished game is left
+   * exactly as it is; a rematch is a new game, not a reset of this one.
+   */
+  const rematchMutation = useMutation({
+    mutationFn: () => createGameFn({ sessionId: sessionId! }),
+    onSuccess: ({ roomCode: next }: { roomCode: string }) => router.push(`/game/${next}`),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   /**
    * Sends a reaction, drawing it locally first.
    *
@@ -505,7 +519,14 @@ export function GameClient({ code }: { code: string }) {
           scores={review.frame?.state.scores}
         />
 
-        {game.status === "completed" && <GameOver game={game} onNew={() => router.push("/")} />}
+        {game.status === "completed" && (
+          <GameOver
+            game={game}
+            onExit={() => router.push("/")}
+            onRematch={() => rematchMutation.mutate()}
+            rematchPending={rematchMutation.isPending}
+          />
+        )}
 
         {/* Grid: constrained so tiles don't grow too large on wide screens. The
             subtrahend is the combined height of everything else in this column,

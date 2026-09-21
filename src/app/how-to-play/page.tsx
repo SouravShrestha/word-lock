@@ -38,7 +38,6 @@ export default function HowToPlayPage() {
     <main className="mx-auto w-full max-w-2xl px-5 pb-16 pt-[calc(1.5rem+env(safe-area-inset-top))]">
       <div className="flex items-center gap-3">
         <BackButton label="Back to Word lock" />
-        <span className="eyebrow text-[0.8rem] text-muted-foreground">Word lock</span>
       </div>
 
       <header className="mt-8">
@@ -169,7 +168,7 @@ export default function HowToPlayPage() {
         </Link>
         <Link
           href="/legal/privacy"
-          className="text-center text-sm font-semibold text-muted-foreground underline underline-offset-4"
+          className="text-center text-sm font-semibold text-muted-foreground underline underline-offset-4 mt-4"
         >
           Privacy policy
         </Link>
