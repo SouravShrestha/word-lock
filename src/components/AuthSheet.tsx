@@ -198,6 +198,36 @@ export function AuthSheet() {
               </p>
             )}
           </div>
+
+          {/*
+            The only two links out of the wall, and the only things on this
+            screen that are not "log in". Someone who has just landed here has
+            been asked to create an account before seeing anything — the rules
+            and the privacy policy are exactly what they need to decide, and both
+            routes are public so following one does not bounce them back here.
+            New tabs, so a half-typed email survives the detour.
+          */}
+          <p className="mt-6 text-center text-xs font-semibold text-muted-foreground">
+            <a
+              href="/how-to-play"
+              target="_blank"
+              rel="noreferrer"
+              className="press underline underline-offset-2"
+            >
+              How to play
+            </a>
+            <span aria-hidden className="mx-2 opacity-50">
+              ·
+            </span>
+            <a
+              href="/legal/privacy"
+              target="_blank"
+              rel="noreferrer"
+              className="press underline underline-offset-2"
+            >
+              Privacy policy
+            </a>
+          </p>
         </>
       )}
     </BottomSheet>

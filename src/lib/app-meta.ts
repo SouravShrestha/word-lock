@@ -28,8 +28,18 @@ export const WORDLIST_URL = "https://github.com/dwyl/english-words";
  * off these and hide themselves rather than linking a player to a 404. Set the
  * URL (or a local path like "/legal/privacy") and the row appears.
  */
-export const PRIVACY_URL: string | null = null;
+export const PRIVACY_URL: string | null = "/legal/privacy";
 export const TERMS_URL: string | null = null;
+
+/**
+ * When the privacy policy last changed, shown at the top of it.
+ *
+ * Kept here rather than in the page so the date is a fact about the app like the
+ * version is, and so there is one thing to bump when the policy is edited. A
+ * stale date on a policy is worse than none: it is the only way a player can
+ * tell whether what they agreed to is still what is written.
+ */
+export const PRIVACY_UPDATED = "21 September 2026";
 
 /**
  * The app's public origin. Prefers the configured site URL, since that is what

@@ -2,25 +2,7 @@
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { CrossIcon } from "@/components/icons/CrossIcon";
-
-const RULES: { title: string; body: string }[] = [
-  {
-    title: "Take turns",
-    body: "Two players share one 5×5 letter grid. On your turn, tap letters to spell a word of 3 letters or more.",
-  },
-  {
-    title: "Claim tiles",
-    body: "Every tile you use in a valid word becomes yours. Tiles your opponent owned flip to your colour.",
-  },
-  {
-    title: "Lock tiles",
-    body: "A tile of yours surrounded on all sides (non-diagonal) by your own tiles is locked - your opponent can no longer steal it.",
-  },
-  {
-    title: "Win the board",
-    body: "The game ends when every tile is claimed. Whoever owns the most tiles wins. Turns expire after 24 hours.",
-  },
-];
+import { RULES } from "@/lib/game/rules";
 
 /**
  * The rules, as a controlled sheet.
@@ -28,6 +10,10 @@ const RULES: { title: string; body: string }[] = [
  * Split out from <HowToPlay /> so the rules can be reached from more than one
  * place: the home screen owns a button, Settings owns a row, and both open this.
  * Keeping the trigger out of here is what makes that possible.
+ *
+ * The rule text comes from `lib/game/rules.ts`, shared with the public
+ * `/how-to-play` page — this sheet is the short version of that page, not a
+ * second account of the game.
  */
 export function HowToPlaySheet({
   open,

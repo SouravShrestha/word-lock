@@ -213,9 +213,17 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             <SectionLabel>Support</SectionLabel>
             <SettingsGroup>
               <SettingsRow label="About" onClick={() => setNested("about")} />
-              <SettingsRow label="Email us" href={supportMailto()} />
+              {/*
+                Sits directly under About rather than at the bottom of the group:
+                ads and cookies have to be disclosed somewhere a player can
+                actually find, and "below the fold of a support list" is not that.
+                An anchor, so it opens as a real page in a new tab — settings is
+                a sheet, and navigating out of it would close the screen the
+                player was reading from.
+              */}
               {PRIVACY_URL ? <SettingsRow label="Privacy policy" href={PRIVACY_URL} /> : null}
               {TERMS_URL ? <SettingsRow label="Terms of service" href={TERMS_URL} /> : null}
+              <SettingsRow label="Email us" href={supportMailto()} />
               <SettingsRow label="Acknowledgements" onClick={() => setNested("credits")} />
             </SettingsGroup>
           </section>

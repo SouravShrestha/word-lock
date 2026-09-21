@@ -8,8 +8,7 @@ import { QueryProvider } from "@/components/QueryProvider";
 import { TopLoader } from "@/components/TopLoader";
 import { SessionProvider } from "@/components/SessionProvider";
 import { AuthProvider } from "@/components/AuthProvider";
-import { AuthSheet } from "@/components/AuthSheet";
-import { UsernameSheet } from "@/components/UsernameSheet";
+import { AuthGate } from "@/components/AuthGate";
 import { AuthErrorNotice } from "@/components/AuthErrorNotice";
 import "./globals.css";
 
@@ -76,8 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SessionProvider>
               <AuthProvider>
                 {children}
-                <AuthSheet />
-                <UsernameSheet />
+                <AuthGate />
                 {/* Reads search params, so it needs a Suspense boundary. */}
                 <Suspense fallback={null}>
                   <AuthErrorNotice />
