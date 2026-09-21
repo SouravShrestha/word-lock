@@ -9,7 +9,7 @@ import { WordLockLogo } from "@/components/WordLockLogo";
 export function Wordmark() {
   return (
     <Link href="/" className="inline-flex" aria-label="Word-lock home">
-      <WordLockLogo className="h-auto w-64 select-none sm:w-80" />
+      <WordLockLogo className="h-auto w-56 select-none" />
     </Link>
   );
 }

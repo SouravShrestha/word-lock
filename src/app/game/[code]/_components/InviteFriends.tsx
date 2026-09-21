@@ -47,7 +47,8 @@ export function InviteFriends({ shareUrl, roomCode }: { shareUrl: string; roomCo
       </Item>
 
       <Item>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => copy("link")}
           className="surface press flex h-full w-full flex-col items-center justify-center gap-2 p-3"
         >
@@ -57,7 +58,8 @@ export function InviteFriends({ shareUrl, roomCode }: { shareUrl: string; roomCo
       </Item>
 
       <Item last>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => copy("code")}
           className="surface press flex h-full w-full flex-col items-center justify-center gap-2 p-3"
         >

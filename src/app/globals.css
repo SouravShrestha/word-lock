@@ -111,7 +111,7 @@
   --surface: oklch(0.98 0.015 95);
   --surface-2: oklch(0.94 0.025 95);
   --sky: #29a8f0;
-  --blush: #FF86D0;
+  --blush: #ff86d0;
   --mint: #17c98a;
   --aqua: #55d4e8;
   --grape: #ff6fd8;
@@ -126,7 +126,7 @@
 
   /* Solid "lip" colours painted under each button fill. */
   --depth-sky: #3b6fe8;
-  --depth-blush: #CC6BA6;
+  --depth-blush: #cc6ba6;
   --depth-sun: #e0a600;
   --depth-mint: #0f9e6b;
   --depth-aqua: #2aa8bf;
@@ -137,7 +137,7 @@
 }
 
 .dark {
-  --background: #131F24;
+  --background: #131f24;
   --foreground: #f2f5f7;
   --card: #3e4852;
   --card-foreground: #f2f5f7;
@@ -154,18 +154,18 @@
   --surface: #3e4852;
   --surface-2: #4a5560;
   --on-accent: #0f1419;
-  --hairline: #37464F;
+  --hairline: #37464f;
   --surface-hairline: transparent;
   /* #3e4852 at 30% over the #131F24 page background, flattened. */
-  --board: #202B32;
+  --board: #202b32;
   --depth-surface: #2a3138;
   --depth-surface-2: #333c45;
   --accent: oklch(0.78 0.15 195);
   --accent-foreground: oklch(0 0 0);
   --destructive: oklch(0.62 0.24 27);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: #37464F;
-  --input: #37464F;
+  --border: #37464f;
+  --input: #37464f;
   --ring: #29a8f0;
   --neutral-tile: #3e4852;
   --neutral-tile-deep: #2f3740;
@@ -237,8 +237,8 @@
   line-height: 1;
   user-select: none;
   transition:
-  background-color 150ms ease,
-  transform 100ms ease;
+    background-color 150ms ease,
+    transform 100ms ease;
 }
 
 @utility wordmark {

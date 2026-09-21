@@ -72,7 +72,8 @@ export function WaitingLobby({
         <div className="flex flex-col items-center gap-10 px-5 py-10">
           {/* Room code */}
           {isHost ? (
-            <button type="button"
+            <button
+              type="button"
               onClick={handleCopy}
               aria-label="Copy room code"
               className="soft-btn btn-surface select-none py-3 pl-7 pr-5"
@@ -101,7 +102,11 @@ export function WaitingLobby({
                 <Avatar avatar={game.players.two?.avatar} className="h-16 w-16" />
               </PlayerSlot>
             ) : isHost ? (
-              <button type="button" onClick={handleShare} className="flex flex-col items-center gap-2.5">
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex flex-col items-center gap-2.5"
+              >
                 <span className="press border-border border-2 rounded-full grid h-18 w-18 place-items-center">
                   <InviteIcon className="h-5 w-5" />
                 </span>
@@ -137,7 +142,8 @@ export function WaitingLobby({
               </p>
             ) : isHost ? (
               <>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={handleStart}
                   disabled={!opponentJoined || starting}
                   className="soft-btn btn-blush w-[65%] py-3.5 text-base"
@@ -170,13 +176,15 @@ export function WaitingLobby({
               </p>
             </div>
             <div className="flex gap-3">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowConfirm(false)}
                 className="soft-btn btn-surface-2 flex-1 py-3"
               >
                 Cancel
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => {
                   setShowConfirm(false);
                   (isHost ? onDestroy : onLeave)();

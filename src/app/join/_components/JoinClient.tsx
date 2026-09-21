@@ -70,7 +70,8 @@ export function JoinClient() {
           })}
         </div>
 
-        <button type="button"
+        <button
+          type="button"
           onClick={handleSubmit}
           disabled={!ready || joinMutation.isPending || joinCode.length < CODE_LENGTH}
           className="soft-btn btn-sky mx-auto w-full max-w-[240px] py-3.5 text-base"

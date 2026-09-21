@@ -1,3 +1,4 @@
+import { LiveIcon } from "@/components/icons/LiveIcon";
 import type { ReviewFrame } from "@/lib/game/review";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ import { cn } from "@/lib/utils";
  *
  * The word is in the colour of whoever played it, the same signal the played
  * words strip uses, so the seat is read without a name taking up the width.
- * "Live" is the way back and is the only control here — the steppers in the
+ * The live badge is the way back and is the only control here — the steppers in the
  * bottom bar are where the walking happens, and duplicating them would put two
  * next buttons on screen at once.
  */
@@ -51,9 +52,10 @@ export function ReviewBar({
       <button
         type="button"
         onClick={onLive}
-        className="press shrink-0 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
+        aria-label="Back to live"
+        className="press shrink-0 py-0.5"
       >
-        LIVE
+        <LiveIcon className="h-8 w-8" />
       </button>
     </div>
   );

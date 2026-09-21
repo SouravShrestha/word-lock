@@ -101,10 +101,7 @@ function main() {
   }
   console.log("Plain-text bytes:   ", plainBytes.toLocaleString());
   console.log("Generated file bytes:", outputBytes.toLocaleString());
-  console.log(
-    "Reduction:          ",
-    `${(100 * (1 - outputBytes / plainBytes)).toFixed(1)}%`,
-  );
+  console.log("Reduction:          ", `${(100 * (1 - outputBytes / plainBytes)).toFixed(1)}%`);
 
   if (dryRun) {
     console.log(`\n[dry-run] Would write to ${OUTPUT_PATH}`);

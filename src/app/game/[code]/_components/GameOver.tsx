@@ -103,7 +103,8 @@ export function GameOver({ game, onNew }: { game: any; onNew: () => void }) {
         </div>
 
         {/* CTA */}
-        <button type="button"
+        <button
+          type="button"
           onClick={onNew}
           className="chunky-btn btn-primary w-full py-2 font-semibold flex items-center justify-center gap-2"
         >

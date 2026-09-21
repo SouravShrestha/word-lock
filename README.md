@@ -99,7 +99,11 @@ Set these as Worker secrets per environment (`wrangler secret put <NAME>`):
 
 ## Contributing
 
-Contributions are welcome! Please fork the repo and submit a pull request.
+Contributions are welcome! Please fork the repo and submit a pull request. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks, and the architecture rules that matter, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for the community guidelines that apply.
+
+## Credits
+
+See [CREDITS.md](CREDITS.md) for the data source, platform, and open-source libraries this project is built on.
 
 ## License
 

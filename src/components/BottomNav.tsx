@@ -76,7 +76,7 @@ export function BottomNav() {
                 </span>
                 <span
                   className={cn(
-                    "relative z-10 hidden text-sm font-bold tracking-wide lg:block",
+                    "relative z-10 hidden text-sm font-bold tracking-wide lg:block pt-1",
                     active ? "text-foreground" : "text-muted-foreground",
                   )}
                 >

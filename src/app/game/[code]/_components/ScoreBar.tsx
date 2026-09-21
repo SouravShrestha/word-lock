@@ -25,7 +25,7 @@ function TurnClock({ deadline, status }: { deadline: string | null; status: stri
     return () => clearInterval(id);
   }, [status]);
 
-  const timerLabel = status === "active" ? timeLeftLabel(deadline) : null;
+  const timerLabel = status === "active" && deadline ? timeLeftLabel(deadline) : null;
 
   return (
     <div className="flex shrink-0 flex-col items-center gap-1.5">
