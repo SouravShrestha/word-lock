@@ -1,0 +1,25 @@
+-- Drops the unused rematch pointer.
+--
+-- `rematch_game_id` (and its partial index) were never created by a migration in
+-- this repo — they were applied directly to the database, which is why they show
+-- up in generated types but in none of the files here. They date from an earlier
+-- design where a finished game pointed at its successor.
+--
+-- The rematch the app actually ships does not need it. "New Game" on the game
+-- over card calls the ordinary create endpoint and drops the player into a fresh
+-- lobby, from where the same invite link reaches the same opponent. The finished
+-- game is left exactly as it was, because a rematch is a new game rather than a
+-- reset of the old one, and nothing on a completed game's channel would tell the
+-- other side that a successor exists. See the comment on `rematchMutation` in
+-- GameClient.tsx.
+--
+-- So the column is a link the write path never sets and the read path never
+-- follows. Dropping it removes the self-referencing foreign key from wl_games
+-- and, with it, a column that generated types keep advertising as part of the
+-- game row. Every row holds null at the time of writing, so nothing is lost.
+--
+-- DROP COLUMN takes the dependent objects with it: the
+-- wl_games_rematch_game_id_fkey constraint and the wl_games_rematch_idx index
+-- both go automatically, so neither is named here.
+ALTER TABLE public.wl_games
+  DROP COLUMN rematch_game_id;
