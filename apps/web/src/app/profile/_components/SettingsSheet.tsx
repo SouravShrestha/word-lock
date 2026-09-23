@@ -1,9 +1,8 @@
 "use client";
-import { deleteAccountFn, useAccount, useAuth, useSession } from "@word-lock/client";
+import { useAccount, useAuth, useSession } from "@word-lock/client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
@@ -39,13 +38,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
   const [mounted, setMounted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [nested, setNested] = useState<Nested>(null);
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteAccountFn({ sessionId: sessionId! }),
-  });
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- the resolved theme is only known on the client
@@ -63,23 +56,6 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
       toast.error("Couldn't log out. Try again.");
     } finally {
       setBusy(false);
-    }
-  };
-
-  const onDeleteAccount = async () => {
-    setDeleting(true);
-    try {
-      await deleteMutation.mutateAsync();
-      setConfirmingDelete(false);
-      await signOut();
-      onClose();
-      router.push("/");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Couldn't delete your account. Try again.",
-      );
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -115,7 +91,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         onClose={onClose}
         label="Settings"
         showHandle={false}
-        dismissable={nested === null && !confirming && !confirmingDelete}
+        dismissable={nested === null && !confirming}
         className="h-dvh max-h-dvh rounded-t-none pt-[calc(1.5rem+env(safe-area-inset-top))]"
       >
         <div className="flex items-center justify-between gap-4">
@@ -163,18 +139,6 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
                 hint="Usernames are permanent and can't be changed."
               />
               <SettingsField label="Email" value={ready ? (user?.email ?? "Logged in") : "…"} />
-            </SettingsGroup>
-          </section>
-
-          <section className="flex flex-col gap-3">
-            <SectionLabel>Danger zone</SectionLabel>
-            <SettingsGroup>
-              <SettingsRow
-                label="Delete account"
-                destructive
-                onClick={() => setConfirmingDelete(true)}
-                className={!ready || !sessionId ? "pointer-events-none opacity-60" : undefined}
-              />
             </SettingsGroup>
           </section>
 
@@ -241,25 +205,6 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         onConfirm={onSignOut}
         onCancel={() => setConfirming(false)}
         isPending={busy}
-      />
-
-      <ConfirmDialog
-        open={confirmingDelete}
-        zClassName="z-[90]"
-        title="Delete your account?"
-        description={
-          <>
-            This cannot be undone. Your username is freed for anyone to claim, and you will not be
-            able to sign back in.
-            <br />
-            Games you have already played stay in your opponents&apos; match history.
-          </>
-        }
-        confirmLabel="Delete account"
-        pendingLabel="Deleting…"
-        onConfirm={onDeleteAccount}
-        onCancel={() => setConfirmingDelete(false)}
-        isPending={deleting}
       />
     </>
   );

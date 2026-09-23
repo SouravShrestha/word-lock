@@ -7,15 +7,15 @@ import { IconButton } from "@/components/IconButton";
 
 export function LeagueGuideSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
-    <BottomSheet open={open} onClose={onClose} label="League tiers">
+    <BottomSheet open={open} onClose={onClose} label="League tiers" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-lg font-bold text-foreground">League tiers</Text>
+        <Text className="font-display text-xl font-bold text-foreground">League tiers</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
 
-      <Text className="font-sans mt-3 text-sm text-mutedForeground">
+      <Text className="font-sans mt-3 text-[15px] text-mutedForeground">
         Climb the ladder by winning games and earning stars.
       </Text>
 

@@ -26,7 +26,7 @@ export function MatchRow({
       <Avatar avatar={entry.opponentAvatar} />
 
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-display text-base font-medium text-foreground">
+        <Text numberOfLines={1} className="font-display text-[17px] font-medium text-foreground">
           {entry.opponentName}
         </Text>
 
@@ -36,7 +36,10 @@ export function MatchRow({
         </View>
       </View>
 
-      <Text className="shrink-0 text-sm font-semibold tracking-wide" style={{ color: palette.sky }}>
+      <Text
+        className="shrink-0 text-[15px] font-semibold tracking-wide"
+        style={{ color: palette.sky }}
+      >
         Details
       </Text>
     </Pressable>
@@ -45,12 +48,12 @@ export function MatchRow({
 
 function StarMeta({ delta }: { delta: number | null }) {
   if (delta === null) {
-    return <Text className="text-xs font-semibold text-mutedForeground">Unranked</Text>;
+    return <Text className="text-[13px] font-semibold text-mutedForeground">Unranked</Text>;
   }
 
   return (
     <Text
-      className="text-xs font-semibold text-mutedForeground"
+      className="text-[13px] font-semibold text-mutedForeground"
       style={{ fontVariant: ["tabular-nums"] }}
     >
       {delta > 0 ? `+ ${delta}` : `- ${Math.abs(delta)}`} stars
@@ -65,12 +68,14 @@ const RESULT_MARK = {
 } satisfies Record<GameResult, { Icon: ComponentType<IconProps>; label: string }>;
 
 function ResultMeta({ result }: { result: GameResult }) {
+  const { resolvedTheme } = useTheme();
+  const palette = colors[resolvedTheme];
   const { Icon, label } = RESULT_MARK[result];
 
   return (
     <View className="flex-row items-center gap-1">
-      <Icon size={14} />
-      <Text className="text-xs font-semibold text-mutedForeground">{label}</Text>
+      <Icon size={14} color={palette.mutedForeground} />
+      <Text className="text-[13px] font-semibold text-mutedForeground">{label}</Text>
     </View>
   );
 }

@@ -20,7 +20,7 @@ const CREDITS: { label: string; hint: string; href: string }[] = [
 
 export function AcknowledgementsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
-    <BottomSheet open={open} onClose={onClose} label="Acknowledgements">
+    <BottomSheet open={open} onClose={onClose} label="Acknowledgements" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
         <Text className="font-display text-lg text-foreground">Acknowledgements</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
@@ -32,7 +32,7 @@ export function AcknowledgementsSheet({ open, onClose }: { open: boolean; onClos
         Word lock is built on open source. Thanks to everyone behind these.
       </Text>
 
-      <View className="mt-6">
+      <View className="mt-6 -mx-2">
         <SettingsGroup>
           {CREDITS.map((credit) => (
             <SettingsRow

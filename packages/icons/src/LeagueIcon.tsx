@@ -12,8 +12,6 @@ import { DEFAULT_ICON_SIZE } from "./types";
 
 export { LEAGUE_TEXT_CLASS } from "./leagueIconData";
 
-
-
 export interface LeagueIconProps {
   league: LeagueId;
   size?: number;

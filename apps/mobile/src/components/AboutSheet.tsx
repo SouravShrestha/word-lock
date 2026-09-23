@@ -15,19 +15,21 @@ import {
 
 export function AboutSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
-    <BottomSheet open={open} onClose={onClose} label="About">
+    <BottomSheet open={open} onClose={onClose} label="About" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-lg text-foreground">About</Text>
+        <Text className="font-display text-xl text-foreground">About</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
 
       <View className="mt-8">
-        <Text className="text-xs font-semibold text-mutedForeground">Version {APP_VERSION}</Text>
+        <Text className="text-[13px] font-semibold text-mutedForeground">
+          Version {APP_VERSION}
+        </Text>
       </View>
 
-      <View className="mt-4">
+      <View className="mt-4 -mx-2">
         <SettingsGroup>
           <SettingsRow label="Made by" hint={AUTHOR_NAME} href={AUTHOR_URL} />
           <SettingsRow label="What's new" hint="Release notes" href={CHANGELOG_URL} />

@@ -1,8 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
-export type EmailSignInOutcome =
-  | { kind: "link-sent" }
-  | { kind: "code-sent" };
+export type EmailSignInOutcome = { kind: "link-sent" } | { kind: "code-sent" };
 
 export interface AuthAdapter {
   client: SupabaseClient;

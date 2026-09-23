@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GameDetailPopup } from "@/components/GameDetailPopup";
 import { MatchRow } from "@/components/MatchRow";
 import { SectionLabel } from "@/components/SectionLabel";
+import { Shimmer } from "@/components/Shimmer";
 
 export default function HistoryScreen() {
   const { sessionId, ready } = useSession();
@@ -29,12 +30,11 @@ export default function HistoryScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
+        <Headline wins={data?.overview.wins ?? 0} />
         {loading ? (
           <HistorySkeleton />
         ) : (
           <>
-            <Headline wins={data?.overview.wins ?? 0} />
-
             <SectionLabel className="mx-5 mt-7">Match history</SectionLabel>
 
             {games.length === 0 ? (
@@ -47,7 +47,7 @@ export default function HistoryScreen() {
                 </Text>
               </View>
             ) : (
-              <View className="mt-3 gap-1.5 pb-8 pt-1">
+              <View className="mt-3 gap-2.5 pb-8 pt-1 mx-1">
                 {games.map((entry) => (
                   <MatchRow key={entry.gameId} entry={entry} onSelect={setSelected} />
                 ))}
@@ -70,7 +70,7 @@ function Headline({ wins }: { wins: number }) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View className="px-5" style={{ paddingTop: Math.max(insets.top, 32) }}>
+    <View className="px-5" style={{ paddingTop: Math.max(insets.top + 24, 24) }}>
       <Text className="font-display text-3xl font-bold text-foreground">Your matches</Text>
 
       <View className="mt-2 flex-row items-center gap-1.5">
@@ -88,13 +88,30 @@ function Headline({ wins }: { wins: number }) {
 
 function HistorySkeleton() {
   return (
-    <View className="gap-3 px-5 pt-8">
-      <View className="h-8 w-40 rounded-md bg-surface" />
-      <View className="mt-4 gap-2">
+    <View accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants">
+      <View className="mt-3 flex-col pt-1">
         {Array.from({ length: 6 }).map((_, i) => (
-          <View key={i} className="h-14 rounded-md bg-surface" />
+          <MatchRowSkeleton key={i} />
         ))}
       </View>
+    </View>
+  );
+}
+
+function MatchRowSkeleton() {
+  return (
+    <View className="mt-1.5 w-full flex-row items-center gap-3.5 px-5 py-3.5">
+      <Shimmer className="h-14 w-14 shrink-0 rounded-full" />
+
+      <View className="min-w-0 flex-1">
+        <Shimmer className="h-4 w-28 rounded-sm" />
+        <View className="mt-2 flex-row items-center gap-3">
+          <Shimmer className="h-3 w-16 rounded-sm" />
+          <Shimmer className="h-3 w-12 rounded-sm" />
+        </View>
+      </View>
+
+      <Shimmer className="h-4 w-14 shrink-0 rounded-sm" />
     </View>
   );
 }

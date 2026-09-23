@@ -23,8 +23,8 @@ function Body({
       <Text
         className={
           destructive
-            ? "text-sm font-medium tracking-wide text-destructive"
-            : "text-sm font-medium tracking-wide text-foreground"
+            ? "text-[15px] font-medium tracking-wide text-destructive"
+            : "text-[15px] font-medium tracking-wide text-foreground"
         }
       >
         {label}
@@ -75,7 +75,7 @@ export function SettingsRow({
         <Body label={label} hint={hint} destructive={destructive} />
         {!destructive && (
           <View style={{ transform: [{ rotate: "-90deg" }] }}>
-            <ChevronDownIcon size={16} color={palette.mutedForeground} />
+            <ChevronDownIcon size={20} color={palette.mutedForeground} />
           </View>
         )}
       </View>
@@ -95,14 +95,17 @@ export function SettingsField({
   return (
     <View className={ROW}>
       <View className="min-w-0 flex-1">
-        <Text className="text-[0.65rem] font-semibold uppercase tracking-wide text-mutedForeground">
+        <Text className="text-[12px] font-semibold tracking-wide text-mutedForeground">
           {label}
         </Text>
-        <Text className="mt-1 text-sm font-medium tracking-wide text-foreground" numberOfLines={1}>
+        <Text
+          className="mt-1 text-[15px] font-medium tracking-wide text-foreground"
+          numberOfLines={1}
+        >
           {value}
         </Text>
         {hint ? (
-          <Text className="font-sans mt-0.5 text-xs text-mutedForeground">{hint}</Text>
+          <Text className="font-sans mt-0.5 text-[13px] text-mutedForeground">{hint}</Text>
         ) : null}
       </View>
     </View>

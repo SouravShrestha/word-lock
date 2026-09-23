@@ -1,7 +1,6 @@
-import { deleteAccountFn, useAccount, useAuth, useSession } from "@word-lock/client";
+import { useAccount, useAuth, useSession } from "@word-lock/client";
 import { browserTimezone } from "@word-lock/core/account";
 import { CrossIcon } from "@word-lock/icons/native";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -18,7 +17,7 @@ import { SectionLabel } from "@/components/SectionLabel";
 import { SettingsField, SettingsGroup, SettingsRow } from "@/components/SettingsRow";
 import { toast } from "@/components/Toast";
 import { Toggle } from "@/components/Toggle";
-import { PRIVACY_URL, supportMailto, TERMS_URL } from "@/lib/app-meta";
+import { PRIVACY_URL, supportMailto, TERMS_URL, siteUrl } from "@/lib/app-meta";
 import { useTheme } from "@/theme/ThemeProvider";
 
 type Nested = "rules" | "leagues" | "about" | "credits" | null;
@@ -31,13 +30,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [nested, setNested] = useState<Nested>(null);
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteAccountFn({ sessionId: sessionId! }),
-  });
 
   const onSignOut = async () => {
     setBusy(true);
@@ -53,23 +46,6 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
     }
   };
 
-  const onDeleteAccount = async () => {
-    setDeleting(true);
-    try {
-      await deleteMutation.mutateAsync();
-      setConfirmingDelete(false);
-      await signOut();
-      onClose();
-      router.push("/");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Couldn't delete your account. Try again.",
-      );
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   return (
     <>
       <BottomSheet
@@ -77,23 +53,23 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         onClose={onClose}
         label="Settings"
         showHandle={false}
-        dismissable={nested === null && !confirming && !confirmingDelete}
+        dismissable={nested === null && !confirming}
       >
-        <View className="flex-row items-center justify-between gap-4">
+        <View className="flex-row items-center justify-between gap-4 px-1 pt-7">
           <Text className="font-display text-lg text-foreground">Settings</Text>
           <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
             <CrossIcon size={14} color="#ffffff" />
           </IconButton>
         </View>
 
-        <View className="mt-8 gap-6">
+        <View className="mt-8 gap-6 px-1">
           <View className="gap-3">
             <SectionLabel>Preferences</SectionLabel>
             <SettingsGroup>
               <View className="flex-row items-center gap-3.5 px-2 py-4">
                 <View className="min-w-0 flex-1">
-                  <Text className="text-sm font-medium text-foreground">Dark theme</Text>
-                  <Text className="font-sans mt-0.5 text-xs text-mutedForeground">
+                  <Text className="text-[15px] font-medium text-foreground">Dark theme</Text>
+                  <Text className="font-sans mt-0.5 text-[13px] text-mutedForeground">
                     Easier on the eyes
                   </Text>
                 </View>
@@ -125,19 +101,6 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
           </View>
 
           <View className="gap-3">
-            <SectionLabel>Danger zone</SectionLabel>
-            <SettingsGroup>
-              <View style={{ opacity: !ready || !sessionId ? 0.6 : 1 }}>
-                <SettingsRow
-                  label="Delete account"
-                  destructive
-                  onPress={() => setConfirmingDelete(true)}
-                />
-              </View>
-            </SettingsGroup>
-          </View>
-
-          <View className="gap-3">
             <SectionLabel>Guides</SectionLabel>
             <SettingsGroup>
               <SettingsRow label="How to play" onPress={() => setNested("rules")} />
@@ -149,8 +112,18 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             <SectionLabel>Support</SectionLabel>
             <SettingsGroup>
               <SettingsRow label="About" onPress={() => setNested("about")} />
-              {PRIVACY_URL ? <SettingsRow label="Privacy policy" href={PRIVACY_URL} /> : null}
-              {TERMS_URL ? <SettingsRow label="Terms of service" href={TERMS_URL} /> : null}
+              {PRIVACY_URL ? (
+                <SettingsRow
+                  label="Privacy policy"
+                  href={PRIVACY_URL.startsWith("/") ? `${siteUrl()}${PRIVACY_URL}` : PRIVACY_URL}
+                />
+              ) : null}
+              {TERMS_URL ? (
+                <SettingsRow
+                  label="Terms of service"
+                  href={TERMS_URL.startsWith("/") ? `${siteUrl()}${TERMS_URL}` : TERMS_URL}
+                />
+              ) : null}
               <SettingsRow label="Email us" href={supportMailto()} />
               <SettingsRow label="Acknowledgements" onPress={() => setNested("credits")} />
             </SettingsGroup>
@@ -183,19 +156,6 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         onConfirm={onSignOut}
         onCancel={() => setConfirming(false)}
         isPending={busy}
-      />
-
-      <ConfirmDialog
-        open={confirmingDelete}
-        title="Delete your account?"
-        description={
-          "This cannot be undone. Your username is freed for anyone to claim, and you will not be able to sign back in.\nGames you have already played stay in your opponents' match history."
-        }
-        confirmLabel="Delete account"
-        pendingLabel="Deleting…"
-        onConfirm={onDeleteAccount}
-        onCancel={() => setConfirmingDelete(false)}
-        isPending={deleting}
       />
     </>
   );

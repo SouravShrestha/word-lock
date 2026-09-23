@@ -4,11 +4,12 @@ import { LeagueIcon, LEAGUE_TEXT_COLOR, QuestionMarkIcon, StarIcon } from "@word
 import { useCallback, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors } from "@word-lock/tokens/native";
 
 import { IconButton } from "@/components/IconButton";
 import { LeagueGuideSheet } from "@/components/LeagueGuideSheet";
-
-const PROMOTION_SIZE = 3;
+import { Shimmer } from "@/components/Shimmer";
+import { useTheme } from "@/theme/ThemeProvider";
 
 export default function LeaderboardScreen() {
   const { data: account } = useAccount();
@@ -21,8 +22,6 @@ export default function LeaderboardScreen() {
 
   const myRank = me?.leagueRank ?? null;
   const inList = myRank !== null && entries.some((e) => e.rank === myRank);
-
-  const demotionStart = Math.max(entries.length - PROMOTION_SIZE, PROMOTION_SIZE);
 
   return (
     <View className="flex-1 bg-background">
@@ -41,15 +40,9 @@ export default function LeaderboardScreen() {
             </Text>
           ) : (
             <>
-              <View className="gap-2.5">
+              <View className="gap-2">
                 {entries.map((entry, index) => (
                   <View key={entry.playerId} className="gap-2.5">
-                    {index === PROMOTION_SIZE && entries.length > PROMOTION_SIZE && (
-                      <ZoneDivider kind="promotion" />
-                    )}
-                    {index === demotionStart && index !== PROMOTION_SIZE && (
-                      <ZoneDivider kind="demotion" />
-                    )}
                     <Row
                       rank={entry.rank}
                       name={entry.username}
@@ -92,6 +85,8 @@ export default function LeaderboardScreen() {
 }
 
 function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: () => void }) {
+  const { resolvedTheme } = useTheme();
+  const palette = colors[resolvedTheme];
   const band = leagueById(league);
   const index = LEAGUES.findIndex((tier) => tier.id === league);
   const scrollRef = useRef<ScrollView>(null);
@@ -114,7 +109,7 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
   return (
     <View
       className="border-b-2 border-hairline px-5 pb-6"
-      style={{ paddingTop: Math.max(insets.top, 24) }}
+      style={{ paddingTop: Math.max(insets.top + 20, 24) }}
     >
       <View className="flex-row items-center justify-between gap-4">
         <Text
@@ -130,7 +125,7 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
           accessibilityLabel="League tiers"
           onPress={onOpenGuide}
         >
-          <QuestionMarkIcon size={18} />
+          <QuestionMarkIcon size={16} color={palette.foreground} />
         </IconButton>
       </View>
 
@@ -161,30 +156,6 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
   );
 }
 
-function ZoneDivider({ kind }: { kind: "promotion" | "demotion" }) {
-  const isPromotion = kind === "promotion";
-  return (
-    <View className="flex-row items-center justify-center gap-1.5 py-1">
-      <Text
-        className={
-          isPromotion ? "font-sans text-xs text-mint" : "font-sans text-xs text-destructive"
-        }
-      >
-        {isPromotion ? "▲" : "▼"}
-      </Text>
-      <Text
-        className={
-          isPromotion
-            ? "text-[0.7rem] font-bold uppercase tracking-wide text-mint"
-            : "text-[0.7rem] font-bold uppercase tracking-wide text-destructive"
-        }
-      >
-        {isPromotion ? "Promotion zone" : "Demotion zone"}
-      </Text>
-    </View>
-  );
-}
-
 function Row({
   rank,
   name,
@@ -200,25 +171,25 @@ function Row({
 }) {
   return (
     <View
-      className={`-mx-5 flex-row items-center gap-3.5 py-6 pl-5 pr-6 ${isViewer ? "bg-surface" : ""}`}
+      className={`-mx-5 flex-row items-center gap-3.5 py-5 pl-6 pr-6 mb-2 ${isViewer ? "bg-board" : ""}`}
     >
       <Text
-        className="w-5 shrink-0 text-center text-sm font-semibold text-accent"
+        className="w-5 shrink-0 text-center text-[15px] font-semibold text-accent"
         style={{ fontVariant: ["tabular-nums"] }}
       >
         {rank}
       </Text>
 
-      <Text numberOfLines={1} className="min-w-0 flex-1 text-sm font-semibold text-foreground">
+      <Text numberOfLines={1} className="min-w-0 flex-1 text-[15px] font-semibold text-foreground">
         {name}
         {isViewer && (
-          <Text className="ml-1.5 text-xs font-normal text-mutedForeground"> (you)</Text>
+          <Text className="ml-1.5 text-[13px] font-normal text-mutedForeground"> (you)</Text>
         )}
       </Text>
 
-      <View className="shrink-0 flex-row items-center gap-1 rounded-full bg-surface px-2.5 py-1">
+      <View className="shrink-0 flex-row items-center gap-1 px-2.5 py-1">
         <StarIcon size={18} color={LEAGUE_TEXT_COLOR[league]} />
-        <Text className="text-sm font-semibold" style={{ color: LEAGUE_TEXT_COLOR[league] }}>
+        <Text className="text-[15px] font-semibold" style={{ color: LEAGUE_TEXT_COLOR[league] }}>
           {stars}
         </Text>
       </View>
@@ -228,10 +199,20 @@ function Row({
 
 function LeaderboardSkeleton() {
   return (
-    <View className="gap-2.5">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <View key={i} className="h-14 rounded-md bg-surface" />
+    <View className="gap-2.5 px-1">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <LeaderboardRowSkeleton key={i} />
       ))}
+    </View>
+  );
+}
+
+function LeaderboardRowSkeleton() {
+  return (
+    <View className="-mx-5 flex-row items-center gap-3.5 py-6 pl-5 pr-6">
+      <Shimmer className="h-4 w-5 shrink-0 rounded-sm" />
+      <Shimmer className="h-4 w-32 min-w-0 flex-1 rounded-sm" />
+      <Shimmer className="h-6 w-14 shrink-0 rounded-sm" />
     </View>
   );
 }

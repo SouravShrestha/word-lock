@@ -26,6 +26,7 @@ export function Toggle({
       trackColor={{ false: palette.surface2, true: palette.sky }}
       thumbColor="#ffffff"
       ios_backgroundColor={palette.surface2}
+      style={{ transform: [{ scale: 0.75 }] }}
     />
   );
 }

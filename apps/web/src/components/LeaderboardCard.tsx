@@ -28,10 +28,6 @@ export function LeaderboardCard({ onOpenGuide }: { onOpenGuide: () => void }) {
   const myRank = me?.leagueRank ?? null;
   const inList = myRank !== null && entries.some((e) => e.rank === myRank);
 
-  // First entry that falls in the demotion zone: the bottom of the band, sized
-  // the same as the promotion cut at the top so the two read as symmetrical.
-  const demotionStart = Math.max(entries.length - PROMOTION_SIZE, PROMOTION_SIZE);
-
   return (
     <div className="flex flex-col">
       <LeagueHeader league={league} onOpenGuide={onOpenGuide} />
@@ -46,12 +42,6 @@ export function LeaderboardCard({ onOpenGuide }: { onOpenGuide: () => void }) {
             <ul className="flex flex-col gap-2.5">
               {entries.map((entry, index) => (
                 <li key={entry.playerId} className="flex flex-col gap-2.5">
-                  {index === PROMOTION_SIZE && entries.length > PROMOTION_SIZE && (
-                    <ZoneDivider kind="promotion" />
-                  )}
-                  {index === demotionStart && index !== PROMOTION_SIZE && (
-                    <ZoneDivider kind="demotion" />
-                  )}
                   <Row
                     rank={entry.rank}
                     name={entry.username}
@@ -93,9 +83,6 @@ export function LeaderboardCard({ onOpenGuide }: { onOpenGuide: () => void }) {
     </div>
   );
 }
-
-/** Rows above this line promote, rows within this many of the bottom demote. */
-const PROMOTION_SIZE = 3;
 
 function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: () => void }) {
   const band = leagueById(league);
@@ -141,20 +128,6 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function ZoneDivider({ kind }: { kind: "promotion" | "demotion" }) {
-  const isPromotion = kind === "promotion";
-  return (
-    <div className="flex items-center justify-center gap-1.5 py-1">
-      <span className={cn("text-xs", isPromotion ? "text-mint" : "text-destructive")} aria-hidden>
-        {isPromotion ? "▲" : "▼"}
-      </span>
-      <p className={cn("eyebrow text-[0.7rem]", isPromotion ? "text-mint" : "text-destructive")}>
-        {isPromotion ? "Promotion zone" : "Demotion zone"}
-      </p>
     </div>
   );
 }

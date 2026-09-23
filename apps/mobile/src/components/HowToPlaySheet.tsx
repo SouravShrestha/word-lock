@@ -17,7 +17,7 @@ export function HowToPlaySheet({ open, onClose }: { open: boolean; onClose: () =
   return (
     <BottomSheet open={open} onClose={onClose} label="How to play" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-lg text-foreground">How to play</Text>
+        <Text className="font-display text-xl text-foreground">How to play</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
