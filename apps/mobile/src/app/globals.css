@@ -1,0 +1,41 @@
+/*
+ * The `:root`/`.dark` custom-property blocks, generated from
+ * packages/tokens/src/tokens.ts, resolved to sRGB — see the comment on
+ * `buildNativeCss` in packages/tokens/scripts/generate.mjs for why this is a
+ * separate artifact from the web's `tokens.css` rather than the same file
+ * reused: NativeWind's CSS-variable runtime cannot parse `oklch()` any more
+ * than plain React Native can.
+ *
+ * Note the dark block is `@media (prefers-color-scheme: dark) { :root { … } }`,
+ * where the web's `tokens.css` uses a bare `.dark`. That is not a style choice
+ * and it does not mean the app ignores the in-app theme picker: for `:root`
+ * variables the interop resolves that query at parse time into a "dark" bucket
+ * and throws the query itself away, so `ThemeProvider.tsx` still decides which
+ * bucket is live via `setColorScheme`. Both of the selectors that look more
+ * natural here fail — a bare `.dark` is not one of the selectors NativeWind
+ * reads variables from at all, and `.dark:root` is only read once the
+ * `@cssInterop set darkMode class dark` flag has been seen, which cannot happen
+ * before this file because the `@import` below must precede `@tailwind base`.
+ * The full reasoning is on `buildNativeCss` in
+ * packages/tokens/scripts/generate.mjs.
+ *
+ * `tailwind.config.js`'s `darkMode: "class"` still matters — it is what makes
+ * the `dark:` *variant utilities* compile, and those live in the utilities layer
+ * after the flag, so they are unaffected by the ordering problem above.
+ *
+ * This `@import` MUST stay above the `@tailwind` directives. NativeWind's Metro
+ * integration compiles this file with `tailwindcss/lib/cli/build` (see
+ * `nativewind/dist/metro/tailwind/v3/child.js`), whose postcss pipeline runs
+ * `postcss-import` — and `postcss-import` refuses to inline an `@import` that
+ * does not precede every other statement. When it sat underneath
+ * `@tailwind utilities` the rule was left un-inlined, so no `:root` block ever
+ * reached the runtime and *every* `var(--…)`-backed style resolved to nothing:
+ * `tailwind.config.js` maps the entire colour palette to `var(--kebab-name)`
+ * and the entire radius scale to `var(--radius-*)`, so the app rendered with
+ * flex and spacing intact but no colours and no rounded corners.
+ */
+@import "@word-lock/tokens/generated/tokens.native.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

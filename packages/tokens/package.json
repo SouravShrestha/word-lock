@@ -1,0 +1,26 @@
+{
+  "name": "@word-lock/tokens",
+  "version": "1.2.1",
+  "private": true,
+  "type": "module",
+  "description": "The design tokens, authored once. Emits CSS custom properties for the web app and an sRGB hex map for React Native.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./native": "./src/native.ts",
+    "./color": "./src/color.ts",
+    "./generated/tokens.css": "./generated/tokens.css",
+    "./generated/tokens.native.css": "./generated/tokens.native.css",
+    "./generated/*": "./generated/*"
+  },
+  "scripts": {
+    "generate": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/generate.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "vitest": "^3.2.4"
+  }
+}

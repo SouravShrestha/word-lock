@@ -8,11 +8,29 @@ Word Lock is a real-time 2-player word territory game where players take turns s
 
 1. Clone this repository: `git clone https://github.com/SouravShrestha/word-lock.git`
 2. Navigate into the project directory: `cd word-lock`
-3. Install the dependencies: `npm install`
-4. Copy `.env.example` to `.env.local` and fill in your Supabase values
+3. Install the dependencies: `npm install` (an npm-workspaces monorepo — one install at the root covers every workspace)
+4. Copy `.env.example` to `apps/web/.env.local` and fill in your Supabase values
 5. Apply the migrations in `supabase/migrations` in filename order
 6. Start the development server: `npm run dev`
 7. Open your browser and go to `http://localhost:3000`
+
+### Repository layout
+
+```
+apps/web       Next.js 15 app, route handlers, the Cloudflare Worker
+apps/mobile    Expo app (iOS + Android)
+packages/*     Code shared by both clients
+supabase/      Migrations — shared infrastructure, not owned by either app
+```
+
+The mobile app runs from its own directory rather than the root, since
+`expo start` needs its own long-lived process:
+
+```bash
+cd apps/mobile
+cp .env.example .env.local   # fill in EXPO_PUBLIC_SUPABASE_URL etc.
+npx expo start
+```
 
 ## Accounts
 
@@ -88,12 +106,15 @@ Set these as Worker secrets per environment (`wrangler secret put <NAME>`):
 - TypeScript
 - Zod for server-side validation
 - Cloudflare Workers (via OpenNext)
+- npm workspaces + Turborepo
 
 ## Development Commands
 
-- Run Development Server: `npm run dev`
-- Build for Production: `npm run build`
-- Deploy: `npm run deploy`
+Run from the repo root.
+
+- Run Development Server (web): `npm run dev`
+- Build every workspace: `npm run build`
+- Deploy the web app: `npm run deploy`
 - Run ESLint: `npm run lint`
 - Format Code: `npm run format`
 

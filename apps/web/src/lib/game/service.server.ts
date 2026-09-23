@@ -1,0 +1,696 @@
+import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
+import { PublicError } from "@/lib/http/errors";
+import { UNNAMED_PLAYER } from "@word-lock/core/account";
+import { resolvePlayer, type Caller } from "./identity.server";
+import { touchPlayStreak } from "./streak.server";
+import { computeStarOutcome, UNRANKED_OUTCOME } from "./stars.server";
+import { getDictionary, isWord } from "./dictionary.server";
+import {
+  computeBoardState,
+  generateGrid,
+  validateMove,
+  MOVE_REJECTION_MESSAGES,
+  computeStats,
+  MAX_HISTORY_GAMES,
+  starHistory,
+  type EngineMove,
+  type PlayerSlot,
+  type PlayerStats,
+  type StatsGameInput,
+  type GamePlayerRow,
+  type GameRow,
+  type MoveRow,
+  type PlayerRow,
+} from "@word-lock/core/game";
+
+export const MAX_ACTIVE_GAMES = 5;
+export const TURN_LIMIT_MS = 24 * 60 * 60 * 1000;
+
+const ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function makeRoomCode(length = 5) {
+  let out = "";
+  for (let i = 0; i < length; i++) {
+    out += ROOM_ALPHABET[Math.floor(Math.random() * ROOM_ALPHABET.length)];
+  }
+  return out;
+}
+
+export type {
+  PlayerRow,
+  PlayerAccountRow,
+  GamePlayerRow,
+  GameRow,
+  MoveRow,
+} from "@word-lock/core/game";
+
+function toEngineMoves(game: GameRow, moves: MoveRow[]): EngineMove[] {
+  return moves.map((m) => ({
+    playerSlot: (m.player_id === game.player1_id ? 1 : 2) as PlayerSlot,
+    word: m.word,
+    tileIndices: m.tile_indices ?? [],
+    passed: m.passed,
+  }));
+}
+
+export async function loadGame(roomCode: string) {
+  const { data: game } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("*")
+    .eq("room_code", roomCode.toUpperCase())
+    .maybeSingle();
+  if (!game) return null;
+
+  const [{ data: moves }, { data: players }] = await Promise.all([
+    getSupabaseAdmin()
+      .from("wl_moves")
+      .select("*")
+      .eq("game_id", game.id)
+      .order("created_at", { ascending: true }),
+    getSupabaseAdmin()
+      .from("wl_players")
+      .select("id, session_id, username, avatar, user_id")
+      .in("id", [game.player1_id, game.player2_id].filter(Boolean) as string[]),
+  ]);
+
+  return {
+    game: game as GameRow,
+    moves: (moves ?? []) as MoveRow[],
+    players: (players ?? []) as GamePlayerRow[],
+  };
+}
+
+export function serializeGame(
+  game: GameRow,
+  moves: MoveRow[],
+  players: PlayerRow[],
+  viewerId: string | null,
+) {
+  const state = computeBoardState(game.grid.split(""), toEngineMoves(game, moves));
+  const p1 = players.find((p) => p.id === game.player1_id) ?? null;
+  const p2 = players.find((p) => p.id === game.player2_id) ?? null;
+
+  return {
+    id: game.id,
+    roomCode: game.room_code,
+    grid: game.grid.split(""),
+    status: game.status,
+    endReason: game.end_reason,
+    winnerId: game.winner_id,
+    lastMoveAt: game.last_move_at,
+    currentTurnPlayerId: game.current_turn_player_id,
+    turnDeadline: new Date(new Date(game.last_move_at).getTime() + TURN_LIMIT_MS).toISOString(),
+    players: {
+      one: p1 ? { id: p1.id, name: p1.username ?? UNNAMED_PLAYER, avatar: p1.avatar } : null,
+      two: p2 ? { id: p2.id, name: p2.username ?? UNNAMED_PLAYER, avatar: p2.avatar } : null,
+    },
+    viewerSlot: viewerId
+      ? viewerId === game.player1_id
+        ? 1
+        : viewerId === game.player2_id
+          ? 2
+          : null
+      : null,
+    starDeltas: {
+      1: game.p1_star_delta,
+      2: game.p2_star_delta,
+    },
+    owners: state.owners,
+    locked: state.locked,
+    scores: state.scores,
+    neutral: state.neutral,
+    playedWords: moves
+      .filter((m) => !m.passed)
+      .map((m) => ({ word: m.word, playerId: m.player_id })),
+    history: moves.map((m) => ({
+      id: m.id,
+      word: m.word,
+      passed: m.passed,
+      playerId: m.player_id,
+      tileIndices: m.tile_indices ?? [],
+      createdAt: m.created_at,
+    })),
+  };
+}
+
+export type SerializedGame = ReturnType<typeof serializeGame>;
+
+export { findViewerId } from "@word-lock/core/game";
+
+async function countActiveGames(playerId: string) {
+  const { count } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("id", { count: "exact", head: true })
+    .neq("status", "completed")
+    .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`);
+  return count ?? 0;
+}
+
+export async function createGame(caller: Caller) {
+  const player = await resolvePlayer(caller);
+  if ((await countActiveGames(player.id)) >= MAX_ACTIVE_GAMES) {
+    throw new PublicError(
+      `You already have ${MAX_ACTIVE_GAMES} games on the go. Finish one before starting another.`,
+    );
+  }
+
+  const grid = generateGrid(getDictionary()).join("");
+
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const roomCode = makeRoomCode();
+    const { data, error } = await getSupabaseAdmin()
+      .from("wl_games")
+      .insert({
+        room_code: roomCode,
+        grid,
+        player1_id: player.id,
+        current_turn_player_id: player.id,
+        status: "waiting",
+      })
+      .select("room_code")
+      .maybeSingle();
+    if (data) return { roomCode: data.room_code };
+    if (error && !error.message.includes("duplicate")) throw new Error(error.message);
+  }
+  throw new PublicError("Couldn't allocate a room code. Try again.");
+}
+
+export async function joinGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
+  const loaded = await loadGame(roomCode);
+  if (!loaded) throw new PublicError("No game found with that code.");
+  const { game } = loaded;
+
+  if (game.player1_id === player.id || game.player2_id === player.id) {
+    return { roomCode: game.room_code };
+  }
+  if (game.player2_id) throw new PublicError("That game is already full.");
+  if (game.status === "completed") throw new PublicError("That game is already finished.");
+  if ((await countActiveGames(player.id)) >= MAX_ACTIVE_GAMES) {
+    throw new PublicError(
+      `You already have ${MAX_ACTIVE_GAMES} games on the go. Finish one before joining another.`,
+    );
+  }
+
+  const { error } = await getSupabaseAdmin()
+    .from("wl_games")
+    .update({ player2_id: player.id })
+    .eq("id", game.id)
+    .is("player2_id", null);
+  if (error) throw new Error(error.message);
+
+  return { roomCode: game.room_code };
+}
+
+export async function startGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
+  const { data: game } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("id, status, player1_id, player2_id")
+    .eq("room_code", roomCode.toUpperCase())
+    .maybeSingle();
+
+  if (!game) throw new PublicError("Game not found.");
+  if (game.player1_id !== player.id) throw new PublicError("Only the host can start the game.");
+  if (game.status !== "waiting") throw new PublicError("Game is not in the waiting state.");
+  if (!game.player2_id) throw new PublicError("Waiting for an opponent to join.");
+
+  const { error } = await getSupabaseAdmin()
+    .from("wl_games")
+    .update({
+      status: "active",
+      current_turn_player_id: game.player1_id,
+      last_move_at: new Date().toISOString(),
+    })
+    .eq("id", game.id);
+  if (error) throw new Error(error.message);
+
+  return { ok: true };
+}
+
+export async function destroyGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
+  const { data: game } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("id, status, player1_id")
+    .eq("room_code", roomCode.toUpperCase())
+    .maybeSingle();
+
+  if (!game) return { ok: true };
+
+  if (game.status === "waiting" && game.player1_id === player.id) {
+    await getSupabaseAdmin().from("wl_games").delete().eq("id", game.id);
+  }
+  return { ok: true };
+}
+
+export async function forfeitGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
+  const { data: game } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("id, status, player1_id, player2_id")
+    .eq("room_code", roomCode.toUpperCase())
+    .maybeSingle();
+
+  if (!game) throw new PublicError("Game not found.");
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
+
+  const isPlayer1 = game.player1_id === player.id;
+  const isPlayer2 = game.player2_id === player.id;
+  if (!isPlayer1 && !isPlayer2) throw new PublicError("You are not a participant in this game.");
+
+  const winnerId = isPlayer1 ? game.player2_id : game.player1_id;
+
+  const loaded = await loadGame(roomCode);
+  const { outcome, commit } = loaded
+    ? await computeStarOutcome(loaded.game, winnerId)
+    : { outcome: UNRANKED_OUTCOME, commit: async () => {} };
+
+  const { data: completed } = await getSupabaseAdmin()
+    .from("wl_games")
+    .update({
+      status: "completed",
+      winner_id: winnerId,
+      end_reason: "forfeit",
+      last_move_at: new Date().toISOString(),
+      p1_star_delta: outcome.p1Delta,
+      p2_star_delta: outcome.p2Delta,
+      p1_stars_after: outcome.p1StarsAfter,
+      p2_stars_after: outcome.p2StarsAfter,
+    })
+    .eq("id", game.id)
+    .neq("status", "completed")
+    .select("id")
+    .maybeSingle();
+
+  if (completed) await commit();
+
+  return { ok: true };
+}
+
+async function claimTurn(game: GameRow, expectedPlayerId: string): Promise<string> {
+  const claimedAt = new Date().toISOString();
+  const { data, error } = await getSupabaseAdmin()
+    .from("wl_games")
+    .update({ last_move_at: claimedAt })
+    .eq("id", game.id)
+    .eq("current_turn_player_id", expectedPlayerId)
+    .eq("last_move_at", game.last_move_at)
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new PublicError("Someone else already took this turn. Refresh and try again.");
+  }
+  return claimedAt;
+}
+
+async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
+  const state = computeBoardState(game.grid.split(""), toEngineMoves(game, moves));
+  const now = new Date().toISOString();
+
+  if (state.finished) {
+    const winnerId =
+      state.winnerSlot === 1 ? game.player1_id : state.winnerSlot === 2 ? game.player2_id : null;
+
+    const { outcome, commit } = await computeStarOutcome(game, winnerId);
+
+    const { data: completed } = await getSupabaseAdmin()
+      .from("wl_games")
+      .update({
+        status: "completed",
+        winner_id: winnerId,
+        end_reason: state.endReason,
+        last_move_at: now,
+        p1_star_delta: outcome.p1Delta,
+        p2_star_delta: outcome.p2Delta,
+        p1_stars_after: outcome.p1StarsAfter,
+        p2_stars_after: outcome.p2StarsAfter,
+      })
+      .eq("id", game.id)
+      .neq("status", "completed")
+      .select("id")
+      .maybeSingle();
+
+    if (completed) await commit();
+    return;
+  }
+
+  const last = moves[moves.length - 1];
+  const next =
+    last.player_id === game.player1_id ? (game.player2_id ?? game.player1_id) : game.player1_id;
+  await getSupabaseAdmin()
+    .from("wl_games")
+    .update({ current_turn_player_id: next, last_move_at: now })
+    .eq("id", game.id);
+}
+
+export async function submitMove(
+  caller: Caller,
+  roomCode: string,
+  word: string,
+  tileIndices: number[],
+) {
+  const player = await resolvePlayer(caller);
+  const loaded = await loadGame(roomCode);
+  if (!loaded) throw new PublicError("No game found with that code. ");
+  const { game, moves } = loaded;
+
+  const state = computeBoardState(game.grid.split(""), toEngineMoves(game, moves));
+  const rejection = validateMove({
+    grid: game.grid.split(""),
+    word,
+    tileIndices,
+    state,
+    isPlayersTurn: game.current_turn_player_id === player.id,
+    gameActive: game.status === "active",
+    isWord,
+  });
+  if (rejection) throw new PublicError(MOVE_REJECTION_MESSAGES[rejection]);
+
+  await claimTurn(game, player.id);
+
+  const { data: inserted, error } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .insert({
+      game_id: game.id,
+      player_id: player.id,
+      word: word.trim().toUpperCase(),
+      tile_indices: tileIndices,
+      passed: false,
+    })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  await touchPlayStreak(player, caller.timezone);
+  return { ok: true };
+}
+
+export async function passTurn(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
+  const loaded = await loadGame(roomCode);
+  if (!loaded) throw new PublicError("No game found with that code. ");
+  const { game, moves } = loaded;
+
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
+  if (game.current_turn_player_id !== player.id) throw new PublicError("It's not your turn yet.");
+
+  await claimTurn(game, player.id);
+
+  const { data: inserted, error } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .insert({ game_id: game.id, player_id: player.id, word: "", tile_indices: [], passed: true })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  await touchPlayStreak(player, caller.timezone);
+  return { ok: true };
+}
+
+export async function sendReaction(caller: Caller, roomCode: string, emoji: string) {
+  const player = await resolvePlayer(caller);
+  const loaded = await loadGame(roomCode);
+  if (!loaded) throw new PublicError("No game found with that code.");
+  const { game } = loaded;
+
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
+
+  const slot: PlayerSlot | null =
+    game.player1_id === player.id ? 1 : game.player2_id === player.id ? 2 : null;
+  if (!slot) throw new PublicError("You're not a player in this game.");
+
+  const channel = getSupabaseAdmin().channel(`game-${game.id}`);
+  try {
+    const result = await channel.httpSend("reaction", { emoji, slot });
+    if (!result.success) {
+      console.error("[sendReaction] broadcast failed:", result.error);
+      throw new PublicError("Failed to send reaction.");
+    }
+  } finally {
+    await getSupabaseAdmin().removeChannel(channel);
+  }
+
+  return { ok: true };
+}
+
+export async function listGamesForSession(caller: Caller) {
+  const player = await resolvePlayer(caller);
+  const { data: games } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("*")
+    .or(`player1_id.eq.${player.id},player2_id.eq.${player.id}`)
+    .order("last_move_at", { ascending: false })
+    .limit(30);
+
+  const rows = (games ?? []) as GameRow[];
+  const ids = rows.map((g) => g.id);
+  const playerIds = new Set<string>();
+  rows.forEach((g) => {
+    playerIds.add(g.player1_id);
+    if (g.player2_id) playerIds.add(g.player2_id);
+  });
+
+  const [{ data: moves }, { data: people }] = await Promise.all([
+    ids.length
+      ? getSupabaseAdmin().from("wl_moves").select("*").in("game_id", ids)
+      : Promise.resolve({ data: [] as MoveRow[] }),
+    getSupabaseAdmin()
+      .from("wl_players")
+      .select("id, session_id, username, avatar")
+      .in("id", Array.from(playerIds)),
+  ]);
+
+  const byGame = new Map<string, MoveRow[]>();
+  for (const move of (moves ?? []) as MoveRow[]) {
+    const list = byGame.get(move.game_id) ?? [];
+    list.push(move);
+    byGame.set(move.game_id, list);
+  }
+
+  return {
+    player: { id: player.id, name: player.username ?? UNNAMED_PLAYER },
+    games: rows.map((game) => {
+      const gameMoves = (byGame.get(game.id) ?? []).sort((a, b) =>
+        a.created_at.localeCompare(b.created_at),
+      );
+      return serializeGame(game, gameMoves, (people ?? []) as PlayerRow[], player.id);
+    }),
+  };
+}
+
+export async function getPlayerStats(caller: Caller): Promise<PlayerStats> {
+  const player = await resolvePlayer(caller);
+  const { data: games } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select(
+      "id, room_code, grid, player1_id, player2_id, status, winner_id, last_move_at, p1_star_delta, p2_star_delta, p1_stars_after, p2_stars_after",
+    )
+    .eq("status", "completed")
+    .or(`player1_id.eq.${player.id},player2_id.eq.${player.id}`)
+    .order("last_move_at", { ascending: false });
+
+  const rows = (games ?? []) as GameRow[];
+  const recentRows = rows.slice(0, MAX_HISTORY_GAMES);
+  const recentIds = recentRows.map((g) => g.id);
+  const playerIds = new Set<string>();
+  recentRows.forEach((g) => {
+    playerIds.add(g.player1_id);
+    if (g.player2_id) playerIds.add(g.player2_id);
+  });
+
+  const [{ data: moves }, { data: people }] = await Promise.all([
+    recentIds.length
+      ? getSupabaseAdmin().from("wl_moves").select("*").in("game_id", recentIds)
+      : Promise.resolve({ data: [] as MoveRow[] }),
+    playerIds.size
+      ? getSupabaseAdmin()
+          .from("wl_players")
+          .select("id, session_id, username, avatar")
+          .in("id", Array.from(playerIds))
+      : Promise.resolve({ data: [] as PlayerRow[] }),
+  ]);
+
+  const byGame = new Map<string, MoveRow[]>();
+  for (const move of (moves ?? []) as MoveRow[]) {
+    const list = byGame.get(move.game_id) ?? [];
+    list.push(move);
+    byGame.set(move.game_id, list);
+  }
+
+  const people_ = (people ?? []) as PlayerRow[];
+  const recentGameIds = new Set(recentIds);
+  const statsGames: StatsGameInput[] = rows.map((game) => {
+    let scores = { 1: 0, 2: 0 };
+    if (recentGameIds.has(game.id)) {
+      const gameMoves = (byGame.get(game.id) ?? []).sort((a, b) =>
+        a.created_at.localeCompare(b.created_at),
+      );
+      scores = computeBoardState(game.grid.split(""), toEngineMoves(game, gameMoves)).scores;
+    }
+    return {
+      id: game.id,
+      room_code: game.room_code,
+      player1_id: game.player1_id,
+      player2_id: game.player2_id,
+      status: game.status,
+      winner_id: game.winner_id,
+      last_move_at: game.last_move_at,
+      p1_star_delta: game.p1_star_delta,
+      p2_star_delta: game.p2_star_delta,
+      p1_stars_after: game.p1_stars_after,
+      p2_stars_after: game.p2_stars_after,
+      scores,
+    };
+  });
+
+  return {
+    ...computeStats(player.id, statsGames, people_),
+    starHistory: starHistory(player.id, statsGames, player.stars, new Date()),
+  };
+}
+
+const SWEEP_BATCH_LIMIT = 50;
+const SWEEP_CONCURRENCY = 5;
+
+async function sweepOneGame(game: GameRow): Promise<boolean> {
+  if (!game.current_turn_player_id) return false;
+
+  try {
+    await claimTurn(game, game.current_turn_player_id);
+  } catch {
+    return false;
+  }
+
+  const { data: moves } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .select("*")
+    .eq("game_id", game.id)
+    .order("created_at", { ascending: true });
+  const { data: inserted } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .insert({
+      game_id: game.id,
+      player_id: game.current_turn_player_id,
+      word: "",
+      tile_indices: [],
+      passed: true,
+    })
+    .select("*")
+    .single();
+  if (!inserted) return false;
+
+  await finishOrAdvance(game, [...((moves ?? []) as MoveRow[]), inserted as MoveRow]);
+  return true;
+}
+
+export async function sweepExpiredTurns() {
+  const cutoff = new Date(Date.now() - TURN_LIMIT_MS).toISOString();
+  const { data: games } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("*")
+    .eq("status", "active")
+    .lt("last_move_at", cutoff)
+    .limit(SWEEP_BATCH_LIMIT);
+
+  const rows = (games ?? []) as GameRow[];
+  let swept = 0;
+
+  for (let i = 0; i < rows.length; i += SWEEP_CONCURRENCY) {
+    const batch = rows.slice(i, i + SWEEP_CONCURRENCY);
+    const results = await Promise.all(batch.map(sweepOneGame));
+    swept += results.filter(Boolean).length;
+  }
+
+  return { swept };
+}
+
+export async function timeoutGame(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
+  const loaded = await loadGame(roomCode);
+  if (!loaded) throw new PublicError("No game found with that code. ");
+  const { game, moves } = loaded;
+
+  if (game.status !== "active") throw new PublicError("This game isn't active.");
+  if (game.player1_id !== player.id && game.player2_id !== player.id) {
+    throw new PublicError("You are not a participant in this game.");
+  }
+  if (!game.current_turn_player_id) throw new PublicError("No active turn.");
+
+  const msLeft =
+    new Date(new Date(game.last_move_at).getTime() + TURN_LIMIT_MS).getTime() - Date.now();
+  if (msLeft > 0) throw new PublicError("Turn has not expired yet.");
+
+  try {
+    await claimTurn(game, game.current_turn_player_id);
+  } catch {
+    return { ok: true };
+  }
+
+  const { data: inserted, error } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .insert({
+      game_id: game.id,
+      player_id: game.current_turn_player_id,
+      word: "",
+      tile_indices: [],
+      passed: true,
+    })
+    .select("*")
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  return { ok: true };
+}
+
+export async function deleteAccount(caller: Caller): Promise<{ ok: true }> {
+  if (!caller.userId) {
+    throw new PublicError("Log in to delete your account.");
+  }
+
+  const player = await resolvePlayer(caller);
+
+  const { data: unfinished } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("room_code, status, player1_id")
+    .neq("status", "completed")
+    .or(`player1_id.eq.${player.id},player2_id.eq.${player.id}`);
+
+  for (const game of unfinished ?? []) {
+    if (game.status === "waiting") {
+      if (game.player1_id === player.id) await destroyGame(caller, game.room_code);
+      else await leaveLobby(caller, game.room_code);
+    } else {
+      await forfeitGame(caller, game.room_code);
+    }
+  }
+
+  const { error } = await getSupabaseAdmin().rpc("wl_delete_account", {
+    p_user_id: caller.userId,
+  });
+  if (error) throw new Error(error.message);
+
+  return { ok: true };
+}
+
+export async function leaveLobby(caller: Caller, roomCode: string) {
+  const player = await resolvePlayer(caller);
+  const { data: game } = await getSupabaseAdmin()
+    .from("wl_games")
+    .select("id, status, player1_id, player2_id")
+    .eq("room_code", roomCode.toUpperCase())
+    .maybeSingle();
+
+  if (!game) return { ok: true };
+  if (game.status !== "waiting") return { ok: true };
+  if (game.player2_id !== player.id) return { ok: true };
+
+  await getSupabaseAdmin().from("wl_games").update({ player2_id: null }).eq("id", game.id);
+
+  return { ok: true };
+}

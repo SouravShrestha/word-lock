@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /*
+     * No "dom" lib: these components render through primitives.web.tsx (plain
+     * lowercase SVG DOM tags) on the web and primitives.native.tsx
+     * (react-native-svg) on a device, but the icon files themselves import
+     * only from "./primitives" and never reach for `document`, `window` or a
+     * DOM type directly. Excluding "dom" is what would catch a stray DOM
+     * reference creeping into a file meant to render on both platforms.
+     */
+    "lib": ["esnext"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}

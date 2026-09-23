@@ -1,0 +1,33 @@
+{
+  "name": "@word-lock/client",
+  "version": "1.2.1",
+  "private": true,
+  "type": "module",
+  "description": "The client/server seam both apps share: the API layer, the TanStack Query hooks, and the session and auth state machines. Platform differences are injected, not branched on.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./api": "./src/api/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@word-lock/core": "*"
+  },
+  "peerDependencies": {
+    "@supabase/supabase-js": ">=2",
+    "@tanstack/react-query": ">=5",
+    "react": ">=19"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.110.9",
+    "@tanstack/react-query": "^5.101.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "vitest": "^3.2.4"
+  }
+}
