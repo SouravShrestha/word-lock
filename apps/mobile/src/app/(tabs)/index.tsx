@@ -140,14 +140,14 @@ function GameList({ title, games }: { title: string; games: LobbyGame[] }) {
   if (games.length === 0) return null;
 
   return (
-    <View className="py-2 mt-6">
+    <View className="py-2 mt-6 -mx-1">
       <SectionLabel className="px-5 mb-2">{title}</SectionLabel>
       <FlatList
         data={games}
         keyExtractor={(game) => game.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 20, gap: 10 }}
+        contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 20, gap: 20 }}
         renderItem={({ item }) => <GameCard game={item} />}
       />
     </View>

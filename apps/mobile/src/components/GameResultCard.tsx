@@ -44,8 +44,8 @@ export function GameResultCard({
 
   return (
     <View
-      className="w-full max-w-sm overflow-hidden rounded-2xl border-2"
-      style={{ borderColor: palette.border, backgroundColor: palette.card }}
+      className="w-full overflow-hidden rounded-2xl"
+      style={{ backgroundColor: palette.surface }}
     >
       <View className="px-4 pb-4 pt-5" style={{ backgroundColor: palette.board }}>
         <View className="flex-row items-start justify-between gap-2">
@@ -73,19 +73,25 @@ export function GameResultCard({
 
       <View
         className="border-y px-4 py-2.5"
-        style={{ borderColor: palette.border, backgroundColor: palette.card }}
+        style={{ borderColor: palette.border, backgroundColor: palette.surface }}
       >
-        <View className="flex-row items-center gap-6">
-          {game.playedWords.map((entry, i) => (
-            <Text
-              key={i}
-              className="font-sans shrink-0 text-sm leading-none"
-              style={{ color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2 }}
-            >
-              {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}
-            </Text>
-          ))}
-        </View>
+        {game.playedWords.length === 0 ? (
+          <View className="items-center justify-center">
+            <Text className="font-sans text-sm text-mutedForeground">no words played</Text>
+          </View>
+        ) : (
+          <View className="flex-row items-center gap-6">
+            {game.playedWords.map((entry, i) => (
+              <Text
+                key={i}
+                className="font-sans shrink-0 text-sm leading-none"
+                style={{ color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2 }}
+              >
+                {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}
+              </Text>
+            ))}
+          </View>
+        )}
       </View>
 
       <View className="p-3" style={{ backgroundColor: palette.board }}>
@@ -143,9 +149,14 @@ function PlayerColumn({
     <View className="w-20 shrink-0 items-center gap-2">
       <View
         className="rounded-full"
-        style={{ padding: 3, borderWidth: 3, borderColor: slot === 1 ? palette.p1 : palette.p2 }}
+        style={{
+          padding: 2,
+          borderWidth: 3,
+          borderColor: slot === 1 ? palette.p1 : palette.p2,
+          backgroundColor: palette.board,
+        }}
       >
-        <Avatar avatar={player?.avatar} size={56} />
+        <Avatar avatar={player?.avatar} size={52} />
       </View>
       <Text numberOfLines={1} className="font-sans max-w-full text-xs leading-none text-foreground">
         {player?.name ?? "-"}

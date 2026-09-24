@@ -93,19 +93,25 @@ export function GameResultCard({
       {/* Words played, oldest first — the game read left to right, as a record
           rather than the live strip's newest-first feed. */}
       <div className="no-scrollbar overflow-x-auto border-y border-border px-4 py-2.5">
-        <ul className="flex h-4 w-max items-center gap-6">
-          {game.playedWords.map((entry, i) => (
-            <li
-              key={i}
-              className={cn(
-                "shrink-0 text-sm leading-none",
-                entry.playerId === game.players.one?.id ? "text-p1" : "text-p2",
-              )}
-            >
-              {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}
-            </li>
-          ))}
-        </ul>
+        {game.playedWords.length === 0 ? (
+          <div className="flex h-4 items-center justify-center">
+            <p className="text-center text-sm text-muted-foreground">No words</p>
+          </div>
+        ) : (
+          <ul className="flex h-4 w-max items-center gap-6">
+            {game.playedWords.map((entry, i) => (
+              <li
+                key={i}
+                className={cn(
+                  "shrink-0 text-sm leading-none",
+                  entry.playerId === game.players.one?.id ? "text-p1" : "text-p2",
+                )}
+              >
+                {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Final board. Same hairline scheme as the live grid: the container draws

@@ -18,15 +18,17 @@ export function GameOver({
 }) {
   return (
     <Modal visible transparent animationType="fade" statusBarTranslucent>
-      <View className="flex-1 items-center justify-center bg-black/70 px-4">
-        <GameResultCard
-          game={game}
-          onExit={onExit}
-          action={
-            onRematch ? { label: "New Game", onPress: onRematch, pending: rematchPending } : null
-          }
-          note={<LeagueMove game={game} />}
-        />
+      <View className="flex-1 items-center justify-center bg-background/80 px-4">
+        <View className="w-full max-w-sm">
+          <GameResultCard
+            game={game}
+            onExit={onExit}
+            action={
+              onRematch ? { label: "New Game", onPress: onRematch, pending: rematchPending } : null
+            }
+            note={<LeagueMove game={game} />}
+          />
+        </View>
       </View>
     </Modal>
   );

@@ -22,8 +22,11 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <View
-      className="mx-auto w-full max-w-2xl flex-1 px-3 pt-3"
-      style={{ paddingBottom: Math.max(insets.bottom, 8) }}
+      className="mx-auto w-full max-w-2xl flex-1 px-3 bg-background"
+      style={{
+        paddingTop: Math.max(insets.top, 12),
+        paddingBottom: Math.max(insets.bottom, 8),
+      }}
     >
       {children}
     </View>

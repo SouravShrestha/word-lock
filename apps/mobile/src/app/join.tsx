@@ -50,8 +50,10 @@ export default function JoinScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background px-5 pt-5">
-      <BackButton />
+    <View className="flex-1 bg-background px-5 pt-16">
+      <View className="ml-3">
+        <BackButton />
+      </View>
 
       <View className="mx-auto flex-1 w-full max-w-sm px-0">
         <SectionLabel className="mt-8">Join a room</SectionLabel>

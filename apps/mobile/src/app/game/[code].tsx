@@ -18,7 +18,7 @@ import { type ReactionEmoji, type HistoryMove } from "@word-lock/core/game";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Text, View, type AppStateStatus } from "react-native";
+import { AppState, Text, View, type AppStateStatus } from "react-native";
 
 import { supabase } from "@/lib/supabase";
 
@@ -218,7 +218,7 @@ export default function GameScreen() {
     return (
       <Shell>
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
+          <Text className="text-lg text-foreground animate-pulse">Loading your game</Text>
         </View>
       </Shell>
     );
@@ -302,6 +302,7 @@ function ActiveBoard({
   const [showPassConfirm, setShowPassConfirm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
+  const [hideGameOver, setHideGameOver] = useState(false);
 
   const historyMoves = useMemo<HistoryMove[]>(() => game.history ?? [], [game.history]);
   const gridLetters = useMemo<string[]>(() => game.grid ?? [], [game.grid]);
@@ -377,7 +378,10 @@ function ActiveBoard({
 
   const rematchMutation = useMutation({
     mutationFn: () => createGameFn({ sessionId: sessionId! }),
-    onSuccess: ({ roomCode: next }: { roomCode: string }) => router.push(`/game/${next}`),
+    onSuccess: ({ roomCode: next }: { roomCode: string }) => {
+      setHideGameOver(true);
+      router.push(`/game/${next}`);
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -416,8 +420,10 @@ function ActiveBoard({
 
   return (
     <Shell>
-      <View className="min-h-0 flex-1 justify-between gap-2">
-        <PlayedWords game={game} />
+      <View className="min-h-0 flex-1 justify-around gap-5">
+        <View className="h-10 -mx-3 justify-center flex">
+          <PlayedWords game={game} />
+        </View>
         <ScoreBar
           game={game}
           p1Active={p1IsActive && game.status === "active"}
@@ -503,10 +509,13 @@ function ActiveBoard({
           onCancel={() => setShowForfeitConfirm(false)}
         />
 
-        {game.status === "completed" && (
+        {game.status === "completed" && !hideGameOver && (
           <GameOver
             game={game}
-            onExit={() => router.push("/")}
+            onExit={() => {
+              setHideGameOver(true);
+              router.push("/");
+            }}
             onRematch={() => rematchMutation.mutate()}
             rematchPending={rematchMutation.isPending}
           />

@@ -40,7 +40,7 @@ export function StreakSheet({
           : "Play a game today to keep your streak going.";
 
   return (
-    <BottomSheet open={open} onClose={onClose} label="Streak">
+    <BottomSheet open={open} onClose={onClose} label="Streak" scrollable={false}>
       <View className="flex-row items-center justify-end gap-4">
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
@@ -48,7 +48,7 @@ export function StreakSheet({
       </View>
 
       <View className="mt-8 items-center">
-        <View style={{ paddingLeft: 20 }}>
+        <View style={{ paddingLeft: 36 }}>
           <StreakIcon size={112} />
         </View>
 

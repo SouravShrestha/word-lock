@@ -22,7 +22,9 @@ export function Tile({
   selected = false,
   onPress,
   disabled,
-}: TileProps) {
+  isTop = false,
+  isLeft = false,
+}: TileProps & { isTop?: boolean; isLeft?: boolean }) {
   const { resolvedTheme } = useTheme();
   const palette = colors[resolvedTheme];
 
@@ -55,7 +57,9 @@ export function Tile({
       accessibilityLabel={`Letter ${letter}${locked ? ", locked" : ""}`}
       onPress={onPress}
       disabled={disabled}
-      className="aspect-square w-full items-center justify-center border-b border-r"
+      className={`aspect-square w-full items-center justify-center border-b border-r ${
+        isTop ? "border-t" : ""
+      } ${isLeft ? "border-l" : ""}`}
       style={{ backgroundColor: fill, borderColor: palette.border }}
     >
       {locked ? (

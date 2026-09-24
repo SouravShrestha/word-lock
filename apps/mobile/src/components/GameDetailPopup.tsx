@@ -1,6 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Modal, Pressable, Text, View } from "react-native";
+import { colors } from "@word-lock/tokens/native";
+
+import { useTheme } from "@/theme/ThemeProvider";
+import { BlurView } from "expo-blur";
 
 import { createGameFn, fetchGameFn } from "@word-lock/client";
 import type { RecentGameEntry } from "@word-lock/core/game";
@@ -52,24 +56,41 @@ export function GameDetailPopup({
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const { resolvedTheme } = useTheme();
+  const palette = colors[resolvedTheme];
+
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable
-        className="flex-1 items-center justify-center bg-background/70 px-4"
-        onPress={onClose}
-      >
+      <Pressable className="flex-1 items-center justify-center px-4" onPress={onClose}>
+        <View className="absolute inset-0">
+          <BlurView
+            intensity={15}
+            tint={resolvedTheme === "dark" ? "dark" : "light"}
+            style={{ flex: 1 }}
+          />
+          <View className="absolute inset-0 bg-background/70" />
+        </View>
+
         {isLoading && (
-          <Pressable onPress={(e) => e.stopPropagation()}>
-            <Text className="font-sans w-full max-w-sm p-5 text-center text-base text-mutedForeground">
-              Loading game
-            </Text>
-          </Pressable>
+          <View className="w-full max-w-sm overflow-hidden rounded-sm">
+            <BlurView
+              intensity={25}
+              tint={resolvedTheme === "dark" ? "dark" : "light"}
+              className="p-5"
+              style={{ backgroundColor: `${palette.surface}80` }}
+            >
+              <Text className="font-sans text-center text-base text-foreground py-2">
+                Loading game
+              </Text>
+            </BlurView>
+          </View>
         )}
 
         {!!error && (
           <Pressable
             onPress={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-md border-2 border-hairline bg-card p-5"
+            className="w-full max-w-sm rounded-2xl p-5"
+            style={{ backgroundColor: palette.surface }}
           >
             <Text className="font-sans text-center text-sm text-destructive">
               {error instanceof Error ? error.message : "Failed to load game"}
@@ -78,7 +99,7 @@ export function GameDetailPopup({
         )}
 
         {!isLoading && !error && game && (
-          <Pressable onPress={(e) => e.stopPropagation()}>
+          <Pressable className="w-full max-w-sm" onPress={(e) => e.stopPropagation()}>
             <GameResultCard
               game={game}
               onExit={onClose}

@@ -10,7 +10,9 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function TopLoader() {
-  const isFetching = useIsFetching();
+  const isFetching = useIsFetching({
+    predicate: (query) => query.state.status === "pending",
+  });
   const isMutating = useIsMutating();
   const isLoading = isFetching > 0 || isMutating > 0;
 

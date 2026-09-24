@@ -71,8 +71,10 @@ export function WaitingLobby({
   };
 
   return (
-    <View className="flex-1 bg-background px-5 pt-5">
-      <BackButton onPress={() => setShowConfirm(true)} label="Exit lobby" />
+    <View className="flex-1 bg-background px-5 pt-16">
+      <View className="ml-3">
+        <BackButton onPress={() => setShowConfirm(true)} label="Exit lobby" />
+      </View>
 
       <View className="flex-1 items-center justify-center gap-10 px-5 py-10">
         {isHost ? (

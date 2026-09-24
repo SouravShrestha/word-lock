@@ -43,6 +43,8 @@ export function BoardGrid({
                   order={highlighted !== -1 ? highlighted + 1 : null}
                   disabled={disabled}
                   onPress={() => onToggleTile(index)}
+                  isTop={index < GRID_SIZE}
+                  isLeft={index % GRID_SIZE === 0}
                 />
               </View>
             );

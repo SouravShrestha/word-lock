@@ -6,6 +6,7 @@ import { colors } from "@word-lock/tokens/native";
 import { BottomSheet, SheetTouchable } from "@/components/BottomSheet";
 import { HowToPlaySheet } from "@/components/HowToPlaySheet";
 import { IconButton } from "@/components/IconButton";
+import { Toggle } from "@/components/Toggle";
 import { useTheme } from "@/theme/ThemeProvider";
 
 function MenuRow({
@@ -61,6 +62,7 @@ export function GameMenuSheet({
   onForfeit: () => void;
 }) {
   const [showRules, setShowRules] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   return (
     <>
@@ -79,7 +81,19 @@ export function GameMenuSheet({
         </View>
 
         <View className="mt-6">
+          <View className="w-full flex-row items-center gap-3.5 py-4">
+            <View className="min-w-0 flex-1">
+              <Text className="text-sm font-medium tracking-wide text-foreground">Dark theme</Text>
+            </View>
+            <Toggle
+              label="Dark theme"
+              checked={theme === "dark"}
+              onChange={(next) => setTheme(next ? "dark" : "light")}
+            />
+          </View>
+
           <MenuRow label="How to play" onPress={() => setShowRules(true)} />
+
           {canForfeit && (
             <MenuRow
               label="Quit game"
