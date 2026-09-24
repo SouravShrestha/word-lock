@@ -30,7 +30,10 @@ export function StreakSheet({
   const today = localDate(new Date(), browserTimezone());
   const days = streakWeek({ play_streak: playStreak, last_played_on: lastPlayedOn }, today);
   const playedToday = lastPlayedOn === today;
-  const isGrace = isGracePeriodActive({ play_streak: playStreak, last_played_on: lastPlayedOn }, today);
+  const isGrace = isGracePeriodActive(
+    { play_streak: playStreak, last_played_on: lastPlayedOn },
+    today,
+  );
 
   const footer =
     playStreak === 0

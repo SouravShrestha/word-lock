@@ -9,6 +9,7 @@ import {
 import type { ReactNode } from "react";
 
 import { AuthGate } from "@/components/AuthGate";
+import { TopLoader } from "@/components/TopLoader";
 import { ToastHost } from "@/components/Toast";
 import { nativeAuthAdapter } from "@/lib/auth-adapter";
 import { nativePlatform } from "@/lib/client-platform";
@@ -39,6 +40,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
               <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
               <AuthGate />
               <ToastHost />
+              <TopLoader />
             </SharedAuthProvider>
           </SharedQueryProvider>
         </SharedSessionProvider>

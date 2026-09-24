@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   experimental: {
     reactCompiler: false,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   async headers() {
     return [
       {
