@@ -78,6 +78,7 @@ export function BottomSheet({
         onClick={dismissable ? guardedClose : undefined}
         className={cn(
           "fixed inset-0 bg-black/50 duration-200",
+          !dismissable && "pointer-events-none",
           zClassName,
           closing ? "animate-out fade-out fill-mode-forwards" : "animate-in fade-in",
         )}

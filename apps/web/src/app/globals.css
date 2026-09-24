@@ -232,7 +232,6 @@
   &:active:not(:disabled) {
     transform: translateY(calc(var(--btn-lip, 4px) - 1px));
     box-shadow: 0 1px 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
-    pointer-events: none;
   }
 
   &:disabled {
@@ -255,7 +254,6 @@
   &:active:not(:disabled) {
     transform: translateY(2px);
     box-shadow: 0 1px 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
-    pointer-events: none;
   }
 }
 
