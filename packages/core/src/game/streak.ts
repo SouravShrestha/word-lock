@@ -62,11 +62,24 @@ export function streakWeek(
   });
 }
 
+export function isGracePeriodActive(
+  state: Pick<StreakState, "play_streak" | "last_played_on">,
+  today: string,
+): boolean {
+  return (
+    state.play_streak > 0 &&
+    state.last_played_on !== null &&
+    addCalendarDays(state.last_played_on, 2) === today
+  );
+}
+
 export function advanceStreak(state: StreakState, today: string): StreakState | null {
   if (state.last_played_on === today) return null;
 
   const continuing =
-    state.last_played_on !== null && nextCalendarDay(state.last_played_on) === today;
+    state.last_played_on !== null &&
+    (nextCalendarDay(state.last_played_on) === today ||
+      addCalendarDays(state.last_played_on, 2) === today);
 
   const play_streak = continuing ? state.play_streak + 1 : 1;
 

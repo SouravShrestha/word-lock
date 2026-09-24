@@ -56,12 +56,21 @@ describe("advanceStreak", () => {
     });
   });
 
-  it("resets to 1 after a missed day", () => {
+  it("continues with a 1-day grace period after a missed day", () => {
     const current = state({ play_streak: 9, best_play_streak: 9, last_played_on: "2026-03-14" });
     expect(advanceStreak(current, "2026-03-16")).toEqual({
+      play_streak: 10,
+      best_play_streak: 10,
+      last_played_on: "2026-03-16",
+    });
+  });
+
+  it("resets to 1 after missing two days", () => {
+    const current = state({ play_streak: 9, best_play_streak: 9, last_played_on: "2026-03-14" });
+    expect(advanceStreak(current, "2026-03-17")).toEqual({
       play_streak: 1,
       best_play_streak: 9,
-      last_played_on: "2026-03-16",
+      last_played_on: "2026-03-17",
     });
   });
 

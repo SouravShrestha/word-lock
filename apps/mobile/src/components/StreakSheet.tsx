@@ -1,5 +1,5 @@
 import { browserTimezone } from "@word-lock/core/account";
-import { localDate, streakWeek } from "@word-lock/core/game";
+import { isGracePeriodActive, localDate, streakWeek } from "@word-lock/core/game";
 import { CrossIcon, StreakIcon, TickIcon } from "@word-lock/icons/native";
 import { colors, radius } from "@word-lock/tokens/native";
 import { Text, View } from "react-native";
@@ -25,13 +25,16 @@ export function StreakSheet({
   const today = localDate(new Date(), browserTimezone());
   const days = streakWeek({ play_streak: playStreak, last_played_on: lastPlayedOn }, today);
   const playedToday = lastPlayedOn === today;
+  const isGrace = isGracePeriodActive({ play_streak: playStreak, last_played_on: lastPlayedOn }, today);
 
   const footer =
     playStreak === 0
       ? "Play a game today to start your streak."
       : playedToday
         ? "You're on a roll! Come back tomorrow to keep your streak going."
-        : "Play a game today to keep your streak going.";
+        : isGrace
+          ? "Play a game today to keep your streak going, you used a grace!"
+          : "Play a game today to keep your streak going.";
 
   return (
     <BottomSheet open={open} onClose={onClose} label="Streak">
