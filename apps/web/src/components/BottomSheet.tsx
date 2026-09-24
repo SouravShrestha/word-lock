@@ -26,31 +26,35 @@ export function BottomSheet({
   const [mounted, setMounted] = useState(false);
   const [rendered, setRendered] = useState(open);
   const [closing, setClosing] = useState(false);
+  const [prevOpen, setPrevOpen] = useState(open);
   const openedAt = useRef(0);
+
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      setRendered(true);
+      setClosing(false);
+    } else {
+      setClosing((wasClosing) => wasClosing || rendered);
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
+      openedAt.current = Date.now();
+    }
+  }, [open]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR-safe "has mounted" flag, must run after the initial client render
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reacting to an `open` prop transition, not derivable at render time
-      setRendered(true);
-      setClosing(false);
-      openedAt.current = Date.now();
-    } else {
-      setClosing((wasClosing) => wasClosing || rendered);
-    }
-  }, [open, rendered]);
-
   const guardedClose = useCallback(() => {
     if (Date.now() - openedAt.current < 300) return;
     onClose?.();
   }, [onClose]);
 
-  // Fallback unmount in case `animationend` never fires (reduced motion, tab
-  // backgrounded mid-animation), which would otherwise leave the sheet stuck.
   useEffect(() => {
     if (!closing) return;
     const timer = setTimeout(() => {
@@ -95,8 +99,6 @@ export function BottomSheet({
           aria-modal="true"
           aria-label={label}
           onClick={(e) => e.stopPropagation()}
-          // Ignore animations bubbling up from content, which would otherwise
-          // unmount the sheet mid-entrance.
           onAnimationEnd={(e) => {
             if (e.target !== e.currentTarget || !closing) return;
             setRendered(false);

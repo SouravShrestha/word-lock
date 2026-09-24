@@ -334,7 +334,6 @@
 
   &:active {
     transform: scale(0.97);
-    pointer-events: none;
   }
 }
 
