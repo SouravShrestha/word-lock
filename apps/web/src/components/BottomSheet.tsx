@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function BottomSheet({
   open,
   onClose,
@@ -28,6 +31,8 @@ export function BottomSheet({
   const [closing, setClosing] = useState(false);
   const [prevOpen, setPrevOpen] = useState(open);
   const openedAt = useRef(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   if (open !== prevOpen) {
     setPrevOpen(open);
@@ -73,6 +78,56 @@ export function BottomSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, dismissable, guardedClose]);
 
+  // Moves focus into the sheet on open and back to whatever triggered it on
+  // close — without this, a screen reader or keyboard user stays anchored to
+  // a trigger button that's now behind an overlay, or to nothing at all once
+  // the sheet unmounts.
+  useEffect(() => {
+    if (!open) {
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
+      return;
+    }
+
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const first = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    (first ?? panelRef.current)?.focus();
+  }, [open]);
+
+  // Traps Tab navigation inside the sheet while it's open, including
+  // non-dismissable ones (the login wall) where there is no other way out of
+  // the sheet than completing it.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      const focusables = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      if (focusables.length === 0) {
+        e.preventDefault();
+        return;
+      }
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey) {
+        if (active === first || !panel.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !panel.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   if (!mounted || !rendered) return null;
 
   return createPortal(
@@ -95,9 +150,11 @@ export function BottomSheet({
         )}
       >
         <div
+          ref={panelRef}
           role="dialog"
           aria-modal="true"
           aria-label={label}
+          tabIndex={-1}
           onClick={(e) => e.stopPropagation()}
           onAnimationEnd={(e) => {
             if (e.target !== e.currentTarget || !closing) return;
