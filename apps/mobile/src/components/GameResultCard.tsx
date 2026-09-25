@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, ScrollView } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 
 import { Avatar } from "@/components/Avatar";
@@ -44,7 +44,7 @@ export function GameResultCard({
 
   return (
     <View
-      className="w-full overflow-hidden rounded-2xl"
+      className="w-full overflow-hidden rounded-lg  border-2 border-border"
       style={{ backgroundColor: palette.surface }}
     >
       <View className="px-4 pb-4 pt-5" style={{ backgroundColor: palette.board }}>
@@ -80,17 +80,19 @@ export function GameResultCard({
             <Text className="font-sans text-sm text-mutedForeground">no words played</Text>
           </View>
         ) : (
-          <View className="flex-row items-center gap-6">
-            {game.playedWords.map((entry, i) => (
-              <Text
-                key={i}
-                className="font-sans shrink-0 text-sm leading-none"
-                style={{ color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2 }}
-              >
-                {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}
-              </Text>
-            ))}
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className="flex-row items-center gap-6">
+              {game.playedWords.map((entry, i) => (
+                <Text
+                  key={i}
+                  className="font-sans shrink-0 text-sm leading-none"
+                  style={{ color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2 }}
+                >
+                  {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}
+                </Text>
+              ))}
+            </View>
+          </ScrollView>
         )}
       </View>
 

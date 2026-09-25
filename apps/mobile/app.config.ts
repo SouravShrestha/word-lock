@@ -17,12 +17,13 @@ export default (): ExpoConfig => ({
   ios: {
     bundleIdentifier: "me.cbsdev.wordlock",
     supportsTablet: false,
+    icon: "./assets/wordlock-ios.icon",
   },
   android: {
     package: "me.cbsdev.wordlock",
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#fbf9ed",
+      backgroundColor: "#131F24",
     },
   },
   plugins: [
