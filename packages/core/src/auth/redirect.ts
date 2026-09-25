@@ -1,3 +1,5 @@
+import { siteUrlFromEnv } from "../build-env";
+
 const DEFAULT_NEXT = "/";
 const MAX_NEXT_LENGTH = 512;
 
@@ -21,7 +23,7 @@ export function safeNextPath(raw: string | null | undefined): string {
 }
 
 export function resolveOrigin(request: Request): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const configured = siteUrlFromEnv()?.trim();
   if (configured) return configured.replace(/\/+$/, "");
   return new URL(request.url).origin;
 }
