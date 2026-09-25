@@ -10,7 +10,7 @@ export const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
 export const WORDLIST_URL = "https://github.com/dwyl/english-words";
 
 export const PRIVACY_URL: string | null = "/legal/privacy";
-export const TERMS_URL: string | null = null;
+export const TERMS_URL: string | null = "/legal/terms";
 
 export const PRIVACY_UPDATED = "22 September 2026";
 

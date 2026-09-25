@@ -16,9 +16,9 @@ describe("link constants", () => {
     expect(LICENSE_URL.startsWith(REPO_URL)).toBe(true);
   });
 
-  it("allows a legal URL to be absent", () => {
+  it("has both legal URLs set", () => {
     expect(PRIVACY_URL).toBe("/legal/privacy");
-    expect(TERMS_URL).toBeNull();
+    expect(TERMS_URL).toBe("/legal/terms");
   });
 });
 

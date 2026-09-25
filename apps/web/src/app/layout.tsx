@@ -10,6 +10,7 @@ import { SessionProvider } from "@/components/SessionProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { AuthGate } from "@/components/AuthGate";
 import { AuthErrorNotice } from "@/components/AuthErrorNotice";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import "./globals.css";
 
 const rubik = Rubik({
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Suspense>
               </AuthProvider>
             </SessionProvider>
+            <CookieConsentBanner />
             <Toaster position="top-center" richColors />
           </ThemeProvider>
         </QueryProvider>
