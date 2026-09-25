@@ -9,15 +9,18 @@ import {
   sendReactionFn,
   startGameFn,
   submitMoveFn,
-  timeoutGameFn,
+  useHostLeftCountdown,
+  useInvalidateOnGameComplete,
   useMoveReview,
+  useReactionFlash,
   useSession,
+  useSweepTimer,
 } from "@word-lock/client";
 import { joinUrl } from "@word-lock/core/app";
 import { type ReactionEmoji, type HistoryMove } from "@word-lock/core/game";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Text, View, type AppStateStatus } from "react-native";
 
 import { supabase } from "@/lib/supabase";
@@ -49,25 +52,10 @@ export default function GameScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
-  const [hostLeftCountdown, setHostLeftCountdown] = useState<number | null>(null);
-  const [activeReaction, setActiveReaction] = useState<{
-    key: number;
-    emoji: string;
-    slot: 1 | 2;
-  } | null>(null);
-  const reactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const showReaction = useCallback((emoji: string, senderSlot: 1 | 2) => {
-    if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
-    setActiveReaction({ key: Date.now(), emoji, slot: senderSlot });
-    reactionTimerRef.current = setTimeout(() => setActiveReaction(null), 2000);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
-    };
-  }, []);
+  const { activeReaction, showReaction } = useReactionFlash();
+  const { hostLeftCountdown, startHostLeftCountdown } = useHostLeftCountdown(() =>
+    router.push("/"),
+  );
 
   const queryKey = useMemo(() => ["game", roomCode, sessionId], [roomCode, sessionId]);
 
@@ -127,7 +115,7 @@ export default function GameScreen() {
       .on(
         "postgres_changes",
         { event: "DELETE", schema: "public", table: "wl_games", filter: `id=eq.${game.id}` },
-        () => setHostLeftCountdown(5),
+        () => startHostLeftCountdown(),
       )
       .on("broadcast", { event: "reaction" }, ({ payload }) => {
         const emoji = payload?.emoji;
@@ -140,7 +128,6 @@ export default function GameScreen() {
 
     return () => {
       supabase.removeChannel(channel);
-      if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
     };
   }, [game?.id, queryClient, queryKey, showReaction]);
 
@@ -184,16 +171,6 @@ export default function GameScreen() {
       }
     };
   }, [roomCode, sessionId]);
-
-  useEffect(() => {
-    if (hostLeftCountdown === null) return;
-    if (hostLeftCountdown === 0) {
-      router.push("/");
-      return;
-    }
-    const timer = setTimeout(() => setHostLeftCountdown(hostLeftCountdown - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [hostLeftCountdown, router]);
 
   if (hostLeftCountdown !== null) {
     return (
@@ -313,32 +290,16 @@ function ActiveBoard({
   });
 
   const isCompleted = game.status === "completed";
-  useEffect(() => {
-    if (!isCompleted) return;
-    queryClient.invalidateQueries({ queryKey: ["account"] });
-    queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
-  }, [isCompleted, queryClient]);
+  useInvalidateOnGameComplete(isCompleted, queryClient);
 
-  useEffect(() => {
-    if (game.status !== "active" || !game.turnDeadline) return;
-
-    const msLeft = new Date(game.turnDeadline).getTime() - Date.now();
-
-    const triggerSweep = () => {
-      if (!sessionId) return;
-      timeoutGameFn({ sessionId, roomCode })
-        .then(() => queryClient.invalidateQueries({ queryKey }))
-        .catch(() => {});
-    };
-
-    if (msLeft <= 0) {
-      triggerSweep();
-      return;
-    }
-
-    const timer = setTimeout(triggerSweep, msLeft);
-    return () => clearTimeout(timer);
-  }, [game.turnDeadline, game.status, queryClient, queryKey, sessionId, roomCode]);
+  useSweepTimer({
+    status: game.status,
+    turnDeadline: game.turnDeadline,
+    sessionId,
+    roomCode,
+    queryClient,
+    queryKey,
+  });
 
   const moveMutation = useMutation({
     mutationFn: () =>

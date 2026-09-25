@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -16,11 +16,14 @@ import {
   submitMoveFn,
   destroyGameFn,
   forfeitGameFn,
-  timeoutGameFn,
   startGameFn,
   leaveLobbyFn,
   sendReactionFn,
   useMoveReview,
+  useReactionFlash,
+  useSweepTimer,
+  useHostLeftCountdown,
+  useInvalidateOnGameComplete,
 } from "@word-lock/client";
 import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/app-meta";
@@ -53,22 +56,13 @@ export function GameClient({ code }: { code: string }) {
   const [showPassConfirm, setShowPassConfirm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
-  const [hostLeftCountdown, setHostLeftCountdown] = useState<number | null>(null);
-  const [activeReaction, setActiveReaction] = useState<{
-    key: number;
-    emoji: string;
-    slot: 1 | 2;
-  } | null>(null);
-  const reactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { activeReaction, showReaction } = useReactionFlash();
+  const { hostLeftCountdown, startHostLeftCountdown } = useHostLeftCountdown(() =>
+    router.push("/"),
+  );
   const viewerSlotRef = useRef<number | null>(null);
   const isHostWaitingRef = useRef(false);
   const isNonHostWaitingRef = useRef(false);
-
-  const showReaction = useCallback((emoji: string, senderSlot: 1 | 2) => {
-    if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
-    setActiveReaction({ key: Date.now(), emoji, slot: senderSlot });
-    reactionTimerRef.current = setTimeout(() => setActiveReaction(null), 2000);
-  }, []);
 
   const queryKey = useMemo(() => ["game", roomCode, sessionId], [roomCode, sessionId]);
   const { data: game, isLoading } = useQuery({
@@ -93,11 +87,7 @@ export function GameClient({ code }: { code: string }) {
   });
 
   const isCompleted = game?.status === "completed";
-  useEffect(() => {
-    if (!isCompleted) return;
-    queryClient.invalidateQueries({ queryKey: ["account"] });
-    queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
-  }, [isCompleted, queryClient]);
+  useInvalidateOnGameComplete(isCompleted, queryClient);
 
   useEffect(() => {
     if (!game?.id) return;
@@ -137,7 +127,7 @@ export function GameClient({ code }: { code: string }) {
           filter: `id=eq.${game.id}`,
         },
         () => {
-          setHostLeftCountdown(5);
+          startHostLeftCountdown();
         },
       )
       .on("broadcast", { event: "reaction" }, ({ payload }) => {
@@ -153,7 +143,6 @@ export function GameClient({ code }: { code: string }) {
 
     return () => {
       supabase.removeChannel(channel);
-      if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
     };
   }, [game?.id, roomCode, sessionId, queryClient, showReaction]);
 
@@ -163,41 +152,14 @@ export function GameClient({ code }: { code: string }) {
     viewerSlotRef.current = game?.viewerSlot ?? null;
   }, [game?.status, game?.viewerSlot]);
 
-  useEffect(() => {
-    if (hostLeftCountdown === null) return;
-
-    if (hostLeftCountdown === 0) {
-      router.push("/");
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setHostLeftCountdown(hostLeftCountdown - 1);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [hostLeftCountdown, router]);
-
-  useEffect(() => {
-    if (game?.status !== "active" || !game.turnDeadline) return;
-
-    const msLeft = new Date(game.turnDeadline).getTime() - Date.now();
-
-    const triggerSweep = () => {
-      if (!sessionId) return;
-      timeoutGameFn({ sessionId, roomCode })
-        .then(() => queryClient.invalidateQueries({ queryKey }))
-        .catch(console.error);
-    };
-
-    if (msLeft <= 0) {
-      triggerSweep();
-      return;
-    }
-
-    const timer = setTimeout(triggerSweep, msLeft);
-    return () => clearTimeout(timer);
-  }, [game?.turnDeadline, game?.status, queryClient, queryKey, sessionId, roomCode]);
+  useSweepTimer({
+    status: game?.status,
+    turnDeadline: game?.turnDeadline,
+    sessionId,
+    roomCode,
+    queryClient,
+    queryKey,
+  });
 
   useEffect(() => {
     const pending = pendingDestroyTimers.get(roomCode);
