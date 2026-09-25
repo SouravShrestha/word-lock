@@ -1,12 +1,12 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const getVerifiedUserMock = vi.fn(async () => null as { id: string } | null);
+const getVerifiedUserMock = vi.fn(async (..._args: any[]) => null as { id: string } | null);
 const queueCookieMock = vi.fn();
 
 vi.mock("@/integrations/supabase/client.route", () => ({
-  getVerifiedUser: (...args: unknown[]) => getVerifiedUserMock(...args),
-  queueCookie: (...args: unknown[]) => queueCookieMock(...args),
+  getVerifiedUser: (...args: any[]) => getVerifiedUserMock(...args),
+  queueCookie: (...args: any[]) => queueCookieMock(...args),
 }));
 
 let players: Array<{ id: string; session_id: string }>;
