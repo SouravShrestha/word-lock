@@ -15,6 +15,7 @@
  * logged server-side and collapsed into a generic message.
  */
 import { NextResponse } from "next/server";
+import { log } from "@/lib/log";
 
 /** An error whose message is safe to show the caller as-is. */
 export class PublicError extends Error {
@@ -44,6 +45,9 @@ export function toErrorResponse(error: unknown, context: string): NextResponse {
     return NextResponse.json({ error: error.message }, { status: error.status });
   }
 
-  console.error(`[${context}]`, error);
+  log.error("Unhandled route error", {
+    context,
+    error: error instanceof Error ? error.message : String(error),
+  });
   return NextResponse.json({ error: GENERIC_MESSAGE }, { status: 500 });
 }
