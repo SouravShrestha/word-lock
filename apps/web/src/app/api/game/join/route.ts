@@ -3,10 +3,13 @@ import { toErrorResponse } from "@/lib/http/errors";
 import { applyCookies } from "@/integrations/supabase/client.route";
 import { joinGame } from "@/lib/game/service.server";
 import { callerSchema, resolveCaller, roomCodeSchema } from "@/lib/game/identity.server";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 const schema = callerSchema.extend({ roomCode: roomCodeSchema });
 
 export async function POST(req: Request) {
+  if (!checkRateLimit(req, "game-join", 15, 60_000)) return rateLimitResponse();
+
   try {
     const body = await req.json();
     const parsed = schema.safeParse(body);

@@ -4,7 +4,7 @@ import type { NextResponse } from "next/server";
 import { parseCookieHeader } from "./cookies";
 import type { Database } from "@word-lock/core/db";
 
-interface PendingCookie {
+export interface PendingCookie {
   name: string;
   value: string;
   options?: CookieOptions;
@@ -50,6 +50,18 @@ export function createRouteClient(request: Request): RouteClient {
     supabase,
     applyCookies: (response) => applyCookies(request, response),
   };
+}
+
+/**
+ * Queues a cookie to be written by the same buffer `applyCookies` already
+ * drains on every route's response — callers outside the Supabase client
+ * (e.g. the guest-session binding cookie in `identity.server.ts`) can piggyback
+ * on this instead of every route handler having to plumb an extra cookie write.
+ */
+export function queueCookie(request: Request, cookie: PendingCookie): void {
+  const pending = pendingCookiesByRequest.get(request) ?? [];
+  pending.push(cookie);
+  pendingCookiesByRequest.set(request, pending);
 }
 
 export function applyCookies<T extends NextResponse>(request: Request, response: T): T {

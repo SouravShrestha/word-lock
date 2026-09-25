@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { toErrorResponse } from "@/lib/http/errors";
 import { sweepExpiredTurns } from "@/lib/game/service.server";
 
@@ -11,7 +12,14 @@ import { sweepExpiredTurns } from "@/lib/game/service.server";
 function isAuthorized(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) return false;
-  return req.headers.get("Authorization") === `Bearer ${cronSecret}`;
+
+  const expected = `Bearer ${cronSecret}`;
+  const provided = req.headers.get("Authorization") ?? "";
+  const expectedBuf = Buffer.from(expected);
+  const providedBuf = Buffer.from(provided);
+  if (expectedBuf.length !== providedBuf.length) return false;
+
+  return timingSafeEqual(expectedBuf, providedBuf);
 }
 
 async function runSweep(req: Request) {

@@ -11,8 +11,11 @@ import { toErrorResponse } from "@/lib/http/errors";
 
 import { checkUsernameAvailable } from "@/lib/account/service.server";
 import { MAX_USERNAME_LENGTH } from "@word-lock/core/account";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function GET(req: Request) {
+  if (!checkRateLimit(req, "username-check", 30, 10_000)) return rateLimitResponse();
+
   try {
     const raw = new URL(req.url).searchParams.get("u") ?? "";
 

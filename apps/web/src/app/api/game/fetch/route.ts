@@ -4,6 +4,7 @@ import { applyCookies } from "@/integrations/supabase/client.route";
 import { z } from "zod";
 import { findViewerId, loadGame, serializeGame } from "@/lib/game/service.server";
 import { resolveCaller, roomCodeSchema } from "@/lib/game/identity.server";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // sessionId is optional here, unlike the mutation endpoints: this is the one
 // read path that serves spectators, who have no session of their own yet.
@@ -12,7 +13,11 @@ const schema = z.object({
   roomCode: roomCodeSchema,
 });
 
+// Legitimate clients poll this every 3s as a realtime fallback, so the limit
+// is generous (and shared across every game a client behind one IP polls).
 export async function POST(req: Request) {
+  if (!checkRateLimit(req, "game-fetch", 120, 60_000)) return rateLimitResponse();
+
   try {
     const body = await req.json();
     const parsed = schema.safeParse(body);

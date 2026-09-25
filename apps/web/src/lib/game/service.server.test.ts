@@ -156,6 +156,11 @@ vi.mock("@/integrations/supabase/client.server", () => ({
       }
       return Promise.resolve({ data: null, error: null });
     },
+    auth: {
+      admin: {
+        deleteUser: () => Promise.resolve({ error: null }),
+      },
+    },
   }),
 }));
 

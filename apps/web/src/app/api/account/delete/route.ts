@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/http/errors";
 import { applyCookies } from "@/integrations/supabase/client.route";
 
-import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { deleteAccount } from "@/lib/game/service.server";
 import { callerSchema, resolveCaller } from "@/lib/game/identity.server";
 
@@ -18,9 +17,6 @@ export async function POST(req: Request) {
 
     const caller = await resolveCaller(req, parsed.data);
     const result = await deleteAccount(caller);
-
-    const { error } = await getSupabaseAdmin().auth.admin.deleteUser(caller.userId!);
-    if (error) throw new Error(error.message);
 
     return applyCookies(req, NextResponse.json(result));
   } catch (error) {
