@@ -87,6 +87,10 @@ function makeQuery(rows: FakeRow[], backing: FakeRow[]) {
       filtered = filtered.filter((r) => (r as Record<string, unknown>)[column] !== value);
       return builder;
     },
+    is(column: string, value: null) {
+      filtered = filtered.filter((r) => ((r as Record<string, unknown>)[column] ?? null) === value);
+      return builder;
+    },
     in(column: string, values: unknown[]) {
       filtered = filtered.filter((r) => values.includes((r as Record<string, unknown>)[column]));
       return builder;
@@ -343,5 +347,83 @@ describe("deleteAccount", () => {
     expect(opponent.user_id).toBe("u-opp");
     expect(games[0].status).toBe("completed");
     expect(games[0].player2_id).toBe("opp");
+  });
+});
+
+describe("taking a seat requires a named account", () => {
+  beforeEach(() => {
+    rpcCalls = [];
+    moves = [];
+  });
+
+  it("rejects a guest joining from an invite link, leaving the seat empty", async () => {
+    players = [
+      player({ id: "host", session_id: "s-host", user_id: "u-host", username: "host" }),
+      player({ id: "guest", session_id: "s-guest", user_id: null }),
+    ];
+    games = [
+      game({
+        id: "g-invite",
+        room_code: "INVIT",
+        status: "waiting",
+        player1_id: "host",
+        player2_id: null,
+      }),
+    ];
+
+    const { joinGame } = await import("./service.server");
+    await expect(joinGame(callerFor(players[1]), "INVIT")).rejects.toThrow("Sign in to play.");
+    expect(games[0].player2_id).toBeNull();
+  });
+
+  it("rejects a signed-in account that has not picked a username yet", async () => {
+    players = [
+      player({ id: "host", session_id: "s-host", user_id: "u-host", username: "host" }),
+      player({ id: "fresh", session_id: "s-fresh", user_id: "u-fresh", username: null }),
+    ];
+    games = [
+      game({
+        id: "g-invite",
+        room_code: "INVIT",
+        status: "waiting",
+        player1_id: "host",
+        player2_id: null,
+      }),
+    ];
+
+    const { joinGame } = await import("./service.server");
+    await expect(joinGame(callerFor(players[1]), "INVIT")).rejects.toThrow(
+      "Pick a username before playing.",
+    );
+    expect(games[0].player2_id).toBeNull();
+  });
+
+  it("seats a named account", async () => {
+    players = [
+      player({ id: "host", session_id: "s-host", user_id: "u-host", username: "host" }),
+      player({ id: "named", session_id: "s-named", user_id: "u-named", username: "named" }),
+    ];
+    games = [
+      game({
+        id: "g-invite",
+        room_code: "INVIT",
+        status: "waiting",
+        player1_id: "host",
+        player2_id: null,
+      }),
+    ];
+
+    const { joinGame } = await import("./service.server");
+    await expect(joinGame(callerFor(players[1]), "INVIT")).resolves.toEqual({ roomCode: "INVIT" });
+    expect(games[0].player2_id).toBe("named");
+  });
+
+  it("rejects a guest creating a lobby", async () => {
+    players = [player({ id: "guest", session_id: "s-guest", user_id: null })];
+    games = [];
+
+    const { createGame } = await import("./service.server");
+    await expect(createGame(callerFor(players[0]))).rejects.toThrow("Sign in to play.");
+    expect(games).toHaveLength(0);
   });
 });

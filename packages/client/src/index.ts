@@ -41,7 +41,7 @@ export { useClaimGuest } from "./auth/use-claim-guest";
 export type { AuthAdapter, AuthContextValue, EmailSignInOutcome } from "./auth/adapter";
 
 export { QUERY_DEFAULTS, shouldRetry } from "./queries/retry";
-export { useAccount } from "./queries/use-account";
+export { useAccount, useHasPlayableAccount } from "./queries/use-account";
 export { useLeaderboard } from "./queries/use-leaderboard";
 
 export { useMoveReview } from "./game/use-move-review";

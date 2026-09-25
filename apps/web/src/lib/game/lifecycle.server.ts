@@ -4,7 +4,7 @@ import { resolvePlayer, type Caller } from "./identity.server";
 import { computeStarOutcome, UNRANKED_OUTCOME } from "./stars.server";
 import { getDictionary } from "./dictionary.server";
 import { loadGame } from "./read.server";
-import { generateGrid } from "@word-lock/core/game";
+import { generateGrid, type PlayerAccountRow } from "@word-lock/core/game";
 
 export const MAX_ACTIVE_GAMES = 5;
 
@@ -27,8 +27,20 @@ async function countActiveGames(playerId: string) {
   return count ?? 0;
 }
 
+/**
+ * Taking a seat needs a signed-in, named account. The login wall is UI-only,
+ * so without this a direct request (or a client whose effects ran behind the
+ * wall) seats a guest row with no username — rendered as `UNNAMED_PLAYER` to
+ * the opponent for the rest of the game.
+ */
+function requireNamedAccount(player: PlayerAccountRow): void {
+  if (!player.user_id) throw new PublicError("Sign in to play.", 401);
+  if (!player.username) throw new PublicError("Pick a username before playing.", 403);
+}
+
 export async function createGame(caller: Caller) {
   const player = await resolvePlayer(caller);
+  requireNamedAccount(player);
   if ((await countActiveGames(player.id)) >= MAX_ACTIVE_GAMES) {
     throw new PublicError(
       `You already have ${MAX_ACTIVE_GAMES} games on the go. Finish one before starting another.`,
@@ -58,6 +70,7 @@ export async function createGame(caller: Caller) {
 
 export async function joinGame(caller: Caller, roomCode: string) {
   const player = await resolvePlayer(caller);
+  requireNamedAccount(player);
   const loaded = await loadGame(roomCode);
   if (!loaded) throw new PublicError("No game found with that code.");
   const { game } = loaded;

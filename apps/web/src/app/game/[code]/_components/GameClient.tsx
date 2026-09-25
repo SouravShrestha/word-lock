@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Tile, type TileOwner } from "@/components/Tile";
 import {
   useSession,
+  useHasPlayableAccount,
   createGameFn,
   fetchGameFn,
   joinGameFn,
@@ -48,6 +49,7 @@ const pendingDestroyTimers = new Map<string, ReturnType<typeof setTimeout>>();
 export function GameClient({ code }: { code: string }) {
   const roomCode = code.toUpperCase();
   const { sessionId, ready } = useSession();
+  const canJoin = useHasPlayableAccount();
   const queryClient = useQueryClient();
   const router = useRouter();
   const [selection, setSelection] = useState<number[]>([]);
@@ -328,8 +330,11 @@ export function GameClient({ code }: { code: string }) {
   }
 
   if (game.status === "waiting") {
+    // An invite link opened logged out renders this behind the login wall;
+    // joining then would seat a nameless guest the host sees as "Player".
     if (
       isSpectator &&
+      canJoin &&
       !joinMutation.isPending &&
       !joinMutation.isSuccess &&
       !joinMutation.isError

@@ -13,6 +13,7 @@ import {
   useInvalidateOnGameComplete,
   useMoveReview,
   useReactionFlash,
+  useHasPlayableAccount,
   useSession,
   useSweepTimer,
 } from "@word-lock/client";
@@ -49,6 +50,7 @@ export default function GameScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const roomCode = code?.toUpperCase() ?? "";
   const { sessionId, ready } = useSession();
+  const canJoin = useHasPlayableAccount();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
@@ -75,9 +77,12 @@ export default function GameScreen() {
 
   const hasAttemptedJoin = useRef(false);
   useEffect(() => {
+    // An invite link opened logged out renders this behind the login wall;
+    // joining then would seat a nameless guest the host sees as "Player".
     if (
       game?.status === "waiting" &&
       isSpectator &&
+      canJoin &&
       ready &&
       sessionId &&
       !hasAttemptedJoin.current
@@ -85,7 +90,7 @@ export default function GameScreen() {
       hasAttemptedJoin.current = true;
       joinMutation.mutate();
     }
-  }, [game?.status, isSpectator, ready, sessionId, joinMutation]);
+  }, [game?.status, isSpectator, canJoin, ready, sessionId, joinMutation]);
 
   const viewerSlotRef = useRef<number | null>(null);
   const isHostWaitingRef = useRef(false);

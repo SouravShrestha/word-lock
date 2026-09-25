@@ -20,3 +20,16 @@ export function useAccount() {
     queryFn: () => fetchAccountFn({ sessionId: sessionId!, timezone: browserTimezone() }),
   });
 }
+
+/**
+ * Whether the caller may take a seat in a game: signed in *and* named. The
+ * login and username sheets already wall off every screen, but a screen that
+ * mounts behind them (an invite link opened logged out) still runs its
+ * effects, so anything that writes on the caller's behalf waits on this
+ * rather than on the session id alone.
+ */
+export function useHasPlayableAccount(): boolean {
+  const { isLoggedIn, ready: authReady } = useAuth();
+  const { data: account } = useAccount();
+  return authReady && isLoggedIn && !!account?.username;
+}
