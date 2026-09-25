@@ -64,8 +64,10 @@ function guestBindValue(sessionId: string, secret: string): string {
 }
 
 function readGuestBindCookie(request: Request): string | null {
-  return parseCookieHeader(request.headers.get("cookie")).find((c) => c.name === GUEST_COOKIE_NAME)
-    ?.value ?? null;
+  return (
+    parseCookieHeader(request.headers.get("cookie")).find((c) => c.name === GUEST_COOKIE_NAME)
+      ?.value ?? null
+  );
 }
 
 function timingSafeStringEqual(a: string, b: string): boolean {

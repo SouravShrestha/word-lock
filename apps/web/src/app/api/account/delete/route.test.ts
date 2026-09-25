@@ -7,10 +7,9 @@ vi.mock("@/lib/game/service.server", () => ({
 }));
 
 vi.mock("@/lib/game/identity.server", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/lib/game/identity.server")>(
-      "@/lib/game/identity.server",
-    );
+  const actual = await vi.importActual<typeof import("@/lib/game/identity.server")>(
+    "@/lib/game/identity.server",
+  );
   return {
     ...actual,
     resolveCaller: vi.fn(async (_req: Request, input: { sessionId: string }) => ({
@@ -43,9 +42,7 @@ describe("POST /api/account/delete", () => {
   it("delegates entirely to deleteAccount — the route itself never touches the admin client", async () => {
     deleteAccountMock.mockResolvedValue({ ok: true });
     const { POST } = await import("./route");
-    const res = await POST(
-      request({ sessionId: "11111111-1111-1111-1111-111111111111" }),
-    );
+    const res = await POST(request({ sessionId: "11111111-1111-1111-1111-111111111111" }));
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });

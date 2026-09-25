@@ -34,7 +34,12 @@ function clientIp(request: Request): string {
  * Returns true if the request is within limit, false if it should be rejected.
  * `limit` requests are allowed per `windowMs` per (bucket, client IP) pair.
  */
-export function checkRateLimit(request: Request, bucket: string, limit: number, windowMs: number): boolean {
+export function checkRateLimit(
+  request: Request,
+  bucket: string,
+  limit: number,
+  windowMs: number,
+): boolean {
   const key = `${bucket}:${clientIp(request)}`;
   const now = Date.now();
   const existing = buckets.get(key);

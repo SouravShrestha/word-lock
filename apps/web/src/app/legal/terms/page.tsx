@@ -48,7 +48,10 @@ export default function TermsPage() {
         <Section title="Accounts and data">
           <P>
             What is collected, why, and how to delete your account are covered in the{" "}
-            <Link href="/legal/privacy" className="font-semibold text-foreground underline underline-offset-2">
+            <Link
+              href="/legal/privacy"
+              className="font-semibold text-foreground underline underline-offset-2"
+            >
               privacy policy
             </Link>
             , which is part of these terms.

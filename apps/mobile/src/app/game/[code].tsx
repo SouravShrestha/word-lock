@@ -134,7 +134,7 @@ export default function GameScreen() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [game?.id, queryClient, queryKey, showReaction]);
+  }, [game?.id, queryClient, queryKey, showReaction, startHostLeftCountdown]);
 
   useEffect(() => {
     const onChange = (state: AppStateStatus) => {

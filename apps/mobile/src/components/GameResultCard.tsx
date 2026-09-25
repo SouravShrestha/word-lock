@@ -86,7 +86,9 @@ export function GameResultCard({
                 <Text
                   key={i}
                   className="font-sans shrink-0 text-sm leading-none"
-                  style={{ color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2 }}
+                  style={{
+                    color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2,
+                  }}
                 >
                   {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}
                 </Text>

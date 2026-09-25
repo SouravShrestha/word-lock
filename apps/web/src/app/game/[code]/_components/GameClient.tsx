@@ -146,7 +146,7 @@ export function GameClient({ code }: { code: string }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [game?.id, roomCode, sessionId, queryClient, showReaction]);
+  }, [game?.id, roomCode, sessionId, queryClient, showReaction, startHostLeftCountdown]);
 
   useEffect(() => {
     isHostWaitingRef.current = game?.status === "waiting" && game?.viewerSlot === 1;

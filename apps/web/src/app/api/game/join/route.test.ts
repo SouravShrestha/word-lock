@@ -7,14 +7,16 @@ vi.mock("@/lib/game/service.server", () => ({
 }));
 
 vi.mock("@/lib/game/identity.server", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/lib/game/identity.server")>(
-      "@/lib/game/identity.server",
-    );
-  return { ...actual, resolveCaller: vi.fn(async (_req: Request, input: { sessionId: string }) => ({
-    sessionId: input.sessionId,
-    userId: null,
-  })) };
+  const actual = await vi.importActual<typeof import("@/lib/game/identity.server")>(
+    "@/lib/game/identity.server",
+  );
+  return {
+    ...actual,
+    resolveCaller: vi.fn(async (_req: Request, input: { sessionId: string }) => ({
+      sessionId: input.sessionId,
+      userId: null,
+    })),
+  };
 });
 
 function request(body: unknown, ip: string) {
@@ -32,7 +34,9 @@ describe("POST /api/game/join", () => {
 
   it("rejects a payload missing a room code", async () => {
     const { POST } = await import("./route");
-    const res = await POST(request({ sessionId: "11111111-1111-1111-1111-111111111111" }, "1.1.1.1"));
+    const res = await POST(
+      request({ sessionId: "11111111-1111-1111-1111-111111111111" }, "1.1.1.1"),
+    );
     expect(res.status).toBe(400);
     expect(joinGameMock).not.toHaveBeenCalled();
   });

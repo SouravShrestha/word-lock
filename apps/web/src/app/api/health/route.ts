@@ -4,7 +4,10 @@ import { log } from "@/lib/log";
 
 export async function GET() {
   try {
-    const { error } = await getSupabaseAdmin().from("wl_games").select("id", { head: true }).limit(1);
+    const { error } = await getSupabaseAdmin()
+      .from("wl_games")
+      .select("id", { head: true })
+      .limit(1);
     if (error) throw new Error(error.message);
 
     return NextResponse.json({ status: "ok" }, { headers: { "Cache-Control": "no-store" } });

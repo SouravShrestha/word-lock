@@ -11,10 +11,9 @@ vi.mock("@/lib/game/service.server", () => ({
 }));
 
 vi.mock("@/lib/game/identity.server", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/lib/game/identity.server")>(
-      "@/lib/game/identity.server",
-    );
+  const actual = await vi.importActual<typeof import("@/lib/game/identity.server")>(
+    "@/lib/game/identity.server",
+  );
   return {
     ...actual,
     resolveCaller: vi.fn(async (_req: Request, input: { sessionId: string }) => ({

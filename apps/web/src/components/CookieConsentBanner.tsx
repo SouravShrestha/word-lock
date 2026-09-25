@@ -18,6 +18,7 @@ export function CookieConsentBanner() {
 
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (!localStorage.getItem(STORAGE_KEY)) setVisible(true);
     } catch {
       // Storage unavailable (private mode, disabled) — nothing to persist, skip the banner.
@@ -45,7 +46,10 @@ export function CookieConsentBanner() {
     >
       <p className="text-xs leading-relaxed text-muted-foreground sm:max-w-md">
         Word lock uses cookies for sign-in and, where permitted, for advertising. See the{" "}
-        <a href="/legal/privacy" className="font-semibold text-foreground underline underline-offset-2">
+        <a
+          href="/legal/privacy"
+          className="font-semibold text-foreground underline underline-offset-2"
+        >
           privacy policy
         </a>{" "}
         for details and your choices.

@@ -1,7 +1,13 @@
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { UNNAMED_PLAYER } from "@word-lock/core/account";
 import { resolvePlayer, type Caller } from "./identity.server";
-import { serializeGame, toEngineMoves, type GameRow, type MoveRow, type PlayerRow } from "./read.server";
+import {
+  serializeGame,
+  toEngineMoves,
+  type GameRow,
+  type MoveRow,
+  type PlayerRow,
+} from "./read.server";
 import {
   computeBoardState,
   computeStats,
