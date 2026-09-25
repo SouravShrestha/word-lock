@@ -18,6 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppProviders } from "@/components/AppProviders";
+import { useBlockHardwareBack } from "@/hooks/useBlockHardwareBack";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,7 +33,7 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
         <Pressable
           accessibilityRole="button"
           onPress={retry}
-          className="mt-6 w-full items-center rounded-md px-4 py-3.5"
+          className="mt-6 w-full items-center rounded-lg px-4 py-3.5"
           style={{ backgroundColor: "#38bdf8" }}
         >
           <Text className="text-base font-bold text-white">Try again</Text>
@@ -43,6 +44,8 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
 }
 
 export default function RootLayout() {
+  useBlockHardwareBack();
+
   const [fontsLoaded] = useFonts({
     Rubik_300Light,
     Rubik_400Regular,
@@ -61,7 +64,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }} className="bg-background">
       <SafeAreaProvider>
         <AppProviders>
-          <Stack screenOptions={{ headerShown: false }}>
+          <Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="game/[code]" />
             <Stack.Screen name="join" />

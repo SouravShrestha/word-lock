@@ -104,14 +104,14 @@ function MatchRowSkeleton() {
       <Shimmer className="h-14 w-14 shrink-0 rounded-full" />
 
       <View className="min-w-0 flex-1">
-        <Shimmer className="h-4 w-28 rounded-sm" />
+        <Shimmer className="h-4 w-28 rounded-[3px]" />
         <View className="mt-2 flex-row items-center gap-3">
-          <Shimmer className="h-3 w-16 rounded-sm" />
-          <Shimmer className="h-3 w-12 rounded-sm" />
+          <Shimmer className="h-3 w-16 rounded-[3px]" />
+          <Shimmer className="h-3 w-12 rounded-[3px]" />
         </View>
       </View>
 
-      <Shimmer className="h-4 w-14 shrink-0 rounded-sm" />
+      <Shimmer className="h-4 w-14 shrink-0 rounded-[3px]" />
     </View>
   );
 }

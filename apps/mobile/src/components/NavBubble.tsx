@@ -47,7 +47,15 @@ export function NavBubble({ focused, children }: { focused: boolean; children: R
 const FADE_DURATION_MS = 150;
 const FADE_EASING = Easing.bezier(0.4, 0, 0.2, 1);
 
-export function NavBubbleOutline({ focused, color }: { focused: boolean; color: string }) {
+export function NavBubbleOutline({
+  focused,
+  borderColor,
+  backgroundColor,
+}: {
+  focused: boolean;
+  borderColor: string;
+  backgroundColor: string;
+}) {
   const opacity = useSharedValue(focused ? 1 : 0);
 
   useEffect(() => {
@@ -68,8 +76,9 @@ export function NavBubbleOutline({ focused, color }: { focused: boolean; color: 
           position: "absolute",
           inset: 0,
           borderWidth: 2,
-          borderColor: color,
-          borderRadius: radius.sm,
+          borderColor,
+          backgroundColor,
+          borderRadius: radius.lg,
         },
       ]}
     />

@@ -37,6 +37,8 @@ export const lightColors = {
   "destructive": "#ee0f1f",
   "destructiveForeground": "#ffffff",
   "border": "rgba(15, 20, 25, 0.12)",
+  "navActive": "#ddf4ff",
+  "navActiveBorder": "#84d8ff",
   "input": "rgba(15, 20, 25, 0.12)",
   "ring": "#29a8f0",
   "p1": "#ff254d", // clamped from oklch(0.66 0.25 20) (overshoot 0.081)
@@ -91,6 +93,8 @@ export const darkColors = {
   "destructive": "#f52027",
   "destructiveForeground": "#f8f8f8",
   "border": "#37464f",
+  "navActive": "#202f36",
+  "navActiveBorder": "#3f85a7",
   "input": "#37464f",
   "ring": "#29a8f0",
   "p1": "#ff4a5d", // clamped from oklch(0.68 0.22 20) (overshoot 0.040)
@@ -154,6 +158,8 @@ export const cssVarNames = {
   "destructive": "--destructive",
   "destructiveForeground": "--destructive-foreground",
   "border": "--border",
+  "navActive": "--nav-active",
+  "navActiveBorder": "--nav-active-border",
   "input": "--input",
   "ring": "--ring",
   "p1": "--p1",

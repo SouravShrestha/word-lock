@@ -121,7 +121,6 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
         <IconButton
           variant="surface"
           size={36}
-          radius={6}
           accessibilityLabel="League tiers"
           onPress={onOpenGuide}
         >

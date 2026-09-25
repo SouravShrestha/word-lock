@@ -45,7 +45,6 @@ export default function ProfileScreen() {
           <IconButton
             variant="surface"
             size={36}
-            radius={6}
             accessibilityLabel="Settings"
             onPress={() => setSettingsOpen(true)}
           >

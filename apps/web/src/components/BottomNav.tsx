@@ -9,7 +9,7 @@ import { ProfileNavIcon } from "@/components/icons/nav/ProfileNavIcon";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { href: "/", label: "Home", Icon: HomeNavIcon, iconClassName: "h-7 w-7" },
+  { href: "/", label: "Home", Icon: HomeNavIcon, iconClassName: "h-6 w-6" },
   { href: "/history", label: "Matches", Icon: HistoryNavIcon, iconClassName: "h-10 w-10" },
   {
     href: "/leaderboard",
@@ -63,9 +63,9 @@ export function BottomNav() {
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute inset-y-2 inset-x-6 rounded-sm border-2 border-border transition-opacity",
+                    "absolute inset-y-2 inset-x-6 rounded-sm border-2 border-nav-active-border transition-opacity",
                     "lg:inset-x-0 lg:inset-y-0 lg:rounded-md",
-                    active ? "opacity-100" : "opacity-0",
+                    active ? "opacity-100 bg-nav-active" : "opacity-0",
                   )}
                 />
                 <span className="relative z-10 grid w-10 shrink-0 place-items-center">

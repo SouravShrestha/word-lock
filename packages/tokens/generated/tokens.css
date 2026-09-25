@@ -26,6 +26,8 @@
   --destructive: oklch(0.6 0.24 27);
   --destructive-foreground: oklch(1 0 0);
   --border: rgb(15 20 25 / 12%);
+  --nav-active: #ddf4ff;
+  --nav-active-border: #84d8ff;
   --input: rgb(15 20 25 / 12%);
   /* Theme-invariant. Light and dark both declared this, identically. */
   --ring: #29a8f0;
@@ -111,6 +113,8 @@
   --destructive: oklch(0.62 0.24 27);
   --destructive-foreground: oklch(0.98 0 0);
   --border: #37464f;
+  --nav-active: #202f36;
+  --nav-active-border: #3f85a7;
   --input: #37464f;
 
   /* Board and player colours. */

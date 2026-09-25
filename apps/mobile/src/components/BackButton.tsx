@@ -32,7 +32,7 @@ export function BackButton({ onPress, label = "Back" }: { onPress?: () => void; 
       style={{
         width: 36,
         alignSelf: "flex-start",
-        borderRadius: 6,
+        borderRadius: 12,
         overflow: "hidden",
         ...lipPadding(LIP, pressed),
       }}
@@ -40,7 +40,7 @@ export function BackButton({ onPress, label = "Back" }: { onPress?: () => void; 
       <Lip depth={palette.depthSun} />
       <View
         className="h-9 w-9 items-center justify-center"
-        style={{ backgroundColor: palette.sun, borderRadius: 6 }}
+        style={{ backgroundColor: palette.sun, borderRadius: 12 }}
       >
         <Svg width={16} height={16} viewBox="0 0 48 38" fill="none">
           <Path

@@ -2,7 +2,6 @@
 
 import { useId, type SVGProps } from "react";
 
-/** Clip-path id is per-instance — see the note in TrophyNavIcon. */
 export function HomeNavIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   const clipId = `home-nav-clip-${useId().replace(/:/g, "")}`;
 

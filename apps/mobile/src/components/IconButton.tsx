@@ -24,7 +24,7 @@ const LIP = 3;
 export function IconButton({
   variant = "surface",
   size = 36,
-  radius = 8,
+  radius = 10,
   disabled = false,
   onPress,
   children,
@@ -75,7 +75,7 @@ export function IconButton({
     >
       <Lip depth={depth} />
       <View
-        className="items-center justify-center"
+        className="items-center justify-center border-surfaceHairline border"
         style={{ width: size, height: size, backgroundColor: fill, borderRadius: radius }}
       >
         {children}

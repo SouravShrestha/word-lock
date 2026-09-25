@@ -21,11 +21,13 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    // A scheme-less host source matches any scheme on that host, which is the
-    // point here: Realtime connects over `wss://`, everything else over
-    // `https://`, and a CSP source pinned to one scheme would silently block
-    // the other.
+    // Browsers (Chrome in particular) do not honour scheme-less hostnames in
+    // connect-src for WebSocket connections — `wss://` must be listed explicitly
+    // alongside the `https://` origin, otherwise Supabase Realtime is blocked.
     const supabaseHost = supabaseUrl ? new URL(supabaseUrl).host : "";
+    const supabaseWss = supabaseUrl ? supabaseUrl.replace(/^https?:\/\//, "wss://") : "";
+
+    const isDev = process.env.NODE_ENV === "development";
 
     const csp = [
       "default-src 'self'",
@@ -33,10 +35,13 @@ const nextConfig: NextConfig = {
       // need per-request header generation, which the static `headers()`
       // config here can't do, so 'unsafe-inline' is the pragmatic middle
       // ground until a nonce plumbing pass is worth the complexity.
-      "script-src 'self' 'unsafe-inline'",
+      // 'unsafe-eval' is additionally required in dev mode: webpack's HMR and
+      // React Refresh use eval() for source maps, and blocking it stops effects
+      // from running (the CSP violation breaks the entire React runtime init).
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: ${supabaseHost}`.trim(),
-      `connect-src 'self' ${supabaseHost}`.trim(),
+      `connect-src 'self' ${supabaseHost} ${supabaseWss}`.trim(),
       "font-src 'self' data:",
       "frame-ancestors 'none'",
       "base-uri 'self'",

@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavBubble, NavBubbleOutline } from "@/components/NavBubble";
 import { useTheme } from "@/theme/ThemeProvider";
 
-const ICON_SIZES = { home: 28, history: 40, leaderboard: 32, profile: 28 } as const;
+const ICON_SIZES = { home: 28, history: 40, leaderboard: 31, profile: 27 } as const;
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -24,12 +24,14 @@ function NavIconBubble({
   size,
   href,
   borderColor,
+  backgroundColor,
   className,
 }: {
   Icon: ComponentType<{ size?: number }>;
   size: number;
   href: string;
   borderColor: string;
+  backgroundColor: string;
   className?: string;
 }) {
   const pathname = usePathname();
@@ -40,7 +42,11 @@ function NavIconBubble({
       className={`items-center justify-center${className ? ` ${className}` : ""}`}
       style={{ width: 46, height: 46 }}
     >
-      <NavBubbleOutline focused={focused} color={borderColor} />
+      <NavBubbleOutline
+        focused={focused}
+        borderColor={borderColor}
+        backgroundColor={backgroundColor}
+      />
       <NavBubble focused={focused}>
         <Icon size={size} />
       </NavBubble>
@@ -55,6 +61,7 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      backBehavior="none"
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -79,7 +86,8 @@ export default function TabsLayout() {
               Icon={HomeNavIcon}
               size={ICON_SIZES.home}
               href="/"
-              borderColor={palette.border}
+              borderColor={palette.navActiveBorder}
+              backgroundColor={palette.navActive}
             />
           ),
         }}
@@ -93,7 +101,8 @@ export default function TabsLayout() {
               Icon={HistoryNavIcon}
               size={ICON_SIZES.history}
               href="/history"
-              borderColor={palette.border}
+              borderColor={palette.navActiveBorder}
+              backgroundColor={palette.navActive}
             />
           ),
         }}
@@ -107,7 +116,8 @@ export default function TabsLayout() {
               Icon={TrophyNavIcon}
               size={ICON_SIZES.leaderboard}
               href="/leaderboard"
-              borderColor={palette.border}
+              borderColor={palette.navActiveBorder}
+              backgroundColor={palette.navActive}
             />
           ),
         }}
@@ -121,7 +131,8 @@ export default function TabsLayout() {
               Icon={ProfileNavIcon}
               size={ICON_SIZES.profile}
               href="/profile"
-              borderColor={palette.border}
+              borderColor={palette.navActiveBorder}
+              backgroundColor={palette.navActive}
               className="pr-1"
             />
           ),

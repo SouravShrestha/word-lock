@@ -88,7 +88,7 @@ export default function HomeScreen() {
 
           <View className="mt-16 w-full max-w-sm flex-row gap-4 px-5">
             <Button
-              variant="sky"
+              variant="mint"
               className="flex-1"
               disabled={!ready || createMutation.isPending}
               loading={createMutation.isPending}
@@ -98,7 +98,7 @@ export default function HomeScreen() {
               {createMutation.isPending ? "Creating" : "New Game"}
             </Button>
             <Button
-              variant="blush"
+              variant="sky"
               className="flex-1"
               onPress={() => router.push("/join")}
               icon={<HeartIcon size={12} color="#ffffff" />}
@@ -209,13 +209,13 @@ function GameCard({ game }: { game: LobbyGame }) {
       onPressOut={() => setPressed(false)}
       className="w-48"
       style={{
-        borderRadius: 8,
+        borderRadius: 12,
         overflow: "hidden",
         ...lipPadding(CARD_LIP, pressed),
       }}
     >
       <Lip depth={palette.depthSurface} />
-      <View className="border border-surfaceHairline bg-surface p-3.5" style={{ borderRadius: 8 }}>
+      <View className="border border-surfaceHairline bg-surface p-3.5" style={{ borderRadius: 12 }}>
         <View className="gap-0.5">
           <Text className="text-sm font-bold text-foreground" numberOfLines={1}>
             <Text className="text-xs font-normal text-mutedForeground">vs </Text>

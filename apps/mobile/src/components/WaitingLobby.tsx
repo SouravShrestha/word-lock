@@ -82,7 +82,7 @@ export function WaitingLobby({
             accessibilityRole="button"
             accessibilityLabel="Copy room code"
             onPress={handleCopy}
-            className="flex-row items-center gap-3 rounded-md py-3 pl-7 pr-5"
+            className="flex-row items-center gap-3 rounded-lg py-3 pl-7 pr-5"
             style={{ backgroundColor: palette.surface }}
           >
             <Text className="font-display text-xl font-bold tracking-[0.3em] text-foreground">

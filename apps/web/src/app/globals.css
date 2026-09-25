@@ -47,6 +47,8 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-nav-active: var(--nav-active);
+  --color-nav-active-border: var(--nav-active-border);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
@@ -384,4 +386,18 @@
 
 @utility nav-bubble {
   animation: nav-bubble-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes glint {
+  0% {
+    transform: translateX(-150%);
+  }
+  40%,
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@utility animate-glint {
+  animation: glint 3s ease-in-out infinite;
 }

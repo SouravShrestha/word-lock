@@ -46,6 +46,8 @@ export const TOKEN_GROUPS: TokenGroup[] = [
         value: { light: "oklch(1 0 0)", dark: "oklch(0.98 0 0)" },
       },
       { name: "border", value: { light: "rgb(15 20 25 / 12%)", dark: "#37464f" } },
+      { name: "nav-active", value: { light: "#ddf4ff", dark: "#202f36" } },
+      { name: "nav-active-border", value: { light: "#84d8ff", dark: "#3f85a7" } },
       { name: "input", value: { light: "rgb(15 20 25 / 12%)", dark: "#37464f" } },
       {
         name: "ring",

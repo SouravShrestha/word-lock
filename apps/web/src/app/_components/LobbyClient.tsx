@@ -89,14 +89,14 @@ export function LobbyClient() {
               type="button"
               onClick={() => createMutation.mutate()}
               disabled={!ready || createMutation.isPending}
-              className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
+              className="soft-btn btn-mint flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
             >
               <PlayIcon className="h-3 w-3" />
               {createMutation.isPending ? "Creating" : "New Game"}
             </button>
             <Link
               href="/join"
-              className="soft-btn btn-blush flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
+              className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
             >
               <HeartIcon className="h-3 w-3" />
               Join

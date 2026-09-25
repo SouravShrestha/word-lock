@@ -32,9 +32,9 @@ const DEPTH_KEY: Partial<Record<ButtonVariant, keyof ReturnType<typeof paletteFo
 const LIGHT_LABEL_VARIANTS = new Set<ButtonVariant>(["sky", "blush", "mint", "danger"]);
 
 const SIZES = {
-  md: { box: "rounded-md px-4 py-3.5", label: "text-base tracking-tight", lip: 5 },
-  sheet: { box: "rounded-md px-4 py-3.5", label: "text-[15px] tracking-wide", lip: 5 },
-  sm: { box: "rounded-md px-4 py-2.5", label: "text-[13px] tracking-tight", lip: 4 },
+  md: { box: "rounded-lg px-4 py-3.5", label: "text-base tracking-tight", lip: 5 },
+  sheet: { box: "rounded-lg px-4 py-3.5", label: "text-[15px] tracking-wide", lip: 5 },
+  sm: { box: "rounded-lg px-4 py-2.5", label: "text-[13px] tracking-tight", lip: 4 },
 } as const;
 
 export type ButtonSize = keyof typeof SIZES;
