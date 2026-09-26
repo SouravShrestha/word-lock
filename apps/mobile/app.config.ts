@@ -35,6 +35,11 @@ export default (): ExpoConfig => ({
         image: "./assets/splash.png",
         resizeMode: "contain",
         backgroundColor: "#fbf9ed",
+        dark: {
+          image: "./assets/splash.png",
+          resizeMode: "contain",
+          backgroundColor: "#131f24",
+        },
       },
     ],
     "expo-status-bar",

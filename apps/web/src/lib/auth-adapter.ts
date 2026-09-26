@@ -30,9 +30,14 @@ export const webAuthAdapter: AuthAdapter = {
   signInWithEmail: async (email: string): Promise<EmailSignInOutcome> => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: callbackUrl(), shouldCreateUser: true },
+      options: { shouldCreateUser: true },
     });
     if (error) throw new Error(error.message);
-    return { kind: "link-sent" };
+    return { kind: "code-sent" };
+  },
+
+  verifyEmailCode: async (email: string, code: string): Promise<void> => {
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+    if (error) throw new Error(error.message);
   },
 };

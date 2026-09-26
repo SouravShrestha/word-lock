@@ -1,9 +1,10 @@
+import { Text } from "@/components/text";
 import { fetchProfileFn, useAccount, useSession } from "@word-lock/client";
 import type { PlayerStats, RecentGameEntry } from "@word-lock/core/game";
 import { LeagueIcon, LEAGUE_TEXT_COLOR } from "@word-lock/icons/native";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { GameDetailPopup } from "@/components/GameDetailPopup";
@@ -39,10 +40,8 @@ export default function HistoryScreen() {
 
             {games.length === 0 ? (
               <View className="mt-6 items-center p-6">
-                <Text className="font-display text-lg font-bold text-foreground">
-                  Nothing here yet
-                </Text>
-                <Text className="font-sans mt-1 text-center text-sm text-mutedForeground">
+                <Text variant="heading">Nothing here yet</Text>
+                <Text variant="body" className="mt-1 text-center">
                   Finish a game to see it listed.
                 </Text>
               </View>
@@ -71,12 +70,12 @@ function Headline({ wins }: { wins: number }) {
 
   return (
     <View className="px-5" style={{ paddingTop: Math.max(insets.top + 24, 24) }}>
-      <Text className="font-display text-3xl font-bold text-foreground">Your matches</Text>
+      <Text variant="pageTitle">Your matches</Text>
 
       <View className="mt-2 flex-row items-center gap-1.5">
         <LeagueIcon league={league} size={24} />
         <Text
-          className="text-sm font-semibold"
+          variant="leagueStars"
           style={{ color: LEAGUE_TEXT_COLOR[league], fontVariant: ["tabular-nums"] }}
         >
           {account?.stars ?? 0}

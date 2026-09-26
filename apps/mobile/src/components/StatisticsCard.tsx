@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useAccount } from "@word-lock/client";
 import {
@@ -46,14 +47,10 @@ export function StatisticsCard({
     <View className="pb-16 pt-5">
       <View className="flex-row items-baseline justify-between gap-3 px-4 pt-2">
         <View className="flex-row items-baseline gap-2">
-          <Text className="font-display text-4xl font-bold tabular-nums text-foreground">
-            {stars}
-          </Text>
+          <Text variant="stat">{stars}</Text>
           <TrendLabel delta={delta} />
         </View>
-        <Text className="text-[13px] font-semibold text-mutedForeground">
-          Peak {account?.peakStars ?? stars}
-        </Text>
+        <Text variant="caption">Peak {account?.peakStars ?? stars}</Text>
       </View>
 
       <View
@@ -73,7 +70,8 @@ export function StatisticsCard({
               style={{ backgroundColor: active ? palette.muted : "transparent" }}
             >
               <Text
-                className="text-xs font-bold tracking-wide"
+                variant="eyebrow"
+                className="tracking-wide"
                 style={{ color: active ? palette.foreground : palette.mutedForeground }}
               >
                 {option.label}
@@ -88,7 +86,7 @@ export function StatisticsCard({
           <StarChart points={points} />
         ) : (
           <View className="h-56 items-center justify-center px-6">
-            <Text className="font-sans text-center text-sm text-mutedForeground">
+            <Text variant="body" className="text-center">
               Play a few ranked games and your star history will show up here.
             </Text>
           </View>
@@ -117,7 +115,7 @@ function TrendLabel({ delta }: { delta: number | null }) {
 
   if (delta === 0) {
     return (
-      <Text className="text-sm font-bold tabular-nums" style={{ color: palette.mutedForeground }}>
+      <Text variant="body" style={{ color: palette.mutedForeground }}>
         no change
       </Text>
     );
@@ -129,7 +127,8 @@ function TrendLabel({ delta }: { delta: number | null }) {
     <View className="flex-row items-center gap-0.5">
       <TrendArrow up={up} color={up ? palette.mint : palette.p1} />
       <Text
-        className="text-sm font-bold tabular-nums"
+        variant="body"
+        className="font-bold tabular-nums"
         style={{ color: up ? palette.mint : palette.p1 }}
       >
         {Math.abs(delta)}
@@ -159,10 +158,12 @@ function share(part: number, total: number): string | null {
 function Stat({ label, value, share }: { label: string; value: number; share?: string | null }) {
   return (
     <View className="flex-1 items-center gap-0.5">
-      <Text className="font-display text-2xl font-bold tabular-nums text-foreground">{value}</Text>
-      <Text className="font-sans text-[0.65rem] uppercase tracking-wide text-mutedForeground">
+      <Text variant="statMd" className="text-foreground">
+        {value}
+      </Text>
+      <Text variant="eyebrow" className="normal-case">
         {label}
-        {share && <Text className="ml-1 tabular-nums normal-case">{` ${share}`}</Text>}
+        {share && <Text className="tabular-nums"> {share}</Text>}
       </Text>
     </View>
   );

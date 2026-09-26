@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { Pressable, View } from "react-native";
 import { LiveIcon } from "@word-lock/icons/native";
 import type { ReviewFrame } from "@word-lock/core/game";
 import { colors } from "@word-lock/tokens/native";
@@ -28,13 +29,14 @@ export function ReviewBar({
       className="h-12 w-full flex-row items-center justify-between gap-3 rounded-sm px-4 py-3"
       style={{ backgroundColor: palette.board }}
     >
-      <Text className="shrink-0 text-xs font-medium tabular-nums text-mutedForeground">
+      <Text variant="autoGen17" className="shrink-0 tabular-nums">
         {moveNumber} / {moveCount}
       </Text>
 
       <Text
+        variant="autoGen18"
         numberOfLines={1}
-        className="min-w-0 flex-1 text-center font-display text-sm font-medium tracking-widest"
+        className="min-w-0 flex-1"
         style={{
           color: move.passed ? palette.mutedForeground : isPlayerOne ? palette.p1 : palette.p2,
         }}

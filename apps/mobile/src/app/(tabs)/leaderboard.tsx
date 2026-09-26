@@ -1,8 +1,9 @@
+import { Text } from "@/components/text";
 import { useAccount, useLeaderboard } from "@word-lock/client";
 import { LEAGUES, leagueById, type LeagueId } from "@word-lock/core/account";
 import { LeagueIcon, LEAGUE_TEXT_COLOR, QuestionMarkIcon, StarIcon } from "@word-lock/icons/native";
 import { useCallback, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@word-lock/tokens/native";
 
@@ -35,7 +36,7 @@ export default function LeaderboardScreen() {
           {isLoading ? (
             <LeaderboardSkeleton />
           ) : entries.length === 0 ? (
-            <Text className="px-1 py-6 text-center text-sm font-semibold text-mutedForeground">
+            <Text variant="label" className="px-1 py-6 text-center text-mutedForeground">
               Nothing here yet.
             </Text>
           ) : (
@@ -56,7 +57,7 @@ export default function LeaderboardScreen() {
 
               {me && myRank !== null && !inList && account?.username && (
                 <>
-                  <Text className="text-center text-xs font-semibold text-mutedForeground">
+                  <Text variant="hint" className="text-center font-semibold">
                     ···
                   </Text>
                   <Row
@@ -70,7 +71,7 @@ export default function LeaderboardScreen() {
               )}
 
               {!me && (
-                <Text className="px-1 text-center text-xs font-semibold text-mutedForeground">
+                <Text variant="hint" className="px-1 text-center font-semibold">
                   Pick a username to join the board.
                 </Text>
               )}
@@ -112,10 +113,7 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
       style={{ paddingTop: Math.max(insets.top + 20, 24) }}
     >
       <View className="flex-row items-center justify-between gap-4">
-        <Text
-          className="font-display text-3xl font-bold"
-          style={{ color: LEAGUE_TEXT_COLOR[league] }}
-        >
+        <Text variant="leagueTitle" style={{ color: LEAGUE_TEXT_COLOR[league] }}>
           {band.name} League
         </Text>
         <IconButton
@@ -128,7 +126,7 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
         </IconButton>
       </View>
 
-      <Text className="mt-1 text-sm font-semibold text-mutedForeground">
+      <Text variant="caption" className="mt-1">
         {band.maxStars === null
           ? `${band.minStars}+ stars`
           : `${band.minStars} - ${band.maxStars} stars`}
@@ -173,22 +171,26 @@ function Row({
       className={`-mx-5 flex-row items-center gap-3.5 py-5 pl-6 pr-6 mb-2 ${isViewer ? "bg-board" : ""}`}
     >
       <Text
-        className="w-5 shrink-0 text-center text-[15px] font-semibold text-accent"
+        variant="label"
+        className="w-5 shrink-0 text-center text-accent"
         style={{ fontVariant: ["tabular-nums"] }}
       >
         {rank}
       </Text>
 
-      <Text numberOfLines={1} className="min-w-0 flex-1 text-[15px] font-semibold text-foreground">
+      <Text variant="label" numberOfLines={1} className="min-w-0 flex-1">
         {name}
         {isViewer && (
-          <Text className="ml-1.5 text-[13px] font-normal text-mutedForeground"> (you)</Text>
+          <Text variant="caption" className="ml-1.5 font-normal">
+            {" "}
+            (you)
+          </Text>
         )}
       </Text>
 
       <View className="shrink-0 flex-row items-center gap-1 px-2.5 py-1">
         <StarIcon size={18} color={LEAGUE_TEXT_COLOR[league]} />
-        <Text className="text-[15px] font-semibold" style={{ color: LEAGUE_TEXT_COLOR[league] }}>
+        <Text variant="label" style={{ color: LEAGUE_TEXT_COLOR[league] }}>
           {stars}
         </Text>
       </View>

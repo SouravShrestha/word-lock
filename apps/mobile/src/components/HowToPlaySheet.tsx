@@ -1,6 +1,7 @@
+import { Text } from "@/components/text";
 import { RULES } from "@word-lock/core/game";
 import { CrossIcon } from "@word-lock/icons/native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { IconButton } from "@/components/IconButton";
@@ -17,7 +18,7 @@ export function HowToPlaySheet({ open, onClose }: { open: boolean; onClose: () =
   return (
     <BottomSheet open={open} onClose={onClose} label="How to play" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-xl text-foreground">How to play</Text>
+        <Text variant="sheetTitle">How to play</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
@@ -28,8 +29,10 @@ export function HowToPlaySheet({ open, onClose }: { open: boolean; onClose: () =
           <View key={rule.title} className="flex-row gap-3">
             <RuleNumber>{i + 1}</RuleNumber>
             <View className="flex-1">
-              <Text className="text-sm font-bold text-foreground">{rule.title}</Text>
-              <Text className="font-sans mt-1 text-sm leading-relaxed text-mutedForeground">
+              <Text variant="body" className="font-bold text-foreground">
+                {rule.title}
+              </Text>
+              <Text variant="body" className="mt-1 leading-relaxed">
                 {rule.body}
               </Text>
             </View>

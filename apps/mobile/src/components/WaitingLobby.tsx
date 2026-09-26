@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useState } from "react";
-import { Pressable, Share, Text, View } from "react-native";
+import { Pressable, Share, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { CheckIcon, CopyIcon, InviteIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
@@ -85,9 +86,7 @@ export function WaitingLobby({
             className="flex-row items-center gap-3 rounded-lg py-3 pl-7 pr-5"
             style={{ backgroundColor: palette.surface }}
           >
-            <Text className="font-display text-xl font-bold tracking-[0.3em] text-foreground">
-              {roomCode}
-            </Text>
+            <Text variant="roomCode">{roomCode}</Text>
             {copied ? (
               <CheckIcon size={16} color={palette.mutedForeground} />
             ) : (
@@ -96,9 +95,7 @@ export function WaitingLobby({
           </Pressable>
         ) : (
           <View className="py-3">
-            <Text className="font-display text-xl font-bold tracking-[0.3em] text-foreground">
-              #{roomCode}
-            </Text>
+            <Text variant="roomCode">#{roomCode}</Text>
           </View>
         )}
 
@@ -107,7 +104,9 @@ export function WaitingLobby({
             <Avatar avatar={game.players.one?.avatar} size={64} />
           </PlayerSlot>
 
-          <Text className="pt-7 text-sm font-bold text-mutedForeground">vs</Text>
+          <Text variant="body" className="font-bold pt-7">
+            vs
+          </Text>
 
           {opponentJoined ? (
             <PlayerSlot name={game.players.two!.name}>
@@ -127,7 +126,8 @@ export function WaitingLobby({
                 <InviteIcon size={20} color={palette.foreground} />
               </View>
               <Text
-                className="max-w-20 text-center text-xs font-bold text-foreground"
+                variant="hint"
+                className="font-bold text-foreground text-center"
                 numberOfLines={1}
               >
                 Share link
@@ -144,14 +144,16 @@ export function WaitingLobby({
                   style={{ borderColor: `${palette.mutedForeground}4d` }}
                 />
               </View>
-              <Text className="font-sans text-xs text-transparent">·</Text>
+              <Text variant="hint" className="text-transparent">
+                ·
+              </Text>
             </View>
           )}
         </View>
 
         <View className="w-full max-w-xs items-center gap-2">
           {isSpectator ? (
-            <Text className="py-4 text-center text-sm font-semibold text-mutedForeground">
+            <Text variant="link" className="py-4 text-center">
               {joinError ? (
                 <Text style={{ color: palette.destructive }}>{joinError}</Text>
               ) : (
@@ -170,18 +172,18 @@ export function WaitingLobby({
                 {starting ? "Game is starting" : "Start Game"}
               </Button>
               {!opponentJoined && (
-                <Text className="mt-4 text-xs font-bold text-mutedForeground">
+                <Text variant="hint" className="mt-4 font-bold">
                   Waiting for opponent
                 </Text>
               )}
               {startError && (
-                <Text className="font-sans text-xs" style={{ color: palette.destructive }}>
+                <Text variant="hint" style={{ color: palette.destructive }}>
                   {startError}
                 </Text>
               )}
             </>
           ) : (
-            <Text className="mt-4 py-4 text-center text-sm font-semibold text-mutedForeground">
+            <Text variant="link" className="mt-4 py-4 text-center">
               {opponentJoined ? "Waiting for host to start" : "Waiting for opponent"}
             </Text>
           )}
@@ -225,7 +227,7 @@ function PlayerSlot({ name, children }: { name: string; children: React.ReactNod
       >
         {children}
       </View>
-      <Text className="max-w-20 text-center text-xs font-bold text-foreground" numberOfLines={1}>
+      <Text variant="autoGen30" className="max-w-20" numberOfLines={1}>
         {name}
       </Text>
     </View>

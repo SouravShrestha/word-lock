@@ -1,6 +1,7 @@
+import { Text } from "@/components/text";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, View } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 
 import { useTheme } from "@/theme/ThemeProvider";
@@ -79,7 +80,7 @@ export function GameDetailPopup({
               className="p-5"
               style={{ backgroundColor: `${palette.surface}80` }}
             >
-              <Text className="font-sans text-center text-base text-foreground py-2">
+              <Text variant="bodyBase" className="py-2 text-center">
                 Loading game
               </Text>
             </BlurView>
@@ -92,7 +93,7 @@ export function GameDetailPopup({
             className="w-full max-w-sm rounded-2xl p-5"
             style={{ backgroundColor: palette.surface }}
           >
-            <Text className="font-sans text-center text-sm text-destructive">
+            <Text variant="body" className="text-center text-destructive">
               {error instanceof Error ? error.message : "Failed to load game"}
             </Text>
           </Pressable>

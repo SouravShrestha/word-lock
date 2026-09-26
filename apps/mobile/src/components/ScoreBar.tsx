@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { timeLeftLabel } from "@word-lock/core/game";
 import { ClockIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
@@ -23,9 +24,7 @@ function TurnClock({ deadline, status }: { deadline: string | null; status: stri
   return (
     <View className="items-center gap-1.5">
       <ClockIcon size={16} color={palette.foreground} />
-      <Text className="font-display text-xs font-medium tabular-nums text-foreground">
-        {timerLabel ?? (status === "completed" ? "Game over" : "-")}
-      </Text>
+      <Text variant="timer">{timerLabel ?? (status === "completed" ? "Game over" : "-")}</Text>
     </View>
   );
 }
@@ -58,7 +57,7 @@ function PlayerChip({
     <View className={`flex-1 flex-row items-center gap-2 ${mirrored ? "flex-row-reverse" : ""}`}>
       <View className="items-center gap-1.5">
         {reaction && (
-          <Text key={reaction.key} className="font-sans absolute -top-1 z-10 text-2xl">
+          <Text variant="autoGen20" key={reaction.key} className="absolute top-1.5 z-10">
             {reaction.emoji}
           </Text>
         )}
@@ -74,15 +73,17 @@ function PlayerChip({
           <Avatar avatar={player?.avatar} size={32} />
         </View>
         <Text
+          variant="body"
           numberOfLines={1}
-          className="font-sans mt-1.5 max-w-[64px] text-center text-xs leading-none"
+          className="mt-1.5 max-w-[64px] text-center text-xs leading-none"
           style={{ color: active ? palette.foreground : palette.mutedForeground }}
         >
           {player?.name ?? "-"}
         </Text>
       </View>
       <Text
-        className="mx-4 font-display text-3xl font-bold leading-none tabular-nums"
+        variant="score"
+        className="mx-4 leading-none"
         style={{ color: active ? scoreColor : palette.mutedForeground }}
       >
         {formatScore(score)}

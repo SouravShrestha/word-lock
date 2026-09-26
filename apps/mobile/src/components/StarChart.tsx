@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useMemo, useState } from "react";
-import { Text, View, type LayoutChangeEvent } from "react-native";
+import { View, type LayoutChangeEvent } from "react-native";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Svg, {
   Circle,

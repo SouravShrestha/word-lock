@@ -1,3 +1,4 @@
+import { Text } from "@/components/text";
 import { checkUsernameFn, setUsernameFn, useAuth, useSession } from "@word-lock/client";
 import {
   MAX_USERNAME_LENGTH,
@@ -10,7 +11,7 @@ import { CheckIcon, SmileyFaceIcon } from "@word-lock/icons/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { colors } from "@word-lock/tokens/native";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { Button } from "@/components/Button";
 import { SheetTextInput, TopSheet } from "@/components/TopSheet";
@@ -108,15 +109,15 @@ export function UsernameSheet() {
     >
       <View className="items-center gap-2">
         <SmileyFaceIcon size={56} />
-        <Text className="font-display mt-5 text-lg leading-tight text-foreground">
+        <Text variant="heading" className="mt-5 leading-tight">
           What shall we call you?
         </Text>
-        <Text className="font-sans text-sm leading-relaxed text-mutedForeground font-normal">
+        <Text variant="body" className="leading-relaxed">
           This is how players see you
         </Text>
       </View>
 
-      <Text className="font-sans mt-4 text-sm leading-relaxed text-mutedForeground text-center">
+      <Text variant="body" className="mt-4 text-center leading-relaxed">
         You can only set this once, so choose carefully.
       </Text>
 
@@ -137,26 +138,26 @@ export function UsernameSheet() {
 
         <View accessibilityRole="text" className="min-h-5 flex-row items-center justify-end gap-1">
           {formatError ? (
-            <Text className="text-right text-xs font-normal text-destructive">
+            <Text variant="hint" className="text-right text-destructive">
               {USERNAME_ERROR_COPY[formatError]}
             </Text>
           ) : availability.state === "taken" ? (
-            <Text className="text-right text-xs font-normal text-destructive">
+            <Text variant="hint" className="text-right text-destructive">
               {availability.reason}
             </Text>
           ) : availability.state === "checking" ? (
-            <Text className="text-right text-xs font-normal text-mutedForeground">
+            <Text variant="hint" className="text-right">
               Checking availability
             </Text>
           ) : availability.state === "free" ? (
             <>
               <CheckIcon size={14} color={palette.mint} />
-              <Text className="text-right text-xs font-normal text-mint">
+              <Text variant="hintSuccess" className="text-right">
                 {normalized} is available
               </Text>
             </>
           ) : (
-            <Text className="text-right text-xs font-normal text-mutedForeground">
+            <Text variant="hint" className="text-right">
               {MIN_USERNAME_LENGTH}–{MAX_USERNAME_LENGTH} characters. Letters, numbers and
               underscores.
             </Text>
@@ -174,27 +175,24 @@ export function UsernameSheet() {
         </Button>
 
         {mutation.error && (
-          <Text accessibilityRole="alert" className="text-sm font-semibold text-destructive">
+          <Text accessibilityRole="alert" variant="error">
             {mutation.error.message}
           </Text>
         )}
 
         <View className="mt-2 flex-row items-center justify-center gap-1.5">
-          <Text className="text-center text-sm font-semibold text-mutedForeground">
+          <Text variant="link" className="text-center">
             Wrong account?
           </Text>
           <Pressable onPress={goBack} disabled={leaving || mutation.isPending}>
-            <Text className="text-sm font-bold text-foreground underline">
+            <Text variant="linkBold" className="underline">
               {leaving ? "Logging out" : "Back to log in"}
             </Text>
           </Pressable>
         </View>
 
         {leaveError && (
-          <Text
-            accessibilityRole="alert"
-            className="text-center text-sm font-semibold text-destructive"
-          >
+          <Text accessibilityRole="alert" variant="error" className="text-center">
             {leaveError}
           </Text>
         )}

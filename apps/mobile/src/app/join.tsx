@@ -1,8 +1,9 @@
+import { Text } from "@/components/text";
 import { useSession, joinGameFn } from "@word-lock/client";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@word-lock/tokens/native";
 
@@ -72,7 +73,7 @@ export default function JoinScreen() {
                   borderColor: palette.sky,
                 }}
               >
-                <Text className="font-display text-xl font-bold text-foreground">{char ?? ""}</Text>
+                <Text variant="sheetTitle">{char ?? ""}</Text>
               </View>
             );
           })}
@@ -89,7 +90,7 @@ export default function JoinScreen() {
         </Button>
 
         {joinMutation.error && (
-          <Text className="mt-4 text-center text-sm font-semibold text-destructive">
+          <Text variant="error" className="mt-4">
             {joinMutation.error.message}
           </Text>
         )}

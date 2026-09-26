@@ -1,8 +1,9 @@
+import { Text } from "@/components/text";
 import { useAccount } from "@word-lock/client";
 import { leagueById } from "@word-lock/core/account";
 import { LEAGUE_TEXT_COLOR, LeagueIcon, StreakIcon } from "@word-lock/icons/native";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { StreakSheet } from "@/components/StreakSheet";
 
@@ -28,10 +29,7 @@ export function StreakPill() {
         style={{ opacity: pressed ? 0.7 : 1 }}
       >
         <StreakIcon size={24} />
-        <Text
-          className="font-display text-base font-bold mt-0.5"
-          style={{ color: STREAK_TEXT_COLOR }}
-        >
+        <Text variant="autoGen24" className="mt-0.5" style={{ color: STREAK_TEXT_COLOR }}>
           {value}
         </Text>
       </Pressable>
@@ -57,10 +55,7 @@ export function StarsPill() {
       className="flex-row items-center gap-1"
     >
       <LeagueIcon league={league} size={36} />
-      <Text
-        className="font-display ml-1 text-base font-bold tracking-wide"
-        style={{ color: LEAGUE_TEXT_COLOR[league] }}
-      >
+      <Text variant="autoGen25" className="ml-1" style={{ color: LEAGUE_TEXT_COLOR[league] }}>
         {value}
       </Text>
     </View>

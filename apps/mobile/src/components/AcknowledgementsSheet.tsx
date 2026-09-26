@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { View } from "react-native";
 import { CrossIcon } from "@word-lock/icons/native";
 
 import { BottomSheet } from "@/components/BottomSheet";
@@ -22,13 +23,13 @@ export function AcknowledgementsSheet({ open, onClose }: { open: boolean; onClos
   return (
     <BottomSheet open={open} onClose={onClose} label="Acknowledgements" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-lg text-foreground">Acknowledgements</Text>
+        <Text variant="autoGen9">Acknowledgements</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
 
-      <Text className="font-sans mt-3 text-sm text-mutedForeground">
+      <Text variant="body" className="mt-3">
         Word lock is built on open source. Thanks to everyone behind these.
       </Text>
 

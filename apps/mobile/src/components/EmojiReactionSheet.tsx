@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { View } from "react-native";
 import { CrossIcon } from "@word-lock/icons/native";
 import { REACTION_EMOJIS, type ReactionEmoji } from "@word-lock/core/game";
 
@@ -15,15 +16,15 @@ export function EmojiReactionSheet({
   onSelect: (emoji: ReactionEmoji) => void;
 }) {
   return (
-    <BottomSheet open={open} onClose={onClose} label="Send a reaction">
+    <BottomSheet open={open} onClose={onClose} label="Send a reaction" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-lg text-foreground">Send a reaction</Text>
+        <Text variant="autoGen9">Send a reaction</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
 
-      <View className="mt-6 flex-row flex-wrap gap-3">
+      <View className="mt-6 flex-row flex-wrap gap-2">
         {REACTION_EMOJIS.map((emoji) => (
           <SheetTouchable
             key={emoji}
@@ -31,10 +32,10 @@ export function EmojiReactionSheet({
             accessibilityLabel={`React with ${emoji}`}
             onPress={() => onSelect(emoji)}
             activeOpacity={0.6}
-            className="aspect-square items-center justify-center"
-            style={{ width: "14%" }}
+            className="aspect-square items-center justify-center p-2"
+            style={{ width: "18%" }}
           >
-            <Text style={{ fontSize: 28 }}>{emoji}</Text>
+            <Text style={{ fontSize: 34, lineHeight: 44 }}>{emoji}</Text>
           </SheetTouchable>
         ))}
       </View>

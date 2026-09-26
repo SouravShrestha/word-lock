@@ -1,8 +1,9 @@
+import { Text } from "@/components/text";
 import { ChevronDownIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 import type { ReactNode } from "react";
 import { useCallback, useState } from "react";
-import { Linking, Text, View } from "react-native";
+import { Linking, View } from "react-native";
 
 import { SheetTouchable } from "@/components/BottomSheet";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -31,7 +32,9 @@ function Body({
       </Text>
       {hint ? (
         typeof hint === "string" ? (
-          <Text className="font-sans mt-0.5 text-xs text-mutedForeground">{hint}</Text>
+          <Text variant="autoGen11" className="mt-0.5">
+            {hint}
+          </Text>
         ) : (
           hint
         )
@@ -95,17 +98,14 @@ export function SettingsField({
   return (
     <View className={ROW}>
       <View className="min-w-0 flex-1">
-        <Text className="text-[12px] font-semibold tracking-wide text-mutedForeground">
-          {label}
-        </Text>
-        <Text
-          className="mt-1 text-[15px] font-medium tracking-wide text-foreground"
-          numberOfLines={1}
-        >
+        <Text variant="autoGen21">{label}</Text>
+        <Text variant="autoGen22" className="mt-1" numberOfLines={1}>
           {value}
         </Text>
         {hint ? (
-          <Text className="font-sans mt-0.5 text-[13px] text-mutedForeground">{hint}</Text>
+          <Text variant="autoGen23" className="mt-0.5">
+            {hint}
+          </Text>
         ) : null}
       </View>
     </View>

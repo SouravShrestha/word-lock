@@ -1,4 +1,5 @@
-import { Pressable, Text, View, ScrollView } from "react-native";
+import { Text } from "@/components/text";
+import { Pressable, View, ScrollView } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 
 import { Avatar } from "@/components/Avatar";
@@ -44,7 +45,7 @@ export function GameResultCard({
 
   return (
     <View
-      className="w-full overflow-hidden rounded-lg  border-2 border-border"
+      className="w-full overflow-hidden rounded-lg border-2 border-border"
       style={{ backgroundColor: palette.surface }}
     >
       <View className="px-4 pb-4 pt-5" style={{ backgroundColor: palette.board }}>
@@ -56,10 +57,10 @@ export function GameResultCard({
           />
 
           <View className="min-w-0 flex-1 items-center gap-1 pt-4">
-            <Text className="font-display text-lg font-bold leading-none text-foreground">
+            <Text variant="heading" className="leading-none">
               {verdict(game)}
             </Text>
-            <Text className="font-sans text-center text-xs leading-tight text-mutedForeground">
+            <Text variant="body" className="text-center leading-tight">
               {reasonLabel(game)}
             </Text>
             <StarDelta game={game} />
@@ -77,7 +78,7 @@ export function GameResultCard({
       >
         {game.playedWords.length === 0 ? (
           <View className="items-center justify-center">
-            <Text className="font-sans text-sm text-mutedForeground">no words played</Text>
+            <Text variant="body">no words played</Text>
           </View>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -85,7 +86,8 @@ export function GameResultCard({
               {game.playedWords.map((entry, i) => (
                 <Text
                   key={i}
-                  className="font-sans shrink-0 text-sm leading-none"
+                  variant="body"
+                  className="shrink-0 leading-none"
                   style={{
                     color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2,
                   }}
@@ -162,11 +164,16 @@ function PlayerColumn({
       >
         <Avatar avatar={player?.avatar} size={52} />
       </View>
-      <Text numberOfLines={1} className="font-sans max-w-full text-xs leading-none text-foreground">
+      <Text
+        variant="body"
+        numberOfLines={1}
+        className="max-w-full text-xs leading-none text-foreground"
+      >
         {player?.name ?? "-"}
       </Text>
       <Text
-        className="font-display text-2xl font-bold leading-none tabular-nums"
+        variant="statMd"
+        className="leading-none"
         style={{ color: slot === 1 ? palette.p1 : palette.p2 }}
       >
         {score}
@@ -213,7 +220,8 @@ function StarDelta({ game }: { game: ResultGame }) {
 
   return (
     <Text
-      className="font-display mt-0.5 text-xs font-bold tabular-nums"
+      variant="timer"
+      className="mt-0.5 font-bold"
       style={{ color: delta > 0 ? palette.mint : palette.mutedForeground }}
     >
       {delta > 0 ? "+" : ""}

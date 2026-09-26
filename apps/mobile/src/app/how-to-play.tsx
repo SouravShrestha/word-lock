@@ -1,3 +1,4 @@
+import { Text } from "@/components/text";
 import { LEAGUES } from "@word-lock/core/account";
 import {
   BASE_STARS,
@@ -8,7 +9,7 @@ import {
 } from "@word-lock/core/game";
 import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/Button";
@@ -25,9 +26,7 @@ export default function HowToPlayScreen() {
         <BackButton label="Back to Word lock" onPress={goHome} />
 
         <View className="mt-8">
-          <Text className="font-display text-3xl font-bold text-foreground">
-            How to play Word lock
-          </Text>
+          <Text variant="pageTitle">How to play Word lock</Text>
           <P className="mt-3">
             Word lock is a two-player word game about territory rather than speed. You and one
             opponent share a single 5×5 grid of letters, and every word you play takes tiles off
@@ -43,7 +42,7 @@ export default function HowToPlayScreen() {
                 <View key={rule.title} className="flex-row gap-3">
                   <RuleNumber>{i + 1}</RuleNumber>
                   <View className="flex-1">
-                    <Text className="text-sm font-bold text-foreground">{rule.title}</Text>
+                    <Text variant="linkBold">{rule.title}</Text>
                     <P className="mt-1">{rule.body}</P>
                   </View>
                 </View>
@@ -168,7 +167,7 @@ export default function HowToPlayScreen() {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View className="gap-3">
-      <Text className="font-display text-lg font-bold text-foreground">{title}</Text>
+      <Text variant="sectionHeading">{title}</Text>
       {children}
     </View>
   );
@@ -187,8 +186,10 @@ function List({ items }: { items: string[] }) {
     <View className="gap-2">
       {items.map((item) => (
         <View key={item} className="flex-row gap-2">
-          <Text className="font-sans text-sm leading-relaxed text-mutedForeground">•</Text>
-          <Text className="font-sans flex-1 text-sm leading-relaxed text-mutedForeground">
+          <Text variant="body" className="leading-relaxed">
+            •
+          </Text>
+          <Text variant="body" className="flex-1 leading-relaxed">
             {item}
           </Text>
         </View>

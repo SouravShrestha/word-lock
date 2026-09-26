@@ -1,6 +1,7 @@
+import { Text } from "@/components/text";
 import { colors } from "@word-lock/tokens/native";
 import { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -87,7 +88,8 @@ export function ToastHost() {
         className="rounded-xl px-4 py-3"
       >
         <Text
-          className="text-center text-sm font-semibold"
+          variant="autoGen29"
+
           style={{ color: current.variant === "default" ? palette.background : foreground }}
         >
           {current.message}

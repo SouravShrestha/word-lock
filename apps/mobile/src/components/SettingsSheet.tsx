@@ -1,9 +1,10 @@
+import { Text } from "@/components/text";
 import { useAccount, useAuth, useSession } from "@word-lock/client";
 import { browserTimezone } from "@word-lock/core/account";
 import { CrossIcon } from "@word-lock/icons/native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 import { AboutSheet } from "@/components/AboutSheet";
 import { AcknowledgementsSheet } from "@/components/AcknowledgementsSheet";
@@ -56,7 +57,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         dismissable={nested === null && !confirming}
       >
         <View className="flex-row items-center justify-between gap-4 px-1 pt-7">
-          <Text className="font-display text-lg text-foreground">Settings</Text>
+          <Text variant="sheetTitle">Settings</Text>
           <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
             <CrossIcon size={14} color="#ffffff" />
           </IconButton>
@@ -68,8 +69,8 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             <SettingsGroup>
               <View className="flex-row items-center gap-3.5 px-2 py-4">
                 <View className="min-w-0 flex-1">
-                  <Text className="text-[15px] font-medium text-foreground">Dark theme</Text>
-                  <Text className="font-sans mt-0.5 text-[13px] text-mutedForeground">
+                  <Text variant="label">Dark theme</Text>
+                  <Text variant="caption" className="mt-0.5">
                     Easier on the eyes
                   </Text>
                 </View>

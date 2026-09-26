@@ -1,9 +1,10 @@
+import { Text } from "@/components/text";
 import { useAuth } from "@word-lock/client";
 import { GoogleIcon, MailIcon, StarIcon, StreakIcon, TrophyNavIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 import { useRouter } from "expo-router";
 import { useCallback, useState, type ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { Button } from "@/components/Button";
 import { SheetTextInput, TopSheet } from "@/components/TopSheet";
@@ -18,9 +19,7 @@ function Perk({ icon, label }: { icon: ReactNode; label: string }) {
   return (
     <View className="flex-row items-center gap-2.5">
       <View className="w-6 shrink-0 items-center justify-center">{icon}</View>
-      <Text className="font-display font-medium text-[15px] tracking-wide text-mutedForeground">
-        {label}
-      </Text>
+      <Text variant="labelTracked">{label}</Text>
     </View>
   );
 }
@@ -98,13 +97,12 @@ export function AuthSheet() {
     >
       {phase === "code" || phase === "verifying" ? (
         <>
-          <Text className="font-display text-xl leading-tight text-foreground">
+          <Text variant="sheetTitle" className="leading-tight">
             Enter your code
           </Text>
-          <Text className="font-sans mt-6 text-[15px] leading-relaxed text-mutedForeground">
-            We sent a 6-digit code to{" "}
-            <Text className="font-bold text-foreground">{email.trim()}</Text>. Enter it below to
-            finish logging in.
+          <Text variant="labelBody" className="mt-6 leading-relaxed">
+            We sent a 6-digit code to <Text variant="autoGen10">{email.trim()}</Text>. Enter it
+            below to finish logging in.
           </Text>
 
           <View className="mt-8 gap-2.5">
@@ -142,26 +140,25 @@ export function AuthSheet() {
               }}
               disabled={phase === "verifying"}
             >
-              <Text className="text-[14px] tracking-wide font-semibold text-mutedForeground mt-4 text-center">
+              <Text variant="link" className="mt-4 text-center">
                 Use a different email
               </Text>
             </Pressable>
           </View>
 
           {error && (
-            <Text
-              accessibilityRole="alert"
-              className="mt-3 text-sm font-semibold text-destructive text-center"
-            >
+            <Text accessibilityRole="alert" variant="error" className="mt-3 text-center">
               {error}
             </Text>
           )}
         </>
       ) : (
         <>
-          <Text className="font-display text-xl leading-tight text-foreground">Log in to play</Text>
-          <Text className="font-sans mt-5 text-[15px] leading-relaxed text-mutedForeground">
-            You need an account so your gamesss, stars and streak follow you across devices.
+          <Text variant="sheetTitle" className="leading-tight">
+            Log in to play
+          </Text>
+          <Text variant="labelBody" className="mt-5 leading-relaxed">
+            You need an account so your games, stars and streak follow you across devices.
           </Text>
 
           <View className="mt-6 gap-3.5">
@@ -196,7 +193,7 @@ export function AuthSheet() {
 
                 <View className="my-1 flex-row items-center gap-3">
                   <View className="h-px flex-1 bg-mutedForeground opacity-20" />
-                  <Text className="font-display font-medium text-xs tracking-wide text-mutedForeground">
+                  <Text variant="hint" className="font-medium tracking-wide">
                     or
                   </Text>
                   <View className="h-px flex-1 bg-mutedForeground opacity-20" />
@@ -234,18 +231,20 @@ export function AuthSheet() {
           </View>
 
           {error && (
-            <Text accessibilityRole="alert" className="mt-3 text-sm font-semibold text-destructive">
+            <Text accessibilityRole="alert" variant="error" className="mt-3">
               {error}
             </Text>
           )}
 
           <View className="mt-6 flex-row items-center justify-center gap-2">
             <Pressable onPress={() => router.push("/how-to-play")}>
-              <Text className="text-sm font-semibold text-mutedForeground">How to play</Text>
+              <Text variant="link">How to play</Text>
             </Pressable>
-            <Text className="font-sans text-xs text-mutedForeground opacity-50">·</Text>
+            <Text variant="hint" className="opacity-50">
+              ·
+            </Text>
             <Pressable onPress={() => router.push("/legal/privacy")}>
-              <Text className="text-sm font-semibold text-mutedForeground">Privacy policy</Text>
+              <Text variant="link">Privacy policy</Text>
             </Pressable>
           </View>
         </>

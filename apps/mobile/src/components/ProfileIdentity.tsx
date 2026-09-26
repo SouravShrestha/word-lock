@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { PencilIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 
@@ -46,14 +47,11 @@ export function ProfileIdentity({
         </View>
       </Pressable>
 
-      <Text
-        numberOfLines={1}
-        className="max-w-full px-3 text-center font-display text-lg font-bold text-foreground"
-      >
+      <Text variant="heading" numberOfLines={1} className="max-w-full px-3 text-center">
         {username ? `@${username}` : "…"}
       </Text>
 
-      <Text className="text-[13px] font-semibold text-mutedForeground">
+      <Text variant="caption">
         {joinedAt ? `Joined ${new Date(joinedAt).getFullYear()}` : "\u00A0"}
       </Text>
 

@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import type { ReactNode } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, View } from "react-native";
 
 import { Button } from "@/components/Button";
 import { useSheetStack } from "@/components/sheet-stack";
@@ -49,9 +50,9 @@ export function ConfirmDialog({
           className="w-full max-w-xs gap-4 rounded-2xl border border-surfaceHairline bg-surface p-6"
         >
           <View className="items-center gap-1">
-            <Text className="text-center text-lg font-bold text-foreground">{title}</Text>
+            <Text variant="autoGen7">{title}</Text>
             {description && (
-              <Text className="font-sans mt-1 text-center text-sm text-mutedForeground">
+              <Text variant="body" className="mt-1">
                 {description}
               </Text>
             )}

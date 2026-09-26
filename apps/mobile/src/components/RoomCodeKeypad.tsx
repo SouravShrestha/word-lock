@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useCallback, useRef, useState, type ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 import { BackspaceIcon } from "@word-lock/icons/native";
 
@@ -102,7 +103,7 @@ function LetterKey({ char, onPress }: { char: string; onPress: () => void }) {
         elevation: pressed ? 1 : 3,
       }}
     >
-      <Text className="text-lg font-bold text-foreground">{char}</Text>
+      <Text variant="autoGen7">{char}</Text>
     </Pressable>
   );
 }

@@ -1,4 +1,5 @@
-import { Modal, Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { Modal, View } from "react-native";
 import { useAccount } from "@word-lock/client";
 import { leagueChange, leagueForStars } from "@word-lock/core/account";
 import { LeagueIcon, LEAGUE_TEXT_COLOR } from "@word-lock/icons/native";
@@ -52,7 +53,8 @@ function LeagueMove({ game }: { game: ResultGame }) {
     <View className="flex-row items-center gap-1.5">
       <LeagueIcon league={league.id} size={20} />
       <Text
-        className="text-xs font-bold uppercase tracking-wider"
+        variant="autoGen13"
+        className="uppercase"
         style={{ color: LEAGUE_TEXT_COLOR[league.id] }}
       >
         {change === "promotion" ? `Promoted to ${league.name}` : `Dropped to ${league.name}`}

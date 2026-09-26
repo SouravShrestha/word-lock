@@ -159,8 +159,8 @@
 /* Legacy alias for `soft-btn`, kept so in-game buttons pick up the same lip. */
 @utility chunky-btn {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   border-radius: 0.55rem;
   border: none;
   box-shadow: 0 var(--btn-lip, 4px) 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
@@ -185,6 +185,107 @@
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0.1em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Named text-variant utilities  (tv-*)
+ *
+ * These mirror the TEXT_VARIANT_CONFIG table in
+ * `apps/mobile/src/components/Text.tsx`.  One row per role — change a
+ * property here and it applies to every web call site that uses the utility.
+ *
+ * Naming convention: `tv-<variant>` so they are easy to grep and do not
+ * clash with Tailwind's own `text-*` size utilities.
+ * -------------------------------------------------------------------------- */
+
+/* ── Display / headings ──────────────────────────────────────────────────── */
+
+@utility tv-screen-title {
+  font-family: var(--font-display);
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@utility tv-heading {
+  font-family: var(--font-display);
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+@utility tv-subheading {
+  font-family: var(--font-display);
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+@utility tv-body {
+  font-family: var(--font-sans);
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
+}
+
+@utility tv-body-base {
+  font-family: var(--font-sans);
+  font-size: 1rem; /* text-base */
+  font-weight: 500;
+}
+
+/* ── UI labels ───────────────────────────────────────────────────────────── */
+
+@utility tv-label {
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 600;
+}
+
+@utility tv-caption {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+}
+
+@utility tv-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Numerics ────────────────────────────────────────────────────────────── */
+
+@utility tv-stat {
+  font-family: var(--font-display);
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@utility tv-stat-md {
+  font-family: var(--font-display);
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@utility tv-score {
+  font-family: var(--font-display);
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@utility tv-timer {
+  font-family: var(--font-display);
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 @utility no-scrollbar {
@@ -222,8 +323,8 @@
   justify-content: center;
   gap: 0.5rem;
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   border-radius: 0.55rem;
   box-shadow: 0 var(--btn-lip, 4px) 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
   transition:

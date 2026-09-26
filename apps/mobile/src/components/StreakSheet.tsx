@@ -1,8 +1,9 @@
+import { Text } from "@/components/text";
 import { browserTimezone } from "@word-lock/core/account";
 import { isGracePeriodActive, localDate, streakWeek } from "@word-lock/core/game";
 import { CrossIcon, StreakIcon, TickIcon } from "@word-lock/icons/native";
 import { colors, radius } from "@word-lock/tokens/native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { IconButton } from "@/components/IconButton";
@@ -52,7 +53,7 @@ export function StreakSheet({
           <StreakIcon size={112} />
         </View>
 
-        <Text className="font-display mt-6 text-2xl font-bold text-foreground">
+        <Text variant="autoGen26" className="mt-6">
           {playStreak === 1 ? "1 Day Streak!" : `${playStreak} Day Streak!`}
         </Text>
 
@@ -91,7 +92,7 @@ export function StreakSheet({
           ))}
         </View>
 
-        <Text className="font-sans mt-8 text-center text-sm leading-relaxed text-mutedForeground">
+        <Text variant="body" className="mt-8 leading-relaxed">
           {footer}
         </Text>
       </View>

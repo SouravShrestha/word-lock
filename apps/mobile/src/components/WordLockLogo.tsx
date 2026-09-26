@@ -20,13 +20,12 @@ export function WordLockLogo({
 }: {
   width?: number;
   height?: number;
-  /** Colour for the LOCK wordmark and padlock shackle (`currentColor` on the web). */
   fillColor?: string;
 } & Pick<ComponentProps<typeof Svg>, "width" | "height">) {
-  const resolvedHeight = height ?? (width / 223) * 106;
+  const resolvedHeight = height ?? (width / 223) * 110;
 
   return (
-    <Svg width={width} height={resolvedHeight} viewBox="0 0 223 106" fill="none">
+    <Svg width={width} height={resolvedHeight} viewBox="0 -4 223 110" fill="none">
       {/* WORD tiles: each is a darker lip rect with the face rect on top. */}
       <Rect
         x="20.5095"

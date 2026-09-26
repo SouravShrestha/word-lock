@@ -1,3 +1,4 @@
+import { Text } from "@/components/text";
 import { createGameFn, fetchLobby, timeoutGameFn, useSession } from "@word-lock/client";
 import { timeLeftLabel } from "@word-lock/core/game";
 import { HeartIcon, PlayIcon } from "@word-lock/icons/native";
@@ -5,7 +6,7 @@ import { colors } from "@word-lock/tokens/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/Button";
@@ -78,7 +79,7 @@ export default function HomeScreen() {
         <StarsPill />
       </View>
 
-      <View className={hasGames ? "mt-10 flex-1" : "flex-1"}>
+      <View className={hasGames ? "mt-12 flex-1" : "flex-1"}>
         <View
           className={
             hasGames ? "items-center pb-8 pt-4" : "flex-1 items-center justify-center pb-8"
@@ -217,33 +218,31 @@ function GameCard({ game }: { game: LobbyGame }) {
       <Lip depth={palette.depthSurface} />
       <View className="border border-surfaceHairline bg-surface p-3.5" style={{ borderRadius: 12 }}>
         <View className="gap-0.5">
-          <Text className="text-sm font-bold text-foreground" numberOfLines={1}>
-            <Text className="text-xs font-normal text-mutedForeground">vs </Text>
+          <Text variant="body" className="font-bold text-foreground" numberOfLines={1}>
+            <Text variant="hint">vs </Text>
             {opponent?.name ?? "?"}
           </Text>
-          <Text className="text-[0.7rem] font-semibold tracking-wide text-mutedForeground">
-            #{game.roomCode}
-          </Text>
+          <Text variant="roomCodeCard">#{game.roomCode}</Text>
         </View>
 
         <View className="mt-2 flex-row items-baseline">
-          <Text className="font-display text-2xl font-semibold text-p1">{game.scores[1]}</Text>
-          <Text className="mx-1 text-xl font-medium text-mutedForeground">:</Text>
-          <Text className="font-display text-2xl font-semibold text-p2">{game.scores[2]}</Text>
+          <Text variant="scoreCard" className="text-p1">
+            {game.scores[1]}
+          </Text>
+          <Text variant="autoGen1" className="mx-1">
+            :
+          </Text>
+          <Text variant="scoreCard" className="text-p2">
+            {game.scores[2]}
+          </Text>
         </View>
 
         <View className="mt-3 flex-row items-center justify-between">
-          <Text
-            className={
-              yourTurn
-                ? "text-[0.65rem] font-bold tracking-wide text-sun"
-                : "text-[0.65rem] font-bold tracking-wide text-mutedForeground"
-            }
-          >
+          <Text variant="turnStatus" className={yourTurn ? "text-sun" : "text-mutedForeground"}>
             {yourTurn ? "Your turn" : "Their turn"}
           </Text>
           {game.status === "active" && game.turnDeadline && (
-            <Text className="text-[0.65rem] font-semibold tabular-nums text-mutedForeground">
+            <Text variant="turnStatus" className="font-semibold tabular-nums text-mutedForeground">
               {timeLeftLabel(game.turnDeadline)}
             </Text>
           )}

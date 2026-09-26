@@ -1,4 +1,5 @@
-import { ScrollView, Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { ScrollView, View } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 
 import { useTheme } from "@/theme/ThemeProvider";
@@ -22,7 +23,8 @@ export function PlayedWords({
         className="flex-1 items-center justify-center"
       >
         <Text
-          className="font-sans text-[15px] leading-none pt-1"
+          variant="autoGen16"
+          className="leading-none pt-1"
           style={{ color: palette.foreground }}
         >
           No words
@@ -44,8 +46,9 @@ export function PlayedWords({
     >
       {entries.map((entry, i) => (
         <Text
+          variant="autoGen16"
           key={i}
-          className="font-sans shrink-0 text-[15px] leading-none pt-1"
+          className="shrink-0 leading-none pt-1"
           style={{ color: entry.playerId === game.players.one?.id ? palette.p1 : palette.p2 }}
         >
           {entry.word.charAt(0).toUpperCase() + entry.word.slice(1).toLowerCase()}

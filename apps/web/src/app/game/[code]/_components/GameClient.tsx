@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Tile, type TileOwner } from "@/components/Tile";
 import {
   useSession,
+  useAuth,
   useHasPlayableAccount,
   createGameFn,
   fetchGameFn,
@@ -91,8 +92,10 @@ export function GameClient({ code }: { code: string }) {
   const isCompleted = game?.status === "completed";
   useInvalidateOnGameComplete(isCompleted, queryClient);
 
+  const { ready: authReady } = useAuth();
+
   useEffect(() => {
-    if (!game?.id) return;
+    if (!game?.id || !authReady) return;
 
     const channel = supabase
       .channel(`game-${game.id}`)
@@ -140,13 +143,14 @@ export function GameClient({ code }: { code: string }) {
         showReaction(emoji, slot);
       })
       .subscribe((status) => {
-        setIsRealtimeConnected(status === "SUBSCRIBED");
+        const connected = status === "SUBSCRIBED";
+        setIsRealtimeConnected((prev) => (prev === connected ? prev : connected));
       });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [game?.id, roomCode, sessionId, queryClient, showReaction, startHostLeftCountdown]);
+  }, [game?.id, authReady, roomCode, sessionId, queryClient, showReaction, startHostLeftCountdown]);
 
   useEffect(() => {
     isHostWaitingRef.current = game?.status === "waiting" && game?.viewerSlot === 1;

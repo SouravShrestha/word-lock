@@ -1,3 +1,4 @@
+import { Text } from "@/components/text";
 import { setAvatarFn, useSession } from "@word-lock/client";
 import { AVATAR_IDS, normalizeAvatarId } from "@word-lock/core/account";
 import { CheckIcon, CrossIcon } from "@word-lock/icons/native";
@@ -15,7 +16,7 @@ import {
 import { cssInterop } from "nativewind";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from "react";
-import { Text, View, useWindowDimensions } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, radius } from "@word-lock/tokens/native";
@@ -159,7 +160,7 @@ export function AvatarSheet({
             {unchanged ? "Saved" : "Save avatar"}
           </Button>
           {mutation.error && (
-            <Text className="mt-2 text-center text-sm font-semibold text-destructive">
+            <Text variant="error" className="mt-2">
               {mutation.error.message}
             </Text>
           )}
@@ -213,8 +214,8 @@ export function AvatarSheet({
           className="flex-row items-start justify-between gap-4"
         >
           <View className="flex-1 gap-1">
-            <Text className="font-display text-xl text-foreground">Choose your avatar</Text>
-            <Text className="font-sans text-[15px] leading-relaxed text-mutedForeground">
+            <Text variant="autoGen8">Choose your avatar</Text>
+            <Text variant="labelBody" className="leading-relaxed">
               This is the face players see next to your name
             </Text>
           </View>

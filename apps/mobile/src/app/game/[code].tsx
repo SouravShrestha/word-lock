@@ -1,3 +1,4 @@
+import { Text } from "@/components/text";
 import {
   createGameFn,
   destroyGameFn,
@@ -15,6 +16,7 @@ import {
   useReactionFlash,
   useHasPlayableAccount,
   useSession,
+  useAuth,
   useSweepTimer,
 } from "@word-lock/client";
 import { joinUrl } from "@word-lock/core/app";
@@ -22,7 +24,7 @@ import { type ReactionEmoji, type HistoryMove } from "@word-lock/core/game";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AppState, Text, View, type AppStateStatus } from "react-native";
+import { AppState, View, type AppStateStatus } from "react-native";
 
 import { supabase } from "@/lib/supabase";
 
@@ -102,8 +104,10 @@ export default function GameScreen() {
     viewerSlotRef.current = game?.viewerSlot ?? null;
   }, [game?.status, game?.viewerSlot]);
 
+  const { ready: authReady } = useAuth();
+
   useEffect(() => {
-    if (!game?.id) return;
+    if (!game?.id || !authReady) return;
 
     const channel = supabase
       .channel(`game-${game.id}`)
@@ -129,12 +133,15 @@ export default function GameScreen() {
         if (slot === viewerSlotRef.current) return;
         showReaction(emoji, slot);
       })
-      .subscribe((status) => setIsRealtimeConnected(status === "SUBSCRIBED"));
+      .subscribe((status) => {
+        const connected = status === "SUBSCRIBED";
+        setIsRealtimeConnected((prev) => (prev === connected ? prev : connected));
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [game?.id, queryClient, queryKey, showReaction, startHostLeftCountdown]);
+  }, [game?.id, authReady, queryClient, queryKey, showReaction, startHostLeftCountdown]);
 
   useEffect(() => {
     const onChange = (state: AppStateStatus) => {
@@ -182,15 +189,15 @@ export default function GameScreen() {
       <Shell>
         <View className="flex-1 items-center justify-center gap-6 px-8">
           <View className="items-center">
-            <Text className="text-2xl font-bold text-foreground">Host left the lobby</Text>
-            <Text className="font-sans mt-2 text-sm text-mutedForeground">
+            <Text variant="autoGen5">Host left the lobby</Text>
+            <Text variant="body" className="mt-2">
               The game has been disbanded
             </Text>
           </View>
-          <Text className="font-display text-6xl font-bold tabular-nums text-foreground">
+          <Text variant="countdown" className="tabular-nums">
             {hostLeftCountdown}
           </Text>
-          <Text className="font-sans text-sm text-mutedForeground">Redirecting to lobby...</Text>
+          <Text variant="body">Redirecting to lobby...</Text>
         </View>
       </Shell>
     );
@@ -200,7 +207,9 @@ export default function GameScreen() {
     return (
       <Shell>
         <View className="flex-1 items-center justify-center">
-          <Text className="text-lg text-foreground animate-pulse">Loading your game</Text>
+          <Text variant="autoGen6" className="animate-pulse">
+            Loading your game
+          </Text>
         </View>
       </Shell>
     );
@@ -210,9 +219,7 @@ export default function GameScreen() {
     return (
       <Shell>
         <View className="flex-1 items-center justify-center gap-4">
-          <Text className="text-center text-lg font-bold text-foreground">
-            No game with code {roomCode}
-          </Text>
+          <Text variant="autoGen7">No game with code {roomCode}</Text>
           <Button variant="surface" onPress={() => router.push("/")}>
             Back to lobby
           </Button>

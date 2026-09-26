@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 import { Button } from "@/components/Button";
 
@@ -17,9 +18,11 @@ export default function NotFoundScreen() {
   return (
     <View className="flex-1 items-center justify-center bg-background px-6">
       <View className="w-full max-w-sm items-center">
-        <Text className="font-display text-7xl font-bold text-foreground">404</Text>
-        <Text className="mt-4 text-xl font-semibold text-foreground">Page not found</Text>
-        <Text className="font-sans mt-2 text-center text-sm text-mutedForeground">
+        <Text variant="autoGen2">404</Text>
+        <Text variant="autoGen3" className="mt-4">
+          Page not found
+        </Text>
+        <Text variant="body" className="mt-2">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </Text>
         <View className="mt-6 w-full">

@@ -1,3 +1,4 @@
+import { Text } from "@/components/text";
 import { useAccount, useLeaderboard } from "@word-lock/client";
 import { leagueById } from "@word-lock/core/account";
 import {
@@ -7,7 +8,7 @@ import {
   StarIcon,
   StreakIcon,
 } from "@word-lock/icons/native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import type { ReactNode } from "react";
 import { colors } from "@word-lock/tokens/native";
 
@@ -59,7 +60,8 @@ function Fact({ icon, tint, label }: { icon: ReactNode; tint: string; label: str
     <View className="w-[47%] flex-row items-center gap-2.5">
       <View className="w-8 shrink-0 items-center justify-center h-7">{icon}</View>
       <Text
-        className="min-w-0 flex-1 text-[15px] font-semibold tracking-wide"
+        variant="label"
+        className="min-w-0 flex-1 tracking-wide"
         style={{ color: tint }}
         numberOfLines={1}
       >

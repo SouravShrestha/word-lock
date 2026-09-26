@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { View } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 
 import { useTheme } from "@/theme/ThemeProvider";
@@ -70,7 +71,7 @@ export function RuleNumber({ children }: { children: React.ReactNode }) {
           borderRadius: RADIUS,
         }}
       >
-        <Text className="font-display text-xs font-bold" style={{ color: palette.onAccent }}>
+        <Text variant="autoGen19" style={{ color: palette.onAccent }}>
           {children}
         </Text>
       </View>

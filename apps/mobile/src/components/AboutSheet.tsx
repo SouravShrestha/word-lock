@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { View } from "react-native";
 import { CrossIcon } from "@word-lock/icons/native";
 
 import { BottomSheet } from "@/components/BottomSheet";
@@ -17,16 +18,14 @@ export function AboutSheet({ open, onClose }: { open: boolean; onClose: () => vo
   return (
     <BottomSheet open={open} onClose={onClose} label="About" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-xl text-foreground">About</Text>
+        <Text variant="autoGen8">About</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
 
       <View className="mt-8">
-        <Text className="text-[13px] font-semibold text-mutedForeground">
-          Version {APP_VERSION}
-        </Text>
+        <Text variant="caption">Version {APP_VERSION}</Text>
       </View>
 
       <View className="mt-4 -mx-2">

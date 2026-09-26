@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { View } from "react-native";
 import { CrossIcon, LeagueIcon, LEAGUE_TEXT_COLOR } from "@word-lock/icons/native";
 import { LEAGUES } from "@word-lock/core/account";
 
@@ -9,13 +10,13 @@ export function LeagueGuideSheet({ open, onClose }: { open: boolean; onClose: ()
   return (
     <BottomSheet open={open} onClose={onClose} label="League tiers" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text className="font-display text-xl font-bold text-foreground">League tiers</Text>
+        <Text variant="sheetTitle">League tiers</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
 
-      <Text className="font-sans mt-3 text-[15px] text-mutedForeground">
+      <Text variant="labelBody" className="mt-3">
         Climb the ladder by winning games and earning stars.
       </Text>
 
@@ -25,12 +26,13 @@ export function LeagueGuideSheet({ open, onClose }: { open: boolean; onClose: ()
             <LeagueIcon league={tier.id} size={48} />
             <View>
               <Text
-                className="font-display text-base font-semibold tracking-wide"
+                variant="autoGen14"
+
                 style={{ color: LEAGUE_TEXT_COLOR[tier.id] }}
               >
                 {tier.name}
               </Text>
-              <Text className="text-xs font-semibold tracking-wide text-mutedForeground">
+              <Text variant="autoGen15">
                 {tier.maxStars === null
                   ? `${tier.minStars}+ stars`
                   : `${tier.minStars} - ${tier.maxStars} stars`}

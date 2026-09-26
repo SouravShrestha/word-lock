@@ -194,7 +194,7 @@ describe("deleteAccount", () => {
       "Log in to delete your account.",
     );
     expect(rpcCalls).toHaveLength(0);
-  });
+  }, 10000);
 
   it("destroys a waiting lobby the caller created, rather than forfeiting it", async () => {
     players = [

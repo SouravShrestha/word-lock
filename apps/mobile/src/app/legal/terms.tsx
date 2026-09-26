@@ -1,6 +1,7 @@
+import { Text } from "@/components/text";
 import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { BackButton } from "@/components/BackButton";
 import { SUPPORT_EMAIL } from "@/lib/app-meta";
@@ -18,8 +19,8 @@ export default function TermsScreen() {
         <BackButton label="Back to Word lock" onPress={goHome} />
 
         <View className="mt-8">
-          <Text className="font-display text-3xl font-bold text-foreground">Terms of use</Text>
-          <Text className="mt-2 text-xs font-semibold text-mutedForeground">
+          <Text variant="pageTitle">Terms of use</Text>
+          <Text variant="dateMeta" className="mt-2">
             Last updated {TERMS_UPDATED}
           </Text>
         </View>
@@ -71,7 +72,7 @@ export default function TermsScreen() {
         </View>
 
         <View className="mt-12 gap-3">
-          <Text onPress={goHome} className="text-sm font-bold text-foreground underline">
+          <Text variant="linkBold" onPress={goHome} className="underline">
             Back to Word lock
           </Text>
           <Text
@@ -89,14 +90,18 @@ export default function TermsScreen() {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View className="gap-3">
-      <Text className="font-display text-lg font-bold text-foreground">{title}</Text>
+      <Text variant="sectionHeading">{title}</Text>
       {children}
     </View>
   );
 }
 
 function P({ children }: { children: ReactNode }) {
-  return <Text className="font-sans text-sm leading-relaxed text-mutedForeground">{children}</Text>;
+  return (
+    <Text variant="body" className="leading-relaxed">
+      {children}
+    </Text>
+  );
 }
 
 function List({ items }: { items: string[] }) {
@@ -104,8 +109,10 @@ function List({ items }: { items: string[] }) {
     <View className="gap-2">
       {items.map((item) => (
         <View key={item} className="flex-row gap-2">
-          <Text className="font-sans text-sm leading-relaxed text-mutedForeground">•</Text>
-          <Text className="font-sans flex-1 text-sm leading-relaxed text-mutedForeground">
+          <Text variant="body" className="leading-relaxed">
+            •
+          </Text>
+          <Text variant="body" className="flex-1 leading-relaxed">
             {item}
           </Text>
         </View>

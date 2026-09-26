@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { ChevronDownIcon, CrossIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 
@@ -40,7 +41,9 @@ function MenuRow({
           {label}
         </Text>
         {hint ? (
-          <Text className="font-sans mt-0.5 text-xs text-mutedForeground">{hint}</Text>
+          <Text variant="autoGen11" className="mt-0.5">
+            {hint}
+          </Text>
         ) : null}
       </View>
       <View style={{ transform: [{ rotate: "-90deg" }], opacity: 0.6 }}>
@@ -74,7 +77,7 @@ export function GameMenuSheet({
         showHandle={!showRules}
       >
         <View className="flex-row items-center justify-between gap-4">
-          <Text className="font-display text-lg text-foreground">Game menu</Text>
+          <Text variant="autoGen9">Game menu</Text>
           <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
             <CrossIcon size={14} color="#ffffff" />
           </IconButton>
@@ -83,7 +86,7 @@ export function GameMenuSheet({
         <View className="mt-6">
           <View className="w-full flex-row items-center gap-3.5 py-4">
             <View className="min-w-0 flex-1">
-              <Text className="text-sm font-medium tracking-wide text-foreground">Dark theme</Text>
+              <Text variant="autoGen12">Dark theme</Text>
             </View>
             <Toggle
               label="Dark theme"

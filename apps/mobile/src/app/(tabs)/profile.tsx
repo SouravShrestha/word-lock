@@ -1,10 +1,11 @@
+import { Text } from "@/components/text";
 import { fetchProfileFn, useAccount, useSession } from "@word-lock/client";
 import type { PlayerStats } from "@word-lock/core/game";
 import { SettingsIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { IconButton } from "@/components/IconButton";
@@ -72,10 +73,10 @@ export default function ProfileScreen() {
               <StatisticsCard starHistory={data!.starHistory} overview={overview} />
             ) : (
               <View className="items-center p-6">
-                <Text className="font-display text-lg font-bold text-foreground">
-                  No games finished yet
+                <Text variant="sectionHeading">No games finished yet</Text>
+                <Text variant="body" className="mt-1">
+                  Go play one!
                 </Text>
-                <Text className="font-sans mt-1 text-sm text-mutedForeground">Go play one!</Text>
               </View>
             )}
           </View>

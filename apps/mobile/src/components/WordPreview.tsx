@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { View } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 
 import { useTheme } from "@/theme/ThemeProvider";
@@ -15,15 +16,14 @@ export function WordPreview({ letters, yourTurn }: { letters: string[]; yourTurn
     >
       {word.length === 0 ? (
         <Text
-          className="text-sm font-medium tracking-wide"
+          variant="autoGen31"
+
           style={{ color: `${palette.foreground}e6` }}
         >
           {yourTurn ? "Select tiles to form a word" : "Opponent's turn"}
         </Text>
       ) : (
-        <Text className="font-display text-sm font-medium tracking-widest text-foreground">
-          {word}
-        </Text>
+        <Text variant="autoGen32">{word}</Text>
       )}
     </View>
   );

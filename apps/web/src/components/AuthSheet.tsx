@@ -5,7 +5,6 @@ import { useCallback, useState } from "react";
 import { BottomSheet } from "@/components/BottomSheet";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { MailIcon } from "@/components/icons/MailIcon";
-import { CheckIcon } from "@/components/icons/CheckIcon";
 import { StreakIcon } from "@/components/icons/StreakIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
 import { TrophyNavIcon } from "@/components/icons/nav/TrophyNavIcon";
@@ -30,14 +29,16 @@ const PERKS = [
 ] as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CODE_LENGTH = 6;
 
-type Phase = "choose" | "sending" | "sent";
+type Phase = "choose" | "sending" | "code" | "verifying";
 
 export function AuthSheet() {
-  const { isLoginRequired, signInWithGoogle, signInWithEmail } = useAuth();
+  const { isLoginRequired, signInWithGoogle, signInWithEmail, verifyEmailCode } = useAuth();
 
   const [phase, setPhase] = useState<Phase>("choose");
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [googleBusy, setGoogleBusy] = useState(false);
 
@@ -47,7 +48,7 @@ export function AuthSheet() {
     try {
       await signInWithGoogle();
     } catch {
-      setError("Couldn't reach Google. Try again, or use a magic link.");
+      setError("Couldn't reach Google. Try again, or use a code instead.");
       setGoogleBusy(false);
     }
   }, [signInWithGoogle]);
@@ -65,42 +66,99 @@ export function AuthSheet() {
       setPhase("sending");
       try {
         await signInWithEmail(trimmed);
-        setPhase("sent");
+        setPhase("code");
       } catch {
-        setError("Couldn't send that link. Wait a moment and try again.");
+        setError("Couldn't send that code. Wait a moment and try again.");
         setPhase("choose");
       }
     },
     [email, signInWithEmail],
   );
 
-  const busy = googleBusy || phase === "sending";
-  const heading = phase === "sent" ? "Check your inbox" : "Log in to play";
+  const onVerify = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const trimmed = code.trim();
+      if (trimmed.length !== CODE_LENGTH) {
+        setError(`Enter the ${CODE_LENGTH}-digit code.`);
+        return;
+      }
+
+      setError(null);
+      setPhase("verifying");
+      try {
+        await verifyEmailCode(email.trim(), trimmed);
+        // On success `isLoginRequired` flips and the sheet closes automatically
+      } catch {
+        setError("That code didn't work. Check it and try again.");
+        setPhase("code");
+      }
+    },
+    [code, email, verifyEmailCode],
+  );
+
+  const busy = googleBusy || phase === "sending" || phase === "verifying";
+  const isCodePhase = phase === "code" || phase === "verifying";
+  const heading = isCodePhase ? "Enter your code" : "Log in to play";
 
   return (
     <BottomSheet open={isLoginRequired} label={heading} dismissable={false} showHandle={false}>
       <h2 className="text-lg leading-tight">{heading}</h2>
 
-      {phase === "sent" ? (
+      {isCodePhase ? (
         <>
-          <div className="mt-8 flex flex-col items-center gap-3 text-center">
-            <span className="text-mint">
-              <CheckIcon className="h-9 w-9" />
-            </span>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              We sent a login link to <span className="font-semibold text-foreground">{email}</span>
-              . Open it on this device to finish logging in.
-            </p>
-          </div>
+          <p className="mt-8 text-sm leading-relaxed text-muted-foreground">
+            We sent a 6-digit code to{" "}
+            <span className="font-semibold text-foreground">{email.trim()}</span>. Enter it below to
+            finish logging in.
+          </p>
 
-          <div className="mt-8 flex flex-col gap-2.5">
-            <button
-              type="button"
-              onClick={() => {
-                setPhase("choose");
+          <form onSubmit={onVerify} className="mt-8 flex flex-col gap-2.5">
+            <label htmlFor="auth-code" className="sr-only">
+              6-digit code
+            </label>
+            <input
+              id="auth-code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={code}
+              onChange={(e) => {
+                setCode(e.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH));
                 setError(null);
               }}
-              className="soft-btn btn-surface-2 w-full py-3 text-sm tracking-wide"
+              placeholder="123456"
+              maxLength={CODE_LENGTH}
+              disabled={phase === "verifying"}
+              aria-invalid={error !== null}
+              aria-describedby={error ? "auth-error" : undefined}
+              className="w-full rounded-xl bg-surface-2 px-4 py-2.5 text-base font-bold tracking-widest text-foreground outline-none ring-sky placeholder:font-normal placeholder:tracking-normal placeholder:text-muted-foreground focus:ring-2 disabled:opacity-60"
+            />
+            <button
+              type="submit"
+              disabled={busy}
+              className="soft-btn btn-sky flex w-full items-center justify-center gap-2.5 py-3 text-sm tracking-wide disabled:opacity-60"
+            >
+              {phase === "verifying" ? "Verifying…" : "Verify code"}
+            </button>
+          </form>
+
+          {error && (
+            <p id="auth-error" role="alert" className="mt-2 text-sm font-semibold text-destructive">
+              {error}
+            </p>
+          )}
+
+          <div className="mt-4 flex flex-col gap-2.5">
+            <button
+              type="button"
+              disabled={phase === "verifying"}
+              onClick={() => {
+                setPhase("choose");
+                setCode("");
+                setError(null);
+              }}
+              className="soft-btn btn-surface-2 w-full py-3 text-sm tracking-wide disabled:opacity-60"
             >
               Use a different email
             </button>
@@ -167,7 +225,7 @@ export function AuthSheet() {
                 className="soft-btn btn-sky flex w-full items-center justify-center gap-2.5 py-3 text-sm tracking-wide disabled:opacity-60"
               >
                 <MailIcon className="h-[1.05rem] w-[1.05rem]" />
-                {phase === "sending" ? "Sending…" : "Email me a link"}
+                {phase === "sending" ? "Sending…" : "Email me a code"}
               </button>
             </form>
 

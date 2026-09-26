@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from "react-native";
+import { Text } from "@/components/text";
+import { Pressable, View } from "react-native";
 import { colors } from "@word-lock/tokens/native";
 
 import { useTheme } from "@/theme/ThemeProvider";
@@ -68,14 +69,15 @@ export function Tile({
           style={{ backgroundColor: lockedCircleFill }}
         >
           <Text
-            className="text-[clamp(0.85rem,3.5vw,1.25rem)] font-bold"
+            variant="autoGen27"
+
             style={{ color: lockedTextColor, fontSize: 16 }}
           >
             {letter}
           </Text>
         </View>
       ) : (
-        <Text className="font-bold" style={{ color: textColor, fontSize: 16 }}>
+        <Text variant="autoGen28" style={{ color: textColor, fontSize: 16 }}>
           {letter}
         </Text>
       )}

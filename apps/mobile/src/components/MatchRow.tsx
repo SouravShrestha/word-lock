@@ -1,5 +1,6 @@
+import { Text } from "@/components/text";
 import type { ComponentType } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { DrawFaceIcon, LossFaceIcon, WinFaceIcon, type IconProps } from "@word-lock/icons/native";
 import type { GameResult, RecentGameEntry } from "@word-lock/core/game";
 import { colors } from "@word-lock/tokens/native";
@@ -26,7 +27,7 @@ export function MatchRow({
       <Avatar avatar={entry.opponentAvatar} />
 
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} className="font-display text-[17px] font-medium text-foreground">
+        <Text variant="matchOpponent" numberOfLines={1}>
           {entry.opponentName}
         </Text>
 
@@ -36,10 +37,7 @@ export function MatchRow({
         </View>
       </View>
 
-      <Text
-        className="shrink-0 text-[15px] font-semibold tracking-wide"
-        style={{ color: palette.sky }}
-      >
+      <Text variant="label" className="shrink-0 tracking-wide" style={{ color: palette.sky }}>
         Details
       </Text>
     </Pressable>
@@ -48,12 +46,13 @@ export function MatchRow({
 
 function StarMeta({ delta }: { delta: number | null }) {
   if (delta === null) {
-    return <Text className="text-[13px] font-semibold text-mutedForeground">Unranked</Text>;
+    return <Text variant="caption">Unranked</Text>;
   }
 
   return (
     <Text
-      className="text-[13px] font-semibold text-mutedForeground"
+      variant="caption"
+
       style={{ fontVariant: ["tabular-nums"] }}
     >
       {delta > 0 ? `+ ${delta}` : `- ${Math.abs(delta)}`} stars
@@ -75,7 +74,7 @@ function ResultMeta({ result }: { result: GameResult }) {
   return (
     <View className="flex-row items-center gap-1">
       <Icon size={14} color={palette.mutedForeground} />
-      <Text className="text-[13px] font-semibold text-mutedForeground">{label}</Text>
+      <Text variant="caption">{label}</Text>
     </View>
   );
 }
