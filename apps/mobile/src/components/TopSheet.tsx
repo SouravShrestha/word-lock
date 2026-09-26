@@ -13,6 +13,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { useTheme } from "@/theme/ThemeProvider";
 
@@ -104,70 +105,72 @@ export function TopSheet({
       onRequestClose={dismissable ? onClose : () => {}}
       statusBarTranslucent
     >
-      <View className="flex-1">
-        <Animated.View
-          pointerEvents="box-none"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            opacity: progress,
-          }}
-        >
-          <Pressable
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            onPress={dismissable ? onClose : undefined}
-            style={{ flex: 1 }}
-          />
-        </Animated.View>
-
-        <Animated.View
-          accessibilityViewIsModal
-          accessibilityRole="none"
-          accessibilityLabel={label}
-          onLayout={(event) => setPanelHeight(event.nativeEvent.layout.height)}
-          style={{
-            backgroundColor: palette.background,
-            borderBottomLeftRadius: radius["2xl"],
-            borderBottomRightRadius: radius["2xl"],
-            overflow: "hidden",
-            maxHeight: Math.max(windowHeight - keyboardHeight - 24, 0),
-            transform: [{ translateY }],
-          }}
-        >
-          <ScrollView
-            scrollEnabled={scrollable || keyboardHeight > 0}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            bounces={false}
-            contentContainerStyle={{
-              paddingHorizontal: 26,
-              paddingTop: Math.max(insets.top, 20) + 24,
-              paddingBottom: showHandle ? 8 : 28,
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View className="flex-1">
+          <Animated.View
+            pointerEvents="box-none"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              opacity: progress,
             }}
           >
-            {children}
-          </ScrollView>
+            <Pressable
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              onPress={dismissable ? onClose : undefined}
+              style={{ flex: 1 }}
+            />
+          </Animated.View>
 
-          {showHandle && (
-            <View className="items-center pb-3">
-              <View
-                style={{
-                  height: 4,
-                  width: 40,
-                  borderRadius: 2,
-                  backgroundColor: palette.mutedForeground,
-                  opacity: 0.3,
-                }}
-              />
-            </View>
-          )}
-        </Animated.View>
-      </View>
+          <Animated.View
+            accessibilityViewIsModal
+            accessibilityRole="none"
+            accessibilityLabel={label}
+            onLayout={(event) => setPanelHeight(event.nativeEvent.layout.height)}
+            style={{
+              backgroundColor: palette.background,
+              borderBottomLeftRadius: radius["2xl"],
+              borderBottomRightRadius: radius["2xl"],
+              overflow: "hidden",
+              maxHeight: Math.max(windowHeight - keyboardHeight - 24, 0),
+              transform: [{ translateY }],
+            }}
+          >
+            <ScrollView
+              scrollEnabled={scrollable || keyboardHeight > 0}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+              contentContainerStyle={{
+                paddingHorizontal: 26,
+                paddingTop: Math.max(insets.top, 20) + 24,
+                paddingBottom: showHandle ? 8 : 28,
+              }}
+            >
+              {children}
+            </ScrollView>
+
+            {showHandle && (
+              <View className="items-center pb-3">
+                <View
+                  style={{
+                    height: 4,
+                    width: 40,
+                    borderRadius: 2,
+                    backgroundColor: palette.mutedForeground,
+                    opacity: 0.3,
+                  }}
+                />
+              </View>
+            )}
+          </Animated.View>
+        </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
