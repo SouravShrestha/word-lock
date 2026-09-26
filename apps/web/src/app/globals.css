@@ -1,0 +1,504 @@
+@import "tailwindcss";
+@source "../";
+@import "tw-animate-css";
+
+/*
+ * The `:root` and `.dark` custom-property blocks, generated from
+ * packages/tokens/src/tokens.ts. They used to be written out below by hand;
+ * they moved because React Native has neither custom properties nor `oklch()`,
+ * so the mobile app cannot read this file, and a second hand-maintained copy of
+ * forty-five colours would drift.
+ *
+ * Values are emitted verbatim, so nothing about how this app renders changed.
+ * The `@theme inline` mapping below stays here: which tokens Tailwind turns into
+ * utilities is a Tailwind concern, not a token one.
+ */
+@import "@word-lock/tokens/generated/tokens.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Word-lock design system - flat minimal.
+ * Neutral surfaces, hairline borders, no depth effects, two muted accent colors.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 6px);
+  --radius-3xl: calc(var(--radius) + 8px);
+  --radius-4xl: calc(var(--radius) + 10px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-nav-active: var(--nav-active);
+  --color-nav-active-border: var(--nav-active-border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-p1: var(--p1);
+  --color-p1-deep: var(--p1-deep);
+  --color-p1-soft: var(--p1-soft);
+  --color-p2: var(--p2);
+  --color-p2-deep: var(--p2-deep);
+  --color-p2-soft: var(--p2-soft);
+  --color-neutral-tile: var(--neutral-tile);
+  --color-neutral-tile-deep: var(--neutral-tile-deep);
+  --color-sun: var(--sun);
+  --color-sun-deep: var(--sun-deep);
+  --color-leaf: var(--leaf);
+  --color-tile-text: var(--tile-text);
+  /* Rubik everywhere. `display` stays a separate token so headings/buttons
+   * can diverge later without touching every call site. */
+  --font-display: var(--font-rubik), system-ui, sans-serif;
+  --font-sans: var(--font-rubik), system-ui, sans-serif;
+
+  /* Flat redesign tokens */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-sky: var(--sky);
+  --color-blush: var(--blush);
+  --color-mint: var(--mint);
+  --color-aqua: var(--aqua);
+  --color-grape: var(--grape);
+  --color-on-accent: var(--on-accent);
+  --color-hairline: var(--hairline);
+
+  /* In-game panel fill (grid tiles, word preview, played-words strip). Was
+   * written as `bg-card/30` at every call site; an alpha of the card colour
+   * resolves differently per theme, so the flattened result is a token now. */
+  --color-board: var(--board);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  html {
+    overscroll-behavior: none;
+  }
+
+  body {
+    overflow-x: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+}
+
+/* Flat panel. Kept under the old name so existing screens pick up the
+ * redesign without per-file edits. */
+@utility neo {
+  border: none;
+  border-radius: 0.9rem;
+  background-color: var(--color-surface);
+}
+
+@utility tile-face {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  user-select: none;
+  transition:
+    background-color 150ms ease,
+    transform 100ms ease;
+}
+
+@utility wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* Legacy alias for `soft-btn`, kept so in-game buttons pick up the same lip. */
+@utility chunky-btn {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  border-radius: 0.55rem;
+  border: none;
+  box-shadow: 0 var(--btn-lip, 4px) 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease,
+    opacity 120ms ease;
+
+  &:active:not(:disabled) {
+    transform: translateY(calc(var(--btn-lip, 4px) - 1px));
+    box-shadow: 0 1px 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+/* Bold uppercase micro-label */
+@utility eyebrow {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Named text-variant utilities  (tv-*)
+ *
+ * These mirror the TEXT_VARIANT_CONFIG table in
+ * `apps/mobile/src/components/Text.tsx`.  One row per role — change a
+ * property here and it applies to every web call site that uses the utility.
+ *
+ * Naming convention: `tv-<variant>` so they are easy to grep and do not
+ * clash with Tailwind's own `text-*` size utilities.
+ * -------------------------------------------------------------------------- */
+
+/* ── Display / headings ──────────────────────────────────────────────────── */
+
+@utility tv-screen-title {
+  font-family: var(--font-display);
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@utility tv-heading {
+  font-family: var(--font-display);
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+@utility tv-subheading {
+  font-family: var(--font-display);
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+@utility tv-body {
+  font-family: var(--font-sans);
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
+}
+
+@utility tv-body-base {
+  font-family: var(--font-sans);
+  font-size: 1rem; /* text-base */
+  font-weight: 500;
+}
+
+/* ── UI labels ───────────────────────────────────────────────────────────── */
+
+@utility tv-label {
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 600;
+}
+
+@utility tv-caption {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+}
+
+@utility tv-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Numerics ────────────────────────────────────────────────────────────── */
+
+@utility tv-stat {
+  font-family: var(--font-display);
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@utility tv-stat-md {
+  font-family: var(--font-display);
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@utility tv-score {
+  font-family: var(--font-display);
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+@utility tv-timer {
+  font-family: var(--font-display);
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Flat redesign primitives.
+ * No ink outlines, no offset shadows: soft radii, solid fills, press-scale.
+ * ------------------------------------------------------------------------- */
+
+/* Neutral raised panel used for cards, pills and avatar slots.
+ * In light mode the surface fill matches the page background, so a hairline
+ * keeps the panel edge readable. In dark mode the fill already contrasts and
+ * the hairline just tightens the edge. */
+@utility surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--surface-hairline);
+  border-radius: 0.9rem;
+}
+
+/*
+ * Extruded button. A solid darker lip sits under the fill; pressing sinks the
+ * face into the lip rather than scaling it. Pair with a `btn-*` fill utility,
+ * or set `--btn-depth` yourself. The fallback lip is a translucent black so an
+ * arbitrary `bg-*` still gets sensible depth.
+ */
+@utility soft-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 0.55rem;
+  box-shadow: 0 var(--btn-lip, 4px) 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease,
+    opacity 120ms ease;
+
+  &:active:not(:disabled) {
+    transform: translateY(calc(var(--btn-lip, 4px) - 1px));
+    box-shadow: 0 1px 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+/* Small square icon button (back arrow, copy, share). Shallower lip. */
+@utility soft-icon-btn {
+  display: grid;
+  place-items: center;
+  border-radius: 0.5rem;
+  --btn-lip: 3px;
+  box-shadow: 0 var(--btn-lip) 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease;
+
+  &:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 var(--btn-depth, rgb(0 0 0 / 28%));
+  }
+}
+
+/* --- Button fills: background, label colour and matching lip ------------- */
+
+@utility btn-sky {
+  background-color: var(--sky);
+  color: #fff;
+  --btn-depth: var(--depth-sky);
+}
+
+@utility btn-blush {
+  background-color: var(--blush);
+  color: #fff;
+  --btn-depth: var(--depth-blush);
+}
+
+@utility btn-sun {
+  background-color: var(--sun);
+  color: var(--on-accent);
+  --btn-depth: var(--depth-sun);
+}
+
+@utility btn-mint {
+  background-color: var(--mint);
+  color: #fff;
+  --btn-depth: var(--depth-mint);
+}
+
+/* The surface fill equals the page background in light mode, so the face would
+ * otherwise read as nothing but its bottom lip. A hairline closes the shape. */
+@utility btn-surface {
+  background-color: var(--surface);
+  color: var(--color-foreground);
+  border: 1px solid var(--surface-hairline);
+  --btn-depth: var(--depth-surface);
+}
+
+@utility btn-surface-2 {
+  background-color: var(--surface-2);
+  color: var(--color-foreground);
+  --btn-depth: var(--depth-surface-2);
+}
+
+@utility btn-primary {
+  background-color: var(--color-primary);
+  color: var(--primary-foreground);
+  --btn-depth: var(--depth-sun);
+}
+
+@utility btn-card {
+  background-color: var(--color-card);
+  color: var(--color-card-foreground);
+  border: 1px solid var(--surface-hairline);
+  --btn-depth: var(--depth-surface);
+}
+
+@utility btn-danger {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  --btn-depth: var(--depth-danger);
+}
+
+/* Compact stat readout (streak, rating). */
+@utility stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Press feedback for non-button surfaces (cards, tiles, links). */
+@utility press {
+  transition: transform 120ms ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Shimmer skeleton: a soft highlight band sweeps left to right across a flat
+ * surface-2 fill, standing in for content that hasn't loaded yet. */
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-2);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      var(--shimmer-highlight, rgba(255, 255, 255, 0.35)),
+      transparent
+    );
+    animation: shimmer-sweep 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes shimmer-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Pop-in bubble for the active bottom-nav tab: scales up from small with a
+ * slight overshoot, like a soap bubble settling into place. */
+@keyframes nav-bubble-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@utility nav-bubble {
+  animation: nav-bubble-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes glint {
+  0% {
+    transform: translateX(-150%);
+  }
+  40%,
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@utility animate-glint {
+  animation: glint 3s ease-in-out infinite;
+}

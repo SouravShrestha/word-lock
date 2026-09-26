@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /*
+     * No "dom" here, deliberately. This package is loaded by Hermes and by the
+     * Cloudflare Workers runtime as well as by browsers, so a stray `window`,
+     * `document` or `localStorage` should fail to compile here rather than fail
+     * at runtime on someone's phone.
+     *
+     * `@types/node` *is* included, which looks like the opposite decision. It
+     * is there for one reason: `build-env.ts` has to spell out
+     * `process.env.NEXT_PUBLIC_…` literally, because both bundlers resolve
+     * those by textual substitution. Declaring a local `process` shim instead
+     * would collide with `@types/node` the moment this source is compiled as
+     * part of the web app's program, which it is. So the "no Node APIs" rule is
+     * enforced by lint rather than by starving the type checker: see the
+     * `@word-lock/core` block in the repo's eslint.config.js, which bans
+     * `node:*` imports and the `Buffer`/`__dirname`/`require` globals outright.
+     */
+    "lib": ["esnext"],
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

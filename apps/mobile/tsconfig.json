@@ -1,0 +1,16 @@
+{
+  // Deliberately not extending the repo's shared tsconfig.base.json: Expo's own
+  // base sets moduleResolution/jsx/target values Metro actually needs (e.g.
+  // "jsx": "react-native"), and layering the two would fight rather than merge.
+  // apps/web and packages/* stay on tsconfig.base.json; this is the one
+  // exception, for the one platform with its own compiler contract.
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"],
+  "exclude": ["node_modules"]
+}

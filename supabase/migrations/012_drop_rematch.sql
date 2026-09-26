@@ -22,4 +22,4 @@
 -- wl_games_rematch_game_id_fkey constraint and the wl_games_rematch_idx index
 -- both go automatically, so neither is named here.
 ALTER TABLE public.wl_games
-  DROP COLUMN rematch_game_id;
+  DROP COLUMN IF EXISTS rematch_game_id;

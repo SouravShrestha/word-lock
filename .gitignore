@@ -11,6 +11,9 @@ node_modules
 dist
 .output
 
+# Turborepo
+.turbo
+
 # Next.js
 .next/
 next-env.d.ts
@@ -33,4 +36,19 @@ next-env.d.ts
 .env*
 !.env.example
 
-.open-next/*
+# A pattern containing a slash is anchored to this file's directory, so the
+# old `.open-next/*` stopped matching once the app moved into apps/web.
+# Trailing-slash-only patterns above (.next/, .wrangler/) already match at any
+# depth and need no change.
+**/.open-next/
+
+# Expo / React Native
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+ios/
+android/

@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /*
+     * Unlike core and tokens, this package does get "dom" — `fetch`, `Response`
+     * and `AbortSignal` are part of its job, and React Native provides all
+     * three. What it must not do is reach for anything *only* a browser has:
+     * `window`, `document`, `localStorage`, `navigator`. Those are injected by
+     * the app through `ClientPlatform`, and the eslint block for this package
+     * bans the globals outright.
+     */
+    "lib": ["dom", "esnext"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}
