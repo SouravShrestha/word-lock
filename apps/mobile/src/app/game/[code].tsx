@@ -109,37 +109,56 @@ export default function GameScreen() {
   useEffect(() => {
     if (!game?.id || !authReady) return;
 
-    const channel = supabase
-      .channel(`game-${game.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "wl_games", filter: `id=eq.${game.id}` },
-        () => queryClient.invalidateQueries({ queryKey }),
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "wl_moves", filter: `game_id=eq.${game.id}` },
-        () => queryClient.invalidateQueries({ queryKey }),
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "wl_games", filter: `id=eq.${game.id}` },
-        () => startHostLeftCountdown(),
-      )
-      .on("broadcast", { event: "reaction" }, ({ payload }) => {
-        const emoji = payload?.emoji;
-        const slot = payload?.slot;
-        if (typeof emoji !== "string" || (slot !== 1 && slot !== 2)) return;
-        if (slot === viewerSlotRef.current) return;
-        showReaction(emoji, slot);
-      })
-      .subscribe((status) => {
+    let isMounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setup = async () => {
+      const existing = supabase.getChannels().find((c) => c.topic === `realtime:game-${game.id}`);
+      if (existing) {
+        await supabase.removeChannel(existing);
+      }
+      if (!isMounted) return;
+
+      channel = supabase
+        .channel(`game-${game.id}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "wl_games", filter: `id=eq.${game.id}` },
+          () => queryClient.invalidateQueries({ queryKey }),
+        )
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "wl_moves", filter: `game_id=eq.${game.id}` },
+          () => queryClient.invalidateQueries({ queryKey }),
+        )
+        .on(
+          "postgres_changes",
+          { event: "DELETE", schema: "public", table: "wl_games", filter: `id=eq.${game.id}` },
+          () => startHostLeftCountdown(),
+        )
+        .on("broadcast", { event: "reaction" }, ({ payload }) => {
+          const emoji = payload?.emoji;
+          const slot = payload?.slot;
+          if (typeof emoji !== "string" || (slot !== 1 && slot !== 2)) return;
+          if (slot === viewerSlotRef.current) return;
+          showReaction(emoji, slot);
+        });
+
+      channel.subscribe((status) => {
         const connected = status === "SUBSCRIBED";
-        setIsRealtimeConnected((prev) => (prev === connected ? prev : connected));
+        if (isMounted) {
+          setIsRealtimeConnected((prev) => (prev === connected ? prev : connected));
+        }
       });
+    };
+
+    setup();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [game?.id, authReady, queryClient, queryKey, showReaction, startHostLeftCountdown]);
 

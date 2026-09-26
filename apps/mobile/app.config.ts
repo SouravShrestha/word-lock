@@ -22,8 +22,8 @@ export default (): ExpoConfig => ({
   android: {
     package: "me.cbsdev.wordlock",
     adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#131F24",
+      foregroundImage: "./assets/android-icon.png",
+      backgroundColor: "#131f24",
     },
   },
   plugins: [
