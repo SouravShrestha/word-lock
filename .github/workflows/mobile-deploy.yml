@@ -1,0 +1,82 @@
+name: Mobile Build & Deploy
+
+on:
+  workflow_call:
+    inputs:
+      profile:
+        description: "EAS build profile (development, production)"
+        required: true
+        type: string
+      ref:
+        description: "Git ref to checkout (optional)"
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "EAS build profile"
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+          - production
+      ref:
+        description: "Git ref to checkout (optional)"
+        required: false
+        type: string
+
+concurrency:
+  group: mobile-${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    env:
+      PROFILE: ${{ inputs.profile || 'development' }}
+      BUILD_REF: ${{ inputs.ref || github.sha }}
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BUILD_REF }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        working-directory: .
+        run: npm ci
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Build locally
+        run: |
+          eas build --platform android \
+            --profile ${{ env.PROFILE }} \
+            --local \
+            --non-interactive \
+            --output=./app-${{ env.PROFILE }}.apk
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ env.PROFILE }}-${{ env.BUILD_REF }}
+          path: apps/mobile/app-${{ env.PROFILE }}.apk
+          retention-days: 30

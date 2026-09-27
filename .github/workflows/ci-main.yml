@@ -138,3 +138,21 @@ jobs:
           command: deploy --env production
           wranglerVersion: "3"
           workingDirectory: apps/web
+
+  mobile-dev:
+    name: Mobile Build (Development)
+    needs: ci
+    uses: ./.github/workflows/mobile-deploy.yml
+    with:
+      profile: development
+    secrets: inherit
+
+  mobile-prod:
+    name: Mobile Build (Production)
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/mobile-deploy.yml
+    with:
+      profile: production
+      ref: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit
