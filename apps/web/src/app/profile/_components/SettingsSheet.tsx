@@ -112,8 +112,8 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             <SettingsGroup>
               <div className="flex items-center gap-3.5 px-2 py-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium">Dark theme</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Easier on the eyes</p>
+                  <p className="tv-body">Dark theme</p>
+                  <p className="mt-0.5 tv-caption text-muted-foreground">Easier on the eyes</p>
                 </div>
                 <Toggle
                   label="Dark theme"
@@ -165,7 +165,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
             type="button"
             onClick={() => setConfirming(true)}
             disabled={busy || !ready}
-            className="soft-btn btn-surface-2 w-full py-3 text-sm tracking-wide disabled:opacity-60"
+            className="soft-btn btn-surface-2 w-full py-3 tv-body tracking-wide disabled:opacity-60"
           >
             {busy ? "Logging out" : "Log out"}
           </button>

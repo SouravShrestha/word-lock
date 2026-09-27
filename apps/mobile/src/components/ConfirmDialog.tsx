@@ -69,11 +69,11 @@ export function ConfirmDialog({
                 <Button
                   variant="danger"
                   disabled={isPending}
-                loading={isPending}
-                onPress={onConfirm}
-              >
-                {isPending ? (pendingLabel ?? confirmLabel) : confirmLabel}
-              </Button>
+                  loading={isPending}
+                  onPress={onConfirm}
+                >
+                  {isPending ? (pendingLabel ?? confirmLabel) : confirmLabel}
+                </Button>
               </View>
             </View>
           </View>

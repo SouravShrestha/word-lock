@@ -20,13 +20,13 @@ export function ReviewBar({
 
   return (
     <div className="bg-board flex h-12 w-full items-center justify-between gap-3 px-4 py-3 rounded-xs">
-      <span className="shrink-0 select-none text-xs font-medium tabular-nums text-muted-foreground">
+      <span className="shrink-0 select-none tv-caption font-medium tabular-nums text-muted-foreground">
         {moveNumber} / {moveCount}
       </span>
 
       <span
         className={cn(
-          "min-w-0 truncate font-display text-sm font-medium tracking-widest",
+          "min-w-0 truncate font-display tv-body tracking-widest",
           move.passed ? "text-muted-foreground" : isPlayerOne ? "text-p1" : "text-p2",
         )}
       >

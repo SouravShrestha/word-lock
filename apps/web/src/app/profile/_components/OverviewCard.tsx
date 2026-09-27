@@ -35,7 +35,7 @@ export function OverviewCard() {
       <div className="grid grid-cols-2 gap-x-3 gap-y-5">
         <Fact
           icon={<StreakIcon className="h-6 w-6" />}
-          tint="text-[#FC9502]"
+          tint="text-streak"
           label={streak === 1 ? "1 day" : `${streak} days`}
         />
         <Fact icon={<StarIcon className="h-6 w-6" />} tint="text-mint" label={`${stars} stars`} />
@@ -59,7 +59,7 @@ function Fact({ icon, tint, label }: { icon: React.ReactNode; tint: string; labe
   return (
     <div className="flex items-center gap-2.5">
       <span className={cn("grid w-8 shrink-0 place-items-center", tint)}>{icon}</span>
-      <span className="min-w-0 truncate text-sm font-semibold">{label}</span>
+      <span className="min-w-0 truncate tv-label">{label}</span>
     </div>
   );
 }

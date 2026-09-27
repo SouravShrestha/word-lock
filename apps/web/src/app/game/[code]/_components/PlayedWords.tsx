@@ -2,7 +2,7 @@ export function PlayedWords({ game }: { game: any }) {
   if (game.playedWords.length === 0) {
     return (
       <div className="neo bg-board overflow-x-auto no-scrollbar rounded-none -mx-3 py-2 md:-mt-2 flex items-center justify-center">
-        <p className="text-center text-sm font-regular text-meta leading-none h-4 pt-[2px]">
+        <p className="text-center tv-body font-regular text-meta leading-none h-4 pt-[2px]">
           No words
         </p>
       </div>
@@ -15,7 +15,7 @@ export function PlayedWords({ game }: { game: any }) {
         {[...game.playedWords].reverse().map((entry: any, i: number) => (
           <li
             key={i}
-            className={`shrink-0 text-sm font-regular leading-none ${
+            className={`shrink-0 tv-body font-regular leading-none ${
               entry.playerId === game.players.one?.id ? "text-p1" : "text-p2"
             }`}
           >

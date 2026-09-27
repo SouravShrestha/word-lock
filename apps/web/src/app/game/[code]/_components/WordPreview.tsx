@@ -3,11 +3,11 @@ export function WordPreview({ letters, yourTurn }: { letters: string[]; yourTurn
   return (
     <div className="bg-board flex h-12 w-full items-center justify-center px-4 py-3 rounded-xs">
       {word.length === 0 ? (
-        <span className="select-none text-sm font-medium tracking-wide text-foreground/90">
+        <span className="select-none tv-body tracking-wide text-foreground/90">
           {yourTurn ? "Select tiles to form a word" : "Opponent's turn"}
         </span>
       ) : (
-        <span className="font-display text-sm font-medium tracking-widest">{word}</span>
+        <span className="font-display tv-body tracking-widest">{word}</span>
       )}
     </div>
   );

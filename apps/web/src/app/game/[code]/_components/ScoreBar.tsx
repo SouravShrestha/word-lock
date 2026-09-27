@@ -19,7 +19,7 @@ function TurnClock({ deadline, status }: { deadline: string | null; status: stri
   return (
     <div className="flex shrink-0 flex-col items-center gap-1.5">
       <ClockIcon className="h-4 w-4 text-foreground" />
-      <p className="font-display text-xs font-medium tabular-nums tracking-wide leading-none">
+      <p className="font-display tv-caption font-medium tabular-nums tracking-wide leading-none">
         {timerLabel ?? (status === "completed" ? "Game over" : "-")}
       </p>
     </div>
@@ -71,7 +71,7 @@ function PlayerChip({
         <p
           title={player?.name ?? undefined}
           className={cn(
-            "mt-1.5 max-w-full truncate text-center text-xs leading-none",
+            "mt-1.5 max-w-full truncate text-center tv-caption leading-none",
             active ? "text-foreground" : "text-muted-foreground",
           )}
         >
@@ -80,7 +80,7 @@ function PlayerChip({
       </div>
       <p
         className={cn(
-          "font-display text-3xl font-bold leading-none tabular-nums mx-4",
+          "font-display tv-screen-title leading-none tabular-nums mx-4",
           active ? scoreColor : "text-muted-foreground",
         )}
       >

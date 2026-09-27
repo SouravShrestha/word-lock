@@ -77,13 +77,13 @@ export function GameDetailPopup({
       }}
     >
       {isLoading && (
-        <div className="w-full max-w-sm p-5 text-center text-base text-muted-foreground">
+        <div className="w-full max-w-sm p-5 text-center tv-body-base text-muted-foreground">
           Loading game
         </div>
       )}
 
       {error && (
-        <div className="neo bg-card w-full max-w-sm p-5 text-center text-sm text-destructive">
+        <div className="neo bg-card w-full max-w-sm p-5 text-center tv-body text-destructive">
           {error.message || "Failed to load game"}
         </div>
       )}

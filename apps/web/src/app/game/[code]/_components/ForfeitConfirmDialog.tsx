@@ -11,8 +11,8 @@ export function ForfeitConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm px-6">
       <div className="neo bg-card w-full max-w-xs p-6 flex flex-col gap-4">
         <div className="text-center">
-          <h2 className="text-lg font-bold">Leave the game?</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h2 className="tv-heading">Leave the game?</h2>
+          <p className="mt-1 tv-body text-muted-foreground">
             Your opponent will win if you leave now.
           </p>
         </div>

@@ -35,11 +35,9 @@ export function MatchRow({
       <Avatar avatar={entry.opponentAvatar} />
 
       <span className="min-w-0 flex-1">
-        <span className="font-display block truncate text-base font-medium">
-          {entry.opponentName}
-        </span>
+        <span className="font-display block truncate tv-body-base">{entry.opponentName}</span>
 
-        <span className="mt-1 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
+        <span className="mt-1 flex items-center gap-3 tv-caption text-muted-foreground">
           <StarMeta delta={entry.starDelta} />
           <ResultMeta
             result={entry.result}
@@ -50,7 +48,7 @@ export function MatchRow({
       </span>
 
       <span className="flex shrink-0 flex-col items-end gap-1.5">
-        <span className="font-semibold tracking-wide text-sm text-sky">Details</span>
+        <span className="font-semibold tracking-wide tv-body text-sky">Details</span>
       </span>
     </button>
   );

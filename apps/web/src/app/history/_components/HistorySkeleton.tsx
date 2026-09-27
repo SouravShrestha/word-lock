@@ -10,7 +10,7 @@ export function HistorySkeleton() {
   return (
     <div aria-hidden>
       <header className="pt-8">
-        <h1 className="font-display text-3xl font-bold">Your matches</h1>
+        <h1 className="font-display tv-screen-title">Your matches</h1>
       </header>
 
       <span className="shimmer mt-7 inline-block h-4 w-28 rounded-xs" />

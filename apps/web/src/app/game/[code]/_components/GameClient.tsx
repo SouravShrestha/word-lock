@@ -306,12 +306,12 @@ export function GameClient({ code }: { code: string }) {
           <div className="w-full max-w-sm p-8 flex flex-col items-center gap-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold">Host left the lobby</h2>
-              <p className="mt-2 text-sm text-muted-foreground">The game has been disbanded</p>
+              <p className="mt-2 tv-body text-muted-foreground">The game has been disbanded</p>
             </div>
             <div className="text-6xl font-bold font-display tabular-nums text-foreground">
               {hostLeftCountdown}
             </div>
-            <p className="text-sm text-muted-foreground">Redirecting to lobby...</p>
+            <p className="tv-body text-muted-foreground">Redirecting to lobby...</p>
           </div>
         </div>
       </Shell>

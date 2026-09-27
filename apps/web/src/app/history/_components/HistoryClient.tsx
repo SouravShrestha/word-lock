@@ -46,8 +46,8 @@ export function HistoryClient() {
 
             {games.length === 0 ? (
               <div className="mt-6 p-6 text-center">
-                <p className="font-display text-lg font-bold">Nothing here yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="font-display tv-heading">Nothing here yet</p>
+                <p className="mt-1 tv-body text-muted-foreground">
                   Finish a game to see it listed.
                 </p>
               </div>
@@ -86,9 +86,9 @@ function Headline({ wins }: { wins: number }) {
 
   return (
     <header className="pt-8">
-      <h1 className="font-display text-3xl font-bold">Your matches</h1>
+      <h1 className="font-display tv-screen-title">Your matches</h1>
 
-      <div className="mt-2 flex items-center gap-4 text-sm font-semibold text-muted-foreground">
+      <div className="mt-2 flex items-center gap-4 tv-label text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <LeagueIcon league={league} className="h-6 w-7" />
           <span className={cn("tabular-nums", LEAGUE_TEXT_CLASS[league])}>

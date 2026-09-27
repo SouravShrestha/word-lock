@@ -17,7 +17,7 @@ export function HowToPlay({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={cn("soft-btn btn-sun px-4 py-2 text-xs", className)}
+        className={cn("soft-btn btn-sun px-4 py-2 tv-caption", className)}
       >
         How to play?
       </button>

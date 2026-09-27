@@ -74,8 +74,8 @@ export function ProfileClient() {
               <StatisticsCard starHistory={data!.starHistory} overview={overview} />
             ) : (
               <div className="p-6 text-center">
-                <p className="font-display text-lg font-bold">No games finished yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">Go play one!</p>
+                <p className="font-display tv-heading">No games finished yet</p>
+                <p className="mt-1 tv-body text-muted-foreground">Go play one!</p>
               </div>
             )}
           </section>

@@ -52,8 +52,8 @@ export function AvatarSheet({
     <BottomSheet open={open} onClose={onClose} label="Choose your avatar">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg leading-tight">Choose your avatar</h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <h2 className="tv-heading leading-tight">Choose your avatar</h2>
+          <p className="tv-body leading-relaxed text-muted-foreground">
             This is the face players see next to your name
           </p>
         </div>
@@ -109,13 +109,13 @@ export function AvatarSheet({
         type="button"
         onClick={() => mutation.mutate()}
         disabled={unchanged || mutation.isPending || !sessionId}
-        className="soft-btn btn-sky mt-7 w-full py-3 text-sm tracking-wide disabled:opacity-60"
+        className="soft-btn btn-sky mt-7 w-full py-3 tv-body tracking-wide disabled:opacity-60"
       >
         {mutation.isPending ? "Saving…" : unchanged ? "Saved" : "Save avatar"}
       </button>
 
       {mutation.error && (
-        <p role="alert" className="mt-2 text-center text-sm font-semibold text-destructive">
+        <p role="alert" className="mt-2 text-center tv-label text-destructive">
           {mutation.error.message}
         </p>
       )}

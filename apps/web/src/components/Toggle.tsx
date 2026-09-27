@@ -31,12 +31,12 @@ export function Toggle({
 
       <span
         aria-hidden
-        className="block h-[22px] w-[41px] rounded-[15px] bg-[#080808] transition-colors duration-[250ms] peer-checked:bg-sky peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background"
+        className="block h-[22px] w-[41px] rounded-[15px] bg-foreground transition-colors duration-[250ms] peer-checked:bg-sky peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background"
       />
 
       <span
         aria-hidden
-        className="pointer-events-none absolute top-[2.5px] left-[2.3px] h-[17px] w-[27px] rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.35),0_6px_12px_rgba(0,0,0,0.18)] transition-transform duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] peer-checked:translate-x-[9px]"
+        className="pointer-events-none absolute top-[2.5px] left-[2.3px] h-[17px] w-[27px] rounded-lg bg-background transition-transform duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] peer-checked:translate-x-[9px]"
       />
     </label>
   );

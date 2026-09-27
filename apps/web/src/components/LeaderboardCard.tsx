@@ -59,7 +59,7 @@ export function LeaderboardCard({ onOpenGuide }: { onOpenGuide: () => void }) {
             */}
             {me && myRank !== null && !inList && account?.username && (
               <>
-                <p className="text-center text-xs font-semibold text-muted-foreground">···</p>
+                <p className="text-center tv-caption text-muted-foreground">···</p>
                 <ul>
                   <Row
                     rank={myRank}
@@ -73,7 +73,7 @@ export function LeaderboardCard({ onOpenGuide }: { onOpenGuide: () => void }) {
             )}
 
             {!me && (
-              <p className="px-1 text-center text-xs font-semibold text-muted-foreground">
+              <p className="px-1 text-center tv-caption text-muted-foreground">
                 Pick a username to join the board.
               </p>
             )}
@@ -96,7 +96,7 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
   return (
     <div className="px-5 pb-6 pt-8 border-b-2 border-border">
       <div className="flex items-center justify-between gap-4">
-        <p className={cn("font-display text-3xl font-bold", LEAGUE_TEXT_CLASS[league])}>
+        <p className={cn("font-display tv-screen-title", LEAGUE_TEXT_CLASS[league])}>
           {band.name} League
         </p>
         <button
@@ -108,7 +108,7 @@ function LeagueHeader({ league, onOpenGuide }: { league: LeagueId; onOpenGuide: 
           <QuestionMarkIcon className="h-[1.1rem] w-[1.1rem]" />
         </button>
       </div>
-      <p className="mt-1 text-sm font-semibold text-muted-foreground">
+      <p className="mt-1 tv-label text-muted-foreground">
         {band.maxStars === null
           ? `${band.minStars}+ stars`
           : `${band.minStars} - ${band.maxStars} stars`}
@@ -153,18 +153,18 @@ function Row({
     <div
       className={cn("flex items-center gap-3.5 pl-5 pr-6 py-6 -mx-5", isViewer && "bg-muted/50")}
     >
-      <span className="font-display w-5 shrink-0 text-center text-sm font-semibold tabular-nums text-accent">
+      <span className="font-display w-5 shrink-0 text-center tv-label tabular-nums text-accent">
         {rank}
       </span>
 
-      <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+      <span className="min-w-0 flex-1 truncate tv-label">
         {name}
         {isViewer && (
-          <span className="ml-1.5 text-xs text-muted-foreground font-normal">(you)</span>
+          <span className="ml-1.5 tv-caption text-muted-foreground font-normal">(you)</span>
         )}
       </span>
 
-      <span className={cn("stat-pill shrink-0 text-sm", LEAGUE_TEXT_CLASS[league])}>
+      <span className={cn("stat-pill shrink-0 tv-body", LEAGUE_TEXT_CLASS[league])}>
         <StarIcon className="h-5 w-5" />
         {stars}
       </span>

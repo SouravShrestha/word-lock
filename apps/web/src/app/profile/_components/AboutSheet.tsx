@@ -36,7 +36,7 @@ export function AboutSheet({
       </div>
 
       <div className="mt-8 flex flex-col items-start gap-1 text-center px-2">
-        <p className="text-xs font-semibold text-muted-foreground">Version {APP_VERSION}</p>
+        <p className="tv-caption text-muted-foreground">Version {APP_VERSION}</p>
       </div>
 
       <div className="mt-4">

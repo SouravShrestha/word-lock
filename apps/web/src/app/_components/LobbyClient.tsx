@@ -89,14 +89,14 @@ export function LobbyClient() {
               type="button"
               onClick={() => createMutation.mutate()}
               disabled={!ready || createMutation.isPending}
-              className="soft-btn btn-mint flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
+              className="soft-btn btn-mint flex flex-1 items-center justify-center gap-2 px-4 py-3.5 tv-body-base"
             >
               <PlayIcon className="h-3 w-3" />
               {createMutation.isPending ? "Creating" : "New Game"}
             </button>
             <Link
               href="/join"
-              className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 text-base"
+              className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 tv-body-base"
             >
               <HeartIcon className="h-3 w-3" />
               Join
@@ -186,8 +186,8 @@ function GameCard({ game, idx, totalGames }: { game: any; idx: number; totalGame
         className="soft-btn btn-surface flex h-full flex-col items-stretch justify-start gap-2 p-3.5 text-left"
       >
         <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="truncate text-sm font-bold leading-tight">
-            <span className="mr-1 text-xs leading-tight text-muted-foreground">vs</span>
+          <p className="truncate tv-label leading-tight">
+            <span className="mr-1 tv-caption leading-tight text-muted-foreground">vs</span>
             {opponent?.name ?? "?"}
           </p>
           <p className="text-[0.7rem] font-semibold tracking-[0.12em] text-muted-foreground">

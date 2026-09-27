@@ -40,7 +40,7 @@ export function AcknowledgementsSheet({
         </button>
       </div>
 
-      <p className="mt-3 text-sm text-muted-foreground">
+      <p className="mt-3 tv-body text-muted-foreground">
         Word lock is built on open source. Thanks to everyone behind these.
       </p>
 
