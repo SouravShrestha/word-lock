@@ -52,6 +52,5 @@ next-env.d.ts
 *.orig.*
 ios/
 android/
-expo-env.d.ts
 
 apps/mobile/builds/*
