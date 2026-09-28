@@ -20,7 +20,7 @@ import {
   useSweepTimer,
 } from "@word-lock/client";
 import { joinUrl } from "@word-lock/core/app";
-import { type ReactionEmoji, type HistoryMove } from "@word-lock/core/game";
+import { isReactionEmoji, type ReactionEmoji, type HistoryMove } from "@word-lock/core/game";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -135,14 +135,7 @@ export default function GameScreen() {
           "postgres_changes",
           { event: "DELETE", schema: "public", table: "wl_games", filter: `id=eq.${game.id}` },
           () => startHostLeftCountdown(),
-        )
-        .on("broadcast", { event: "reaction" }, ({ payload }) => {
-          const emoji = payload?.emoji;
-          const slot = payload?.slot;
-          if (typeof emoji !== "string" || (slot !== 1 && slot !== 2)) return;
-          if (slot === viewerSlotRef.current) return;
-          showReaction(emoji, slot);
-        });
+        );
 
       channel.subscribe((status) => {
         const connected = status === "SUBSCRIBED";
@@ -160,7 +153,52 @@ export default function GameScreen() {
         supabase.removeChannel(channel);
       }
     };
-  }, [game?.id, authReady, queryClient, queryKey, showReaction, startHostLeftCountdown]);
+  }, [game?.id, authReady, queryClient, queryKey, startHostLeftCountdown]);
+
+  // Reactions ride their own private channel, authorized by migration 014's
+  // realtime.messages policy: only this game's two players may join, and no
+  // client may send (the server broadcasts). Kept off the game channel so a
+  // refused join can never take game updates down, and only opened once the
+  // viewer is seated in an active game, since a join before that is refused.
+  const canReceiveReactions = game?.status === "active" && game?.viewerSlot != null;
+
+  useEffect(() => {
+    if (!game?.id || !authReady || !canReceiveReactions) return;
+
+    let isMounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setup = async () => {
+      const topic = `reactions-${game.id}`;
+      const existing = supabase.getChannels().find((c) => c.topic === `realtime:${topic}`);
+      if (existing) {
+        await supabase.removeChannel(existing);
+      }
+      if (!isMounted) return;
+
+      channel = supabase
+        .channel(topic, { config: { private: true } })
+        .on("broadcast", { event: "reaction" }, ({ payload }) => {
+          const emoji = payload?.emoji;
+          const slot = payload?.slot;
+          if (typeof emoji !== "string" || !isReactionEmoji(emoji)) return;
+          if (slot !== 1 && slot !== 2) return;
+          if (slot === viewerSlotRef.current) return;
+          showReaction(emoji, slot);
+        });
+
+      channel.subscribe();
+    };
+
+    setup();
+
+    return () => {
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [game?.id, authReady, canReceiveReactions, showReaction]);
 
   useEffect(() => {
     const onChange = (state: AppStateStatus) => {

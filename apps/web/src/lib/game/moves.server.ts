@@ -147,7 +147,11 @@ export async function sendReaction(caller: Caller, roomCode: string, emoji: stri
     game.player1_id === player.id ? 1 : game.player2_id === player.id ? 2 : null;
   if (!slot) throw new PublicError("You're not a player in this game.");
 
-  const channel = getSupabaseAdmin().channel(`game-${game.id}`);
+  // Private: only the two players can receive (migration 014). The service role
+  // bypasses that policy, so the server remains the only sender.
+  const channel = getSupabaseAdmin().channel(`reactions-${game.id}`, {
+    config: { private: true },
+  });
   try {
     const result = await channel.httpSend("reaction", { emoji, slot });
     if (!result.success) {
