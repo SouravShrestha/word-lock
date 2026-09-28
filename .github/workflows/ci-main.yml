@@ -30,11 +30,6 @@ jobs:
       - name: Restore dependencies
         run: npm ci
 
-      - name: Debug secrets availability
-        run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL is set: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}"
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY is set: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}"
-
       - name: Typecheck
         run: npm run typecheck
 
@@ -145,7 +140,8 @@ jobs:
     uses: ./.github/workflows/mobile-deploy.yml
     with:
       profile: development
-    secrets: inherit
+    secrets:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
   mobile-prod:
     name: Mobile Build (Production)
@@ -155,4 +151,5 @@ jobs:
     with:
       profile: production
       ref: ${{ needs.release-please.outputs.tag_name }}
-    secrets: inherit
+    secrets:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

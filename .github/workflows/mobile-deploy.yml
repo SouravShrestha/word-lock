@@ -11,6 +11,9 @@ on:
         description: "Git ref to checkout (optional)"
         required: false
         type: string
+    secrets:
+      EXPO_TOKEN:
+        required: true
   workflow_dispatch:
     inputs:
       profile:
@@ -26,9 +29,13 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: read
+
 concurrency:
   group: mobile-${{ github.workflow }}-${{ inputs.ref || github.ref }}
-  cancel-in-progress: true
+  # A production build is a release artifact; never cancel one mid-flight.
+  cancel-in-progress: ${{ (inputs.profile || 'development') != 'production' }}
 
 jobs:
   build-android:
@@ -41,18 +48,18 @@ jobs:
         working-directory: apps/mobile
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.BUILD_REF }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 20
           cache: "npm"
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: temurin
           java-version: 17
@@ -62,7 +69,7 @@ jobs:
         run: npm ci
 
       - name: Install EAS CLI
-        run: npm install -g eas-cli
+        run: npm install -g eas-cli@24.8.0
 
       - name: Build locally
         run: |
@@ -75,7 +82,7 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: android-${{ env.PROFILE }}-${{ env.BUILD_REF }}
           path: apps/mobile/app-${{ env.PROFILE }}.apk
