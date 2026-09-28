@@ -134,15 +134,6 @@ jobs:
           wranglerVersion: "3"
           workingDirectory: apps/web
 
-  mobile-dev:
-    name: Mobile Build (Development)
-    needs: ci
-    uses: ./.github/workflows/mobile-deploy.yml
-    with:
-      profile: development
-    secrets:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
   mobile-prod:
     name: Mobile Build (Production)
     needs: release-please
