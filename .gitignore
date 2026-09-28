@@ -52,5 +52,6 @@ next-env.d.ts
 *.orig.*
 ios/
 android/
+screenshots/
 
 apps/mobile/builds/*
