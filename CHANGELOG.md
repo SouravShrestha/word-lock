@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.0...word-lock-monorepo-v1.4.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* **ci:** install expo-dev-client for mobile development builds ([#14](https://github.com/SouravShrestha/word-lock/issues/14)) ([7d3c1ec](https://github.com/SouravShrestha/word-lock/commit/7d3c1ec8834ae54414841734cabaf37d6e93b988))
+
 ## [1.4.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.3.0...word-lock-monorepo-v1.4.0) (2026-09-26)
 
 ### Features
