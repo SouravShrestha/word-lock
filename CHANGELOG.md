@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.1...word-lock-monorepo-v1.4.2) (2026-09-28)
+
+
+### Bug Fixes
+
+* force production deployment ([#17](https://github.com/SouravShrestha/word-lock/issues/17)) ([6a44570](https://github.com/SouravShrestha/word-lock/commit/6a44570f36f3ad4d0df59dbcc07ad4d5cdf341e7))
+
 ## [1.4.1](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.0...word-lock-monorepo-v1.4.1) (2026-09-28)
 
 
