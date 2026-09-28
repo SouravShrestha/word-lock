@@ -45,7 +45,7 @@ export function ProfileIdentity({
       </button>
 
       <p
-        className="max-w-full truncate px-3 text-center font-display text-lg font-bold"
+        className="max-w-full truncate px-3 text-center font-display tv-heading"
         title={username ?? undefined}
       >
         {username ? `@${username}` : "…"}
@@ -56,7 +56,7 @@ export function ProfileIdentity({
         full one next to the name reads like a record rather than a profile.
         Nothing is shown until the summary lands, so the block does not jump.
       */}
-      <p className="text-xs font-semibold text-muted-foreground">
+      <p className="tv-caption text-muted-foreground">
         {joinedAt ? `Joined ${new Date(joinedAt).getFullYear()}` : "\u00A0"}
       </p>
 

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Rubik } from "next/font/google";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/Toaster";
 import { ThemeProvider } from "next-themes";
 
 import { QueryProvider } from "@/components/QueryProvider";
@@ -81,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </AuthProvider>
             </SessionProvider>
             <CookieConsentBanner />
-            <Toaster position="top-center" richColors />
+            <Toaster />
           </ThemeProvider>
         </QueryProvider>
       </body>

@@ -17,8 +17,8 @@ function Body({
 }) {
   return (
     <div className="min-w-0 flex-1">
-      <p className={cn("text-sm font-medium tracking-wide", labelClassName)}>{label}</p>
-      {hint ? <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p> : null}
+      <p className={cn("tv-body tracking-wide", labelClassName)}>{label}</p>
+      {hint ? <p className="mt-0.5 tv-caption text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }
@@ -88,9 +88,9 @@ export function SettingsField({
   return (
     <div className={ROW}>
       <div className="min-w-0 flex-1">
-        <p className="eyebrow text-[0.65rem] text-muted-foreground">{label}</p>
-        <p className="mt-1 truncate text-sm font-medium tracking-wide">{value}</p>
-        {hint ? <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p> : null}
+        <p className="tv-eyebrow text-muted-foreground">{label}</p>
+        <p className="mt-1 truncate tv-body tracking-wide">{value}</p>
+        {hint ? <p className="mt-0.5 tv-caption text-muted-foreground">{hint}</p> : null}
       </div>
     </div>
   );

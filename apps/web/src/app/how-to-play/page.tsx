@@ -31,7 +31,7 @@ export default function HowToPlayPage() {
       </div>
 
       <header className="mt-8">
-        <h1 className="font-display text-3xl font-bold">How to play Word lock</h1>
+        <h1 className="font-display tv-screen-title">How to play Word lock</h1>
         <P className="mt-3">
           Word lock is a two-player word game about territory rather than speed. You and one
           opponent share a single 5×5 grid of letters, and every word you play takes tiles off each
@@ -45,9 +45,9 @@ export default function HowToPlayPage() {
           <ol className="flex flex-col gap-4">
             {RULES.map((rule, i) => (
               <li key={rule.title} className="flex gap-3">
-                <span className="soft-btn btn-sun mt-0.5 h-7 w-7 shrink-0 text-xs">{i + 1}</span>
+                <span className="soft-btn btn-sun mt-0.5 h-7 w-7 shrink-0 tv-caption">{i + 1}</span>
                 <div>
-                  <h3 className="text-sm font-bold">{rule.title}</h3>
+                  <h3 className="tv-label">{rule.title}</h3>
                   <P className="mt-1">{rule.body}</P>
                 </div>
               </li>
@@ -151,12 +151,12 @@ export default function HowToPlayPage() {
       </div>
 
       <div className="mt-12 flex flex-col gap-3">
-        <Link href="/" className="soft-btn btn-sky w-full py-3.5 text-center text-base">
+        <Link href="/" className="soft-btn btn-sky w-full py-3.5 text-center tv-body-base">
           Play Word lock
         </Link>
         <Link
           href="/legal/privacy"
-          className="text-center text-sm font-semibold text-muted-foreground underline underline-offset-4 mt-4"
+          className="text-center tv-label text-muted-foreground underline underline-offset-4 mt-4"
         >
           Privacy policy
         </Link>
@@ -168,7 +168,7 @@ export default function HowToPlayPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-display text-lg font-bold">{title}</h2>
+      <h2 className="font-display tv-heading">{title}</h2>
       {children}
     </section>
   );
@@ -176,13 +176,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function P({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <p className={`text-sm leading-relaxed text-muted-foreground ${className ?? ""}`}>{children}</p>
+    <p className={`tv-body leading-relaxed text-muted-foreground ${className ?? ""}`}>{children}</p>
   );
 }
 
 function List({ items }: { items: string[] }) {
   return (
-    <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+    <ul className="list-disc space-y-2 pl-5 tv-body leading-relaxed text-muted-foreground">
       {items.map((item) => (
         <li key={item}>{item}</li>
       ))}

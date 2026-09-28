@@ -20,11 +20,10 @@ export function StreakPill() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={value === 1 ? "1 day streak" : `${value} day streak`}
-        className="stat-pill press text-sm text-[#FC9502]"
+        className="stat-pill press tv-body text-streak"
       >
         <StreakIcon className="h-6 w-6" />
-        <span className="-ml-1 pt-1 text-base">{value}</span>
+        <span className="-ml-1 pt-1 tv-body-base">{value}</span>
       </button>
 
       <StreakSheet
@@ -45,11 +44,11 @@ export function StarsPill() {
 
   return (
     <span
-      className={cn("stat-pill text-sm", LEAGUE_TEXT_CLASS[league])}
+      className={cn("stat-pill tv-body", LEAGUE_TEXT_CLASS[league])}
       title={`${value} stars · ${leagueById(league).name}`}
     >
       <LeagueIcon league={league} className="h-8 w-9" />
-      <span className="text-base -ml-1">{value}</span>
+      <span className="tv-body-base -ml-1">{value}</span>
     </span>
   );
 }

@@ -79,8 +79,8 @@ export function GameResultCard({
           />
 
           <div className="flex min-w-0 flex-1 flex-col items-center gap-1 pt-4 text-center">
-            <p className="font-display text-lg font-bold leading-none">{verdict(game)}</p>
-            <p className="text-xs leading-tight text-muted-foreground">{reasonLabel(game)}</p>
+            <p className="font-display tv-heading leading-none">{verdict(game)}</p>
+            <p className="tv-caption leading-tight text-muted-foreground">{reasonLabel(game)}</p>
             <StarDelta game={game} />
           </div>
 
@@ -95,7 +95,7 @@ export function GameResultCard({
       <div className="no-scrollbar overflow-x-auto border-y border-border px-4 py-2.5">
         {game.playedWords.length === 0 ? (
           <div className="flex h-4 items-center justify-center">
-            <p className="text-center text-sm text-muted-foreground">No words</p>
+            <p className="text-center tv-body text-muted-foreground">No words</p>
           </div>
         ) : (
           <ul className="flex h-4 w-max items-center gap-6">
@@ -103,7 +103,7 @@ export function GameResultCard({
               <li
                 key={i}
                 className={cn(
-                  "shrink-0 text-sm leading-none",
+                  "shrink-0 tv-body leading-none",
                   entry.playerId === game.players.one?.id ? "text-p1" : "text-p2",
                 )}
               >
@@ -134,7 +134,7 @@ export function GameResultCard({
         <button
           type="button"
           onClick={onExit}
-          className="chunky-btn btn-surface flex-1 py-3 text-base"
+          className="chunky-btn btn-surface flex-1 py-3 tv-body-base"
         >
           {exitLabel}
         </button>
@@ -144,7 +144,7 @@ export function GameResultCard({
             type="button"
             onClick={action.onClick}
             disabled={action.pending}
-            className="chunky-btn btn-sky flex-1 py-3 text-base"
+            className="chunky-btn btn-sky flex-1 py-3 tv-body-base"
           >
             {action.pending ? "Loading" : action.label}
           </button>
@@ -180,17 +180,10 @@ function PlayerColumn({
           slot === 1 ? "ring-p1" : "ring-p2",
         )}
       />
-      <p title={player?.name ?? undefined} className="max-w-full truncate text-xs leading-none">
+      <p title={player?.name ?? undefined} className="max-w-full truncate tv-caption leading-none">
         {player?.name ?? "-"}
       </p>
-      <p
-        className={cn(
-          "font-display text-2xl font-bold leading-none tabular-nums",
-          slot === 1 ? "text-p1" : "text-p2",
-        )}
-      >
-        {score}
-      </p>
+      <p className={cn("tv-stat-md leading-none", slot === 1 ? "text-p1" : "text-p2")}>{score}</p>
     </div>
   );
 }
@@ -252,7 +245,7 @@ function StarDelta({ game }: { game: ResultGame }) {
   return (
     <p
       className={cn(
-        "font-display mt-0.5 text-xs font-bold tabular-nums",
+        "font-display mt-0.5 tv-caption font-bold tabular-nums",
         delta > 0 ? "text-mint" : "text-muted-foreground",
       )}
     >

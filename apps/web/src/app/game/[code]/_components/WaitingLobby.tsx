@@ -93,7 +93,7 @@ export function WaitingLobby({
               <Avatar avatar={game.players.one?.avatar} className="h-16 w-16" />
             </PlayerSlot>
 
-            <span className="pt-7 text-sm font-bold text-muted-foreground">vs</span>
+            <span className="pt-7 tv-label text-muted-foreground">vs</span>
 
             {opponentJoined ? (
               <PlayerSlot name={game.players.two.name}>
@@ -108,7 +108,9 @@ export function WaitingLobby({
                 <span className="press border-border border-2 rounded-full grid h-18 w-18 place-items-center">
                   <InviteIcon className="h-5 w-5" />
                 </span>
-                <span className="max-w-20 truncate text-center text-xs font-bold">Share link</span>
+                <span className="max-w-20 truncate text-center tv-caption font-bold">
+                  Share link
+                </span>
               </button>
             ) : (
               <div className="flex flex-col items-center gap-2.5">
@@ -118,14 +120,14 @@ export function WaitingLobby({
                     className="h-11 w-11 rounded-full border-2 border-dashed border-muted-foreground/30"
                   />
                 </span>
-                <span className="invisible text-xs">·</span>
+                <span className="invisible tv-caption">·</span>
               </div>
             )}
           </div>
 
           <div className="flex w-full max-w-xs flex-col items-center gap-2">
             {isSpectator ? (
-              <p className="py-4 text-sm font-semibold text-muted-foreground">
+              <p className="py-4 tv-label text-muted-foreground">
                 {joinError ? (
                   <span className="text-destructive">{joinError}</span>
                 ) : (
@@ -138,19 +140,19 @@ export function WaitingLobby({
                   type="button"
                   onClick={handleStart}
                   disabled={!opponentJoined || starting}
-                  className="soft-btn btn-blush w-[65%] py-3.5 text-base"
+                  className="soft-btn btn-blush w-[65%] py-3.5 tv-body-base"
                 >
                   {starting ? "Game is starting" : "Start Game"}
                 </button>
                 {!opponentJoined && (
-                  <p className="animate-pulse text-xs font-bold text-muted-foreground mt-4">
+                  <p className="animate-pulse tv-caption font-bold text-muted-foreground mt-4">
                     Waiting for opponent
                   </p>
                 )}
-                {startError && <p className="text-xs text-destructive">{startError}</p>}
+                {startError && <p className="tv-caption text-destructive">{startError}</p>}
               </>
             ) : (
-              <p className="animate-pulse py-4 text-sm font-semibold text-muted-foreground mt-4">
+              <p className="animate-pulse py-4 tv-label text-muted-foreground mt-4">
                 {opponentJoined ? "Waiting for host to start" : "Waiting for opponent"}
               </p>
             )}
@@ -162,8 +164,8 @@ export function WaitingLobby({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
           <div className="surface flex w-full max-w-xs flex-col gap-4 p-6">
             <div className="text-center">
-              <h2 className="text-lg font-bold">Exit lobby?</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <h2 className="tv-heading">Exit lobby?</h2>
+              <p className="mt-1 tv-body text-muted-foreground">
                 {isHost ? "The lobby will be disbanded." : "You'll leave the game lobby."}
               </p>
             </div>
@@ -199,7 +201,7 @@ function PlayerSlot({ name, children }: { name: string; children: React.ReactNod
       <span className="border-border border-2 rounded-full grid h-18 w-18 place-items-center">
         {children}
       </span>
-      <span title={name} className="max-w-20 truncate text-center text-xs font-bold">
+      <span title={name} className="max-w-20 truncate text-center tv-caption font-bold">
         {name}
       </span>
     </div>

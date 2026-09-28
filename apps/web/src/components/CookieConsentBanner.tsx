@@ -44,7 +44,7 @@ export function CookieConsentBanner() {
         "fixed inset-x-0 bottom-0 z-[60] flex flex-col gap-3 border-t border-border/60 bg-background/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur sm:flex-row sm:items-center sm:justify-between",
       )}
     >
-      <p className="text-xs leading-relaxed text-muted-foreground sm:max-w-md">
+      <p className="tv-caption leading-relaxed text-muted-foreground sm:max-w-md">
         Word lock uses cookies for sign-in and, where permitted, for advertising. See the{" "}
         <a
           href="/legal/privacy"
@@ -57,7 +57,7 @@ export function CookieConsentBanner() {
       <button
         type="button"
         onClick={accept}
-        className="soft-btn btn-sky shrink-0 self-start px-4 py-2 text-xs tracking-wide sm:self-auto"
+        className="soft-btn btn-sky shrink-0 self-start px-4 py-2 tv-caption tracking-wide sm:self-auto"
       >
         Got it
       </button>

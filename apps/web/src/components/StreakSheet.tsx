@@ -70,7 +70,7 @@ export function StreakSheet({
             <li key={day.date} className="flex flex-col items-center gap-1.5">
               <span
                 className={cn(
-                  "text-xs font-bold",
+                  "tv-caption font-bold",
                   day.isToday ? "text-foreground" : "text-muted-foreground",
                 )}
               >
@@ -83,9 +83,8 @@ export function StreakSheet({
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-md",
                   day.played ? "bg-leaf text-white" : "bg-surface-2",
-                  // Today gets an outline either way, so an unticked cell still
                   // reads as "this is the one you can still fill in".
-                  day.isToday && "ring-2 ring-[#FC9502] ring-offset-2 ring-offset-background",
+                  day.isToday && "ring-2 ring-streak ring-offset-2 ring-offset-background",
                 )}
               >
                 {day.played && <TickIcon className="h-4 w-4" />}
@@ -94,7 +93,7 @@ export function StreakSheet({
           ))}
         </ol>
 
-        <p className="mt-8 text-center text-sm leading-relaxed text-muted-foreground">{footer}</p>
+        <p className="mt-8 text-center tv-body leading-relaxed text-muted-foreground">{footer}</p>
       </div>
     </BottomSheet>
   );

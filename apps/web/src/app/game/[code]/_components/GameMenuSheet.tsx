@@ -28,8 +28,10 @@ function MenuRow({
       className={cn("press flex w-full items-center gap-3.5 px-2 py-4 text-left", className)}
     >
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium tracking-wide">{label}</span>
-        {hint ? <span className="mt-0.5 block text-xs text-muted-foreground">{hint}</span> : null}
+        <span className="block tv-body tracking-wide">{label}</span>
+        {hint ? (
+          <span className="mt-0.5 block tv-caption text-muted-foreground">{hint}</span>
+        ) : null}
       </span>
       <ChevronRightIcon aria-hidden size={16} className="shrink-0 opacity-60" strokeWidth={2.5} />
     </button>
@@ -80,8 +82,10 @@ export function GameMenuSheet({
         <div className="mt-6 flex flex-col">
           <div className="flex items-center gap-3.5 px-2 py-4">
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium tracking-wide">Dark theme</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">Easier on the eyes</span>
+              <span className="block tv-body tracking-wide">Dark theme</span>
+              <span className="mt-0.5 block tv-caption text-muted-foreground">
+                Easier on the eyes
+              </span>
             </span>
             <Toggle
               label="Dark theme"

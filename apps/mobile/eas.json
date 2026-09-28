@@ -1,0 +1,43 @@
+{
+  "cli": {
+    "version": ">= 16.24.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "local": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://test.wordlock.cbsdev.me",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://falecdhgmzmnoryremus.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhbGVjZGhnbXptbm9yeXJlbXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzQ4MDIsImV4cCI6MjEwMDQ1MDgwMn0.VfXUgHMV_6roJED8xdbI9RBHH0-I4kDWwEDk07BcGQM"
+      }
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://test.wordlock.cbsdev.me",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://falecdhgmzmnoryremus.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhbGVjZGhnbXptbm9yeXJlbXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NzQ4MDIsImV4cCI6MjEwMDQ1MDgwMn0.VfXUgHMV_6roJED8xdbI9RBHH0-I4kDWwEDk07BcGQM"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://wordlock.cbsdev.me",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://cjlhkwoqdsvsgqtguuof.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqbGhrd29xZHN2c2dxdGd1dW9mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwNDU3ODAsImV4cCI6MjEwMDYyMTc4MH0.Z_7ZFMMN0ahmcSAiqdMaXo_lr_4KsNlgjnRVIwwJ_2I"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

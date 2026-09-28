@@ -88,24 +88,26 @@ export default function HomeScreen() {
           <Wordmark />
 
           <View className="mt-16 w-full max-w-sm flex-row gap-4 px-5">
-            <Button
-              variant="mint"
-              className="flex-1"
-              disabled={!ready || createMutation.isPending}
-              loading={createMutation.isPending}
-              onPress={() => createMutation.mutate()}
-              icon={<PlayIcon size={12} color="#ffffff" />}
-            >
-              {createMutation.isPending ? "Creating" : "New Game"}
-            </Button>
-            <Button
-              variant="sky"
-              className="flex-1"
-              onPress={() => router.push("/join")}
-              icon={<HeartIcon size={12} color="#ffffff" />}
-            >
-              Join
-            </Button>
+            <View className="flex-1">
+              <Button
+                variant="mint"
+                disabled={!ready || createMutation.isPending}
+                loading={createMutation.isPending}
+                onPress={() => createMutation.mutate()}
+                icon={<PlayIcon size={12} color="#ffffff" />}
+              >
+                {createMutation.isPending ? "Creating" : "New Game"}
+              </Button>
+            </View>
+            <View className="flex-1">
+              <Button
+                variant="sky"
+                onPress={() => router.push("/join")}
+                icon={<HeartIcon size={12} color="#ffffff" />}
+              >
+                Join
+              </Button>
+            </View>
           </View>
         </View>
 

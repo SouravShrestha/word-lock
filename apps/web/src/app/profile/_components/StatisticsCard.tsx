@@ -71,9 +71,7 @@ export function StatisticsCard({
           <span className="font-display text-4xl font-bold tabular-nums">{stars}</span>
           <TrendLabel delta={delta} />
         </div>
-        <span className="text-xs font-semibold text-muted-foreground">
-          Peak {account?.peakStars ?? stars}
-        </span>
+        <span className="tv-caption text-muted-foreground">Peak {account?.peakStars ?? stars}</span>
       </div>
 
       <div
@@ -88,7 +86,7 @@ export function StatisticsCard({
             onClick={() => setRange(option.id)}
             aria-pressed={option.id === range}
             className={cn(
-              "press rounded-sm px-3 py-1.5 text-xs font-bold tracking-wide transition-colors",
+              "press rounded-sm px-3 py-1.5 tv-caption font-bold tracking-wide transition-colors",
               option.id === range
                 ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:text-foreground",
@@ -108,7 +106,7 @@ export function StatisticsCard({
           <StarChart points={points} />
         ) : (
           <div className="grid h-56 place-items-center px-6 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="tv-body text-muted-foreground">
               Play a few ranked games and your star history will show up here.
             </p>
           </div>
@@ -139,7 +137,7 @@ function TrendLabel({ delta }: { delta: number | null }) {
   if (delta === null) return null;
 
   if (delta === 0) {
-    return <span className="text-sm font-bold text-muted-foreground tabular-nums">no change</span>;
+    return <span className="tv-label text-muted-foreground tabular-nums">no change</span>;
   }
 
   const up = delta > 0;
@@ -147,7 +145,7 @@ function TrendLabel({ delta }: { delta: number | null }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-0.5 text-sm font-bold tabular-nums",
+        "inline-flex items-center gap-0.5 tv-label tabular-nums",
         up ? "text-mint" : "text-p1",
       )}
     >
@@ -179,7 +177,7 @@ function share(part: number, total: number): string | null {
 function Stat({ label, value, share }: { label: string; value: number; share?: string | null }) {
   return (
     <div className="flex flex-col items-center gap-0.5">
-      <span className="font-display text-2xl font-bold tabular-nums">{value}</span>
+      <span className="font-display tv-stat-md">{value}</span>
       <span className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
         {label}
         {share && <span className="ml-1 normal-case tabular-nums">{share}</span>}

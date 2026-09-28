@@ -103,11 +103,11 @@ export function AuthSheet() {
 
   return (
     <BottomSheet open={isLoginRequired} label={heading} dismissable={false} showHandle={false}>
-      <h2 className="text-lg leading-tight">{heading}</h2>
+      <h2 className="tv-heading leading-tight">{heading}</h2>
 
       {isCodePhase ? (
         <>
-          <p className="mt-8 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-8 tv-body leading-relaxed text-muted-foreground">
             We sent a 6-digit code to{" "}
             <span className="font-semibold text-foreground">{email.trim()}</span>. Enter it below to
             finish logging in.
@@ -132,19 +132,19 @@ export function AuthSheet() {
               disabled={phase === "verifying"}
               aria-invalid={error !== null}
               aria-describedby={error ? "auth-error" : undefined}
-              className="w-full rounded-xl bg-surface-2 px-4 py-2.5 text-base font-bold tracking-widest text-foreground outline-none ring-sky placeholder:font-normal placeholder:tracking-normal placeholder:text-muted-foreground focus:ring-2 disabled:opacity-60"
+              className="w-full rounded-xl bg-surface-2 px-4 py-2.5 tv-body-base font-bold tracking-widest text-foreground outline-none ring-sky placeholder:font-normal placeholder:tracking-normal placeholder:text-muted-foreground focus:ring-2 disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={busy}
-              className="soft-btn btn-sky flex w-full items-center justify-center gap-2.5 py-3 text-sm tracking-wide disabled:opacity-60"
+              className="soft-btn btn-sky flex w-full items-center justify-center gap-2.5 py-3 tv-body tracking-wide disabled:opacity-60"
             >
               {phase === "verifying" ? "Verifying…" : "Verify code"}
             </button>
           </form>
 
           {error && (
-            <p id="auth-error" role="alert" className="mt-2 text-sm font-semibold text-destructive">
+            <p id="auth-error" role="alert" className="mt-2 tv-label text-destructive">
               {error}
             </p>
           )}
@@ -158,7 +158,7 @@ export function AuthSheet() {
                 setCode("");
                 setError(null);
               }}
-              className="soft-btn btn-surface-2 w-full py-3 text-sm tracking-wide disabled:opacity-60"
+              className="soft-btn btn-surface-2 w-full py-3 tv-body tracking-wide disabled:opacity-60"
             >
               Use a different email
             </button>
@@ -166,7 +166,7 @@ export function AuthSheet() {
         </>
       ) : (
         <>
-          <p className="mt-8 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-8 tv-body leading-relaxed text-muted-foreground">
             You need an account so your games, stars and streak follow you across devices.
           </p>
 
@@ -176,7 +176,7 @@ export function AuthSheet() {
                 <span className="flex w-6 shrink-0 items-center justify-center">
                   <Icon className={iconClass} />
                 </span>
-                <span className="font-display text-sm tracking-wide text-muted-foreground">
+                <span className="font-display tv-body tracking-wide text-muted-foreground">
                   {label}
                 </span>
               </li>
@@ -188,7 +188,7 @@ export function AuthSheet() {
               type="button"
               onClick={onGoogle}
               disabled={busy}
-              className="soft-btn btn-surface-2 flex w-full items-center justify-center gap-2.5 py-3 text-sm tracking-wide disabled:opacity-60"
+              className="soft-btn btn-surface-2 flex w-full items-center justify-center gap-2.5 py-3 tv-body tracking-wide disabled:opacity-60"
             >
               <GoogleIcon className="h-[1.15rem] w-[1.15rem]" />
               {googleBusy ? "Opening Google…" : "Continue with Google"}
@@ -196,7 +196,9 @@ export function AuthSheet() {
 
             <div className="my-1 flex items-center gap-3" aria-hidden>
               <span className="h-px flex-1 bg-muted-foreground/20" />
-              <span className="font-display text-xs tracking-wide text-muted-foreground">or</span>
+              <span className="font-display tv-caption tracking-wide text-muted-foreground">
+                or
+              </span>
               <span className="h-px flex-1 bg-muted-foreground/20" />
             </div>
 
@@ -217,12 +219,12 @@ export function AuthSheet() {
                 placeholder="you@example.com"
                 aria-invalid={error !== null}
                 aria-describedby={error ? "auth-error" : undefined}
-                className="w-full rounded-xl bg-surface-2 px-4 py-2.5 text-base font-bold text-foreground outline-none ring-sky placeholder:font-normal placeholder:text-muted-foreground focus:ring-2"
+                className="w-full rounded-xl bg-surface-2 px-4 py-2.5 tv-body-base font-bold text-foreground outline-none ring-sky placeholder:font-normal placeholder:text-muted-foreground focus:ring-2"
               />
               <button
                 type="submit"
                 disabled={busy}
-                className="soft-btn btn-sky flex w-full items-center justify-center gap-2.5 py-3 text-sm tracking-wide disabled:opacity-60"
+                className="soft-btn btn-sky flex w-full items-center justify-center gap-2.5 py-3 tv-body tracking-wide disabled:opacity-60"
               >
                 <MailIcon className="h-[1.05rem] w-[1.05rem]" />
                 {phase === "sending" ? "Sending…" : "Email me a code"}
@@ -230,13 +232,13 @@ export function AuthSheet() {
             </form>
 
             {error && (
-              <p id="auth-error" role="alert" className="text-sm font-semibold text-destructive">
+              <p id="auth-error" role="alert" className="tv-label text-destructive">
                 {error}
               </p>
             )}
           </div>
 
-          <p className="mt-6 text-center text-xs font-semibold text-muted-foreground">
+          <p className="mt-6 text-center tv-caption text-muted-foreground">
             <a
               href="/how-to-play"
               target="_blank"

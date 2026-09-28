@@ -48,7 +48,7 @@ function LeagueMove({ game }: { game: any }) {
   return (
     <span
       className={cn(
-        "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider",
+        "flex items-center gap-1.5 tv-caption font-bold uppercase tracking-wider",
         LEAGUE_TEXT_CLASS[league.id],
       )}
     >

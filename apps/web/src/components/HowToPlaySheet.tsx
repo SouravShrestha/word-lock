@@ -29,10 +29,10 @@ export function HowToPlaySheet({
       <ol className="mt-10 flex flex-col gap-4">
         {RULES.map((rule, i) => (
           <li key={rule.title} className="flex gap-3">
-            <span className="soft-btn btn-sun mt-0.5 h-7 w-7 shrink-0 text-xs">{i + 1}</span>
+            <span className="soft-btn btn-sun mt-0.5 h-7 w-7 shrink-0 tv-caption">{i + 1}</span>
             <div>
-              <p className="text-sm font-bold">{rule.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{rule.body}</p>
+              <p className="tv-label">{rule.title}</p>
+              <p className="mt-1 tv-body leading-relaxed text-muted-foreground">{rule.body}</p>
             </div>
           </li>
         ))}

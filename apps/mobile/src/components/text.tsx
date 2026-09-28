@@ -92,8 +92,8 @@ export const TEXT_STYLE_CONFIG = {
   eyebrow: {
     Usage: "SectionLabel text",
     "Font-Family": "font-sans",
-    Size: "text-[0.65rem]",
-    Weight: "font-bold",
+    Size: "text-[0.85rem]",
+    Weight: "font-semibold",
     LetterSpacing: "tracking-wider",
     Color: "text-mutedForeground",
   },
@@ -214,7 +214,7 @@ export const TEXT_STYLE_CONFIG = {
   buttonMd: {
     Usage: "Button md",
     "Font-Family": "font-display",
-    Size: "text-base",
+    Size: "text-[15px]",
     Weight: "font-bold",
     LetterSpacing: "tracking-wider",
     Color: "",
@@ -446,8 +446,9 @@ export const TEXT_STYLE_CONFIG = {
   autoGen29: {
     Usage: "Auto-generated style for text-sm",
     Size: "text-sm",
-    Weight: "font-semibold",
+    Weight: "font-medium",
     Color: "",
+    LetterSpacing: "tracking-wide",
   },
   autoGen30: {
     Usage: "Auto-generated style for text-xs",

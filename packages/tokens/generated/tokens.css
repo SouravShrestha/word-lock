@@ -62,6 +62,8 @@
   --aqua: #55d4e8;
   /* Theme-invariant. */
   --grape: #ff6fd8;
+  /* Theme-invariant streak color. */
+  --streak: #FC9502;
   /* Theme-invariant. Light and dark both declared this, identically. */
   --on-accent: #0f1419;
   --hairline: rgb(15 20 25 / 12%);

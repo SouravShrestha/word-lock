@@ -60,8 +60,8 @@ export function ConfirmDialog({
     >
       <div className="surface flex w-full max-w-xs flex-col gap-4 p-6">
         <div className="text-center">
-          <h2 className="text-lg font-bold">{title}</h2>
-          {description && <div className="mt-1 text-sm text-muted-foreground">{description}</div>}
+          <h2 className="tv-heading">{title}</h2>
+          {description && <div className="mt-1 tv-body text-muted-foreground">{description}</div>}
         </div>
         <div className="flex gap-3">
           <button

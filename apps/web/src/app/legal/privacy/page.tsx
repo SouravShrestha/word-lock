@@ -19,10 +19,8 @@ export default function PrivacyPolicyPage() {
       </div>
 
       <header className="mt-8">
-        <h1 className="font-display text-3xl font-bold">Privacy policy</h1>
-        <p className="mt-2 text-xs font-semibold text-muted-foreground">
-          Last updated {PRIVACY_UPDATED}
-        </p>
+        <h1 className="font-display tv-screen-title">Privacy policy</h1>
+        <p className="mt-2 tv-caption text-muted-foreground">Last updated {PRIVACY_UPDATED}</p>
       </header>
 
       <div className="mt-8 flex flex-col gap-8">
@@ -179,12 +177,12 @@ export default function PrivacyPolicyPage() {
       </div>
 
       <div className="mt-12 flex flex-col gap-3">
-        <Link href="/" className="text-sm font-bold underline underline-offset-4">
+        <Link href="/" className="tv-label underline underline-offset-4">
           Back to Word lock
         </Link>
         <Link
           href="/how-to-play"
-          className="text-sm font-semibold text-muted-foreground underline underline-offset-4"
+          className="tv-label text-muted-foreground underline underline-offset-4"
         >
           How to play
         </Link>
@@ -196,19 +194,19 @@ export default function PrivacyPolicyPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-display text-lg font-bold">{title}</h2>
+      <h2 className="font-display tv-heading">{title}</h2>
       {children}
     </section>
   );
 }
 
 function P({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm leading-relaxed text-muted-foreground">{children}</p>;
+  return <p className="tv-body leading-relaxed text-muted-foreground">{children}</p>;
 }
 
 function List({ items }: { items: string[] }) {
   return (
-    <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+    <ul className="list-disc space-y-2 pl-5 tv-body leading-relaxed text-muted-foreground">
       {items.map((item) => (
         <li key={item}>{item}</li>
       ))}

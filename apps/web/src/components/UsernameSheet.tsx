@@ -114,13 +114,13 @@ export function UsernameSheet() {
     >
       <div className="flex flex-col items-center gap-2 text-center mt-4">
         <SmileyFaceIcon className="h-14 w-14" />
-        <h2 className="text-lg leading-tight mt-6">What shall we call you?</h2>
-        <p className="text-sm leading-relaxed text-muted-foreground mt-0">
+        <h2 className="tv-heading leading-tight mt-6">What shall we call you?</h2>
+        <p className="tv-body leading-relaxed text-muted-foreground mt-0">
           This is how players see you
         </p>
       </div>
 
-      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+      <p className="mt-1 tv-body leading-relaxed text-muted-foreground">
         You can only set this once, so choose carefully.
       </p>
 
@@ -131,7 +131,7 @@ export function UsernameSheet() {
         <div className="relative">
           <span
             aria-hidden
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground"
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 tv-body-base font-bold text-muted-foreground"
           >
             @
           </span>
@@ -147,11 +147,11 @@ export function UsernameSheet() {
             onChange={(e) => setValue(e.target.value)}
             aria-invalid={formatError !== null || availability.state === "taken"}
             aria-describedby="username-hint"
-            className="w-full rounded-md bg-surface-2 py-2.5 pl-9 pr-4 text-base font-bold text-foreground outline-none ring-sky placeholder:font-normal placeholder:text-muted-foreground focus:ring-2"
+            className="w-full rounded-md bg-surface-2 py-2.5 pl-9 pr-4 tv-body-base font-bold text-foreground outline-none ring-sky placeholder:font-normal placeholder:text-muted-foreground focus:ring-2"
           />
         </div>
 
-        <p id="username-hint" role="status" className="min-h-5 text-xs font-light text-right">
+        <p id="username-hint" role="status" className="min-h-5 tv-caption font-light text-right">
           {formatError ? (
             <span className="text-destructive">{USERNAME_ERROR_COPY[formatError]}</span>
           ) : availability.state === "taken" ? (
@@ -164,7 +164,7 @@ export function UsernameSheet() {
               {normalized} is available
             </span>
           ) : (
-            <span className="text-muted-foreground text-xs">
+            <span className="text-muted-foreground tv-caption">
               {MIN_USERNAME_LENGTH}–{MAX_USERNAME_LENGTH} characters. Letters, numbers and
               underscores.
             </span>
@@ -174,18 +174,18 @@ export function UsernameSheet() {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="soft-btn btn-sky w-full py-3 text-sm tracking-wide disabled:opacity-60"
+          className="soft-btn btn-sky w-full py-3 tv-body tracking-wide disabled:opacity-60"
         >
           {mutation.isPending ? "Saving…" : "Claim username"}
         </button>
 
         {mutation.error && (
-          <p role="alert" className="text-sm font-semibold text-destructive">
+          <p role="alert" className="tv-label text-destructive">
             {mutation.error.message}
           </p>
         )}
 
-        <p className="mt-1 text-center text-xs font-semibold leading-relaxed text-muted-foreground">
+        <p className="mt-1 text-center tv-caption leading-relaxed text-muted-foreground">
           Wrong account?{" "}
           <button
             type="button"
@@ -198,7 +198,7 @@ export function UsernameSheet() {
         </p>
 
         {leaveError && (
-          <p role="alert" className="text-center text-sm font-semibold text-destructive">
+          <p role="alert" className="text-center tv-label text-destructive">
             {leaveError}
           </p>
         )}

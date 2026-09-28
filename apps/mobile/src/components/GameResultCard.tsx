@@ -119,20 +119,23 @@ export function GameResultCard({
       </View>
 
       <View className="flex-row gap-3 px-3 pb-4" style={{ backgroundColor: palette.board }}>
-        <Button variant="surface" className="flex-1" onPress={onExit}>
-          {exitLabel}
-        </Button>
+        <View className="flex-1">
+          <Button variant="surface" onPress={onExit}>
+            {exitLabel}
+          </Button>
+        </View>
 
         {action && (
-          <Button
-            variant="sky"
-            className="flex-1"
-            disabled={action.pending}
-            loading={action.pending}
-            onPress={action.onPress}
-          >
-            {action.label}
-          </Button>
+          <View className="flex-1">
+            <Button
+              variant="sky"
+              disabled={action.pending}
+              loading={action.pending}
+              onPress={action.onPress}
+            >
+              {action.label}
+            </Button>
+          </View>
         )}
       </View>
     </View>

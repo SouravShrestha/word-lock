@@ -73,15 +73,13 @@ export function JoinClient() {
           type="button"
           onClick={handleSubmit}
           disabled={!ready || joinMutation.isPending || joinCode.length < CODE_LENGTH}
-          className="soft-btn btn-sky mx-auto w-full max-w-[240px] py-3.5 text-base"
+          className="soft-btn btn-sky mx-auto w-full max-w-[240px] py-3.5 tv-body-base"
         >
           {joinMutation.isPending ? "Joining" : "Let's go!"}
         </button>
 
         {joinMutation.error && (
-          <p className="mt-4 text-center text-sm font-semibold text-destructive">
-            {joinMutation.error.message}
-          </p>
+          <p className="mt-4 text-center tv-label text-destructive">{joinMutation.error.message}</p>
         )}
 
         <div className="-mx-2 mt-auto">

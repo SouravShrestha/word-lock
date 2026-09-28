@@ -23,7 +23,7 @@ export default (): ExpoConfig => ({
     package: "me.cbsdev.wordlock",
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#131F24",
+      backgroundColor: "#131f24",
     },
   },
   plugins: [
@@ -32,11 +32,11 @@ export default (): ExpoConfig => ({
     [
       "expo-splash-screen",
       {
-        image: "./assets/splash.png",
+        image: "./assets/splash-icon.png",
         resizeMode: "contain",
         backgroundColor: "#fbf9ed",
         dark: {
-          image: "./assets/splash.png",
+          image: "./assets/splash-icon.png",
           resizeMode: "contain",
           backgroundColor: "#131f24",
         },
@@ -51,7 +51,7 @@ export default (): ExpoConfig => ({
   },
   extra: {
     eas: {
-      projectId: undefined,
+      projectId: "36850b2b-048e-471f-8fe1-beb552a7bcbd",
     },
   },
 });

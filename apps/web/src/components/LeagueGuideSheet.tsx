@@ -18,7 +18,7 @@ export function LeagueGuideSheet({
   return (
     <BottomSheet open={open} onClose={onClose} label="League tiers" zClassName={zClassName}>
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg font-bold">League tiers</h2>
+        <h2 className="tv-heading">League tiers</h2>
         <button
           type="button"
           onClick={onClose}
@@ -28,7 +28,7 @@ export function LeagueGuideSheet({
           <CrossIcon className="h-3.5 w-3.5" />
         </button>
       </div>
-      <p className="mt-3 text-sm text-muted-foreground">
+      <p className="mt-3 tv-body text-muted-foreground">
         Climb the ladder by winning games and earning stars.
       </p>
 
@@ -39,13 +39,13 @@ export function LeagueGuideSheet({
             <div className="flex flex-col">
               <span
                 className={cn(
-                  "font-display text-base font-semibold tracking-wide",
+                  "font-display tv-body-base font-semibold tracking-wide",
                   LEAGUE_TEXT_CLASS[tier.id],
                 )}
               >
                 {tier.name}
               </span>
-              <span className="text-xs font-semibold text-muted-foreground tracking-wide">
+              <span className="tv-caption text-muted-foreground tracking-wide">
                 {tier.maxStars === null
                   ? `${tier.minStars}+ stars`
                   : `${tier.minStars} - ${tier.maxStars} stars`}

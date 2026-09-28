@@ -87,6 +87,7 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: "mint", value: "#17c98a", note: "Theme-invariant." },
       { name: "aqua", value: "#55d4e8", note: "Theme-invariant." },
       { name: "grape", value: "#ff6fd8", note: "Theme-invariant." },
+      { name: "streak", value: "#FC9502", note: "Theme-invariant streak color." },
       {
         name: "on-accent",
         value: "#0f1419",

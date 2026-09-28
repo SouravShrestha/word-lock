@@ -29,7 +29,7 @@ import {
 } from "@word-lock/client";
 import { supabase } from "@/integrations/supabase/client";
 import { siteUrl } from "@/lib/app-meta";
-import { type ReactionEmoji, type HistoryMove } from "@word-lock/core/game";
+import { isReactionEmoji, type ReactionEmoji, type HistoryMove } from "@word-lock/core/game";
 import { joinUrl } from "@word-lock/core/app";
 import { Shell } from "./Shell";
 import { WaitingLobby } from "./WaitingLobby";
@@ -97,60 +97,117 @@ export function GameClient({ code }: { code: string }) {
   useEffect(() => {
     if (!game?.id || !authReady) return;
 
-    const channel = supabase
-      .channel(`game-${game.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "wl_games",
-          filter: `id=eq.${game.id}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["game", roomCode, sessionId] });
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "wl_moves",
-          filter: `game_id=eq.${game.id}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["game", roomCode, sessionId] });
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "wl_games",
-          filter: `id=eq.${game.id}`,
-        },
-        () => {
-          startHostLeftCountdown();
-        },
-      )
-      .on("broadcast", { event: "reaction" }, ({ payload }) => {
-        const emoji = payload?.emoji;
-        const slot = payload?.slot;
-        if (typeof emoji !== "string" || (slot !== 1 && slot !== 2)) return;
-        if (slot === viewerSlotRef.current) return;
-        showReaction(emoji, slot);
-      })
-      .subscribe((status) => {
+    let isMounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setup = async () => {
+      const existing = supabase.getChannels().find((c) => c.topic === `realtime:game-${game.id}`);
+      if (existing) {
+        await supabase.removeChannel(existing);
+      }
+      if (!isMounted) return;
+
+      channel = supabase
+        .channel(`game-${game.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "wl_games",
+            filter: `id=eq.${game.id}`,
+          },
+          () => {
+            queryClient.invalidateQueries({ queryKey: ["game", roomCode, sessionId] });
+          },
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "wl_moves",
+            filter: `game_id=eq.${game.id}`,
+          },
+          () => {
+            queryClient.invalidateQueries({ queryKey: ["game", roomCode, sessionId] });
+          },
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "DELETE",
+            schema: "public",
+            table: "wl_games",
+            filter: `id=eq.${game.id}`,
+          },
+          () => {
+            startHostLeftCountdown();
+          },
+        );
+
+      channel.subscribe((status) => {
         const connected = status === "SUBSCRIBED";
-        setIsRealtimeConnected((prev) => (prev === connected ? prev : connected));
+        if (isMounted) {
+          setIsRealtimeConnected((prev) => (prev === connected ? prev : connected));
+        }
       });
+    };
+
+    setup();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
-  }, [game?.id, authReady, roomCode, sessionId, queryClient, showReaction, startHostLeftCountdown]);
+  }, [game?.id, authReady, roomCode, sessionId, queryClient, startHostLeftCountdown]);
+
+  // Reactions ride their own private channel, authorized by migration 014's
+  // realtime.messages policy: only this game's two players may join, and no
+  // client may send (the server broadcasts). Kept off the game channel so a
+  // refused join can never take game updates down, and only opened once the
+  // viewer is seated in an active game, since a join before that is refused.
+  const canReceiveReactions = game?.status === "active" && game?.viewerSlot != null;
+
+  useEffect(() => {
+    if (!game?.id || !authReady || !canReceiveReactions) return;
+
+    let isMounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const setup = async () => {
+      const topic = `reactions-${game.id}`;
+      const existing = supabase.getChannels().find((c) => c.topic === `realtime:${topic}`);
+      if (existing) {
+        await supabase.removeChannel(existing);
+      }
+      if (!isMounted) return;
+
+      channel = supabase
+        .channel(topic, { config: { private: true } })
+        .on("broadcast", { event: "reaction" }, ({ payload }) => {
+          const emoji = payload?.emoji;
+          const slot = payload?.slot;
+          if (typeof emoji !== "string" || !isReactionEmoji(emoji)) return;
+          if (slot !== 1 && slot !== 2) return;
+          if (slot === viewerSlotRef.current) return;
+          showReaction(emoji, slot);
+        });
+
+      channel.subscribe();
+    };
+
+    setup();
+
+    return () => {
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [game?.id, authReady, canReceiveReactions, showReaction]);
 
   useEffect(() => {
     isHostWaitingRef.current = game?.status === "waiting" && game?.viewerSlot === 1;
@@ -287,12 +344,12 @@ export function GameClient({ code }: { code: string }) {
           <div className="w-full max-w-sm p-8 flex flex-col items-center gap-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold">Host left the lobby</h2>
-              <p className="mt-2 text-sm text-muted-foreground">The game has been disbanded</p>
+              <p className="mt-2 tv-body text-muted-foreground">The game has been disbanded</p>
             </div>
             <div className="text-6xl font-bold font-display tabular-nums text-foreground">
               {hostLeftCountdown}
             </div>
-            <p className="text-sm text-muted-foreground">Redirecting to lobby...</p>
+            <p className="tv-body text-muted-foreground">Redirecting to lobby...</p>
           </div>
         </div>
       </Shell>

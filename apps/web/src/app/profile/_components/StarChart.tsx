@@ -102,7 +102,7 @@ function StarTooltip({ point }: { point: ChartPoint | null }) {
   if (!point) return null;
 
   return (
-    <div className="rounded-md bg-foreground px-2.5 py-1.5 text-xs text-background shadow-md">
+    <div className="rounded-md bg-foreground px-2.5 py-1.5 tv-caption text-background">
       <span className="tabular-nums">{new Date(point.x).toLocaleDateString()}</span>
       <span>: </span>
       <span className="font-bold tabular-nums">{point.stars}</span>

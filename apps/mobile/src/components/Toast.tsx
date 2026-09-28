@@ -75,23 +75,19 @@ export function ToastHost() {
       : current.variant === "success"
         ? palette.mint
         : palette.foreground;
-  const foreground = current.variant === "success" ? "#ffffff" : palette.background;
+  const foreground = "#ffffff";
 
   return (
     <View
       pointerEvents="none"
-      className="absolute inset-x-0 top-0 items-center px-6"
+      className="absolute inset-x-0 top-0 items-center"
       style={{ paddingTop: Math.max(insets.top, 12) + 8 }}
     >
       <Animated.View
-        style={[animatedStyle, { backgroundColor: background, maxWidth: 360 }]}
-        className="rounded-xl px-4 py-3"
+        style={[animatedStyle, { backgroundColor: background }]}
+        className="px-4 py-3 w-full"
       >
-        <Text
-          variant="autoGen29"
-
-          style={{ color: current.variant === "default" ? palette.background : foreground }}
-        >
+        <Text variant="autoGen29" style={{ color: foreground }} className="text-center">
           {current.message}
         </Text>
       </Animated.View>

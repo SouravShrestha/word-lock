@@ -30,11 +30,6 @@ jobs:
       - name: Restore dependencies
         run: npm ci
 
-      - name: Debug secrets availability
-        run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL is set: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}"
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY is set: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}"
-
       - name: Typecheck
         run: npm run typecheck
 
@@ -138,3 +133,23 @@ jobs:
           command: deploy --env production
           wranglerVersion: "3"
           workingDirectory: apps/web
+
+  mobile-dev:
+    name: Mobile Build (Development)
+    needs: ci
+    uses: ./.github/workflows/mobile-deploy.yml
+    with:
+      profile: development
+    secrets:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+  mobile-prod:
+    name: Mobile Build (Production)
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/mobile-deploy.yml
+    with:
+      profile: production
+      ref: ${{ needs.release-please.outputs.tag_name }}
+    secrets:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
