@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.4](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.3...word-lock-monorepo-v1.4.4) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** update mobile workflow to build and upload AAB instead of APK ([4019eba](https://github.com/SouravShrestha/word-lock/commit/4019eba8c19f0936a2469e60b9ad1d26388d13ad))
+
 ## [1.4.3](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.2...word-lock-monorepo-v1.4.3) (2026-09-29)
 
 

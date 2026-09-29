@@ -1,6 +1,6 @@
 {
   "name": "word-lock-monorepo",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "private": true,
   "type": "module",
   "packageManager": "npm@10.9.2",
