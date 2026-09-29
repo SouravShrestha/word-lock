@@ -63,22 +63,27 @@ export function IconButton({
       activeOpacity={1}
       className={className}
       {...pressableProps}
-      style={{
-        opacity: disabled ? 0.45 : 1,
-        width: size,
-        height: size + LIP,
-        alignSelf: "flex-start",
-        borderRadius: radius,
-        overflow: "hidden",
-        ...lipPadding(LIP, sink),
-      }}
+      style={{ alignSelf: "flex-start", borderRadius: radius }}
     >
-      <Lip depth={depth} />
+      {/* Disabled fade on an inner View — see the note in Button.tsx. */}
       <View
-        className="items-center justify-center border-surfaceHairline border"
-        style={{ width: size, height: size, backgroundColor: fill, borderRadius: radius }}
+        needsOffscreenAlphaCompositing={disabled}
+        style={{
+          opacity: disabled ? 0.45 : 1,
+          width: size,
+          height: size + LIP,
+          borderRadius: radius,
+          overflow: "hidden",
+          ...lipPadding(LIP, sink),
+        }}
       >
-        {children}
+        <Lip depth={depth} />
+        <View
+          className="items-center justify-center border-surfaceHairline border"
+          style={{ width: size, height: size, backgroundColor: fill, borderRadius: radius }}
+        >
+          {children}
+        </View>
       </View>
     </SheetTouchable>
   );

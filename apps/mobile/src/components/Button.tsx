@@ -118,38 +118,52 @@ export function Button({
       activeOpacity={1}
       className={`${roundedOf(box)} ${className ?? ""}`}
       {...pressableProps}
-      style={{
-        opacity: disabled ? 0.45 : 1,
-        overflow: "hidden",
-        ...lipPadding(lip, sink),
-      }}
     >
-      <Lip depth={depth} />
+      {/*
+       * The disabled fade lives on this inner View, not on the touchable:
+       * on Android `SheetTouchable` is gesture-handler's TouchableOpacity,
+       * which snapshots `style.opacity` into an Animated.Value once at mount
+       * and never re-reads it, so a button mounted disabled stayed at 0.45
+       * after enabling. Offscreen compositing fades lip and face as one
+       * layer; without it Android applies alpha per child and the lip shows
+       * through the lower half of the face.
+       */}
       <View
-        className={box}
+        className={roundedOf(box)}
+        needsOffscreenAlphaCompositing={disabled}
         style={{
-          backgroundColor: fill,
-          borderWidth: isSurfaceVariant ? 1 : 0,
-          borderColor: palette.surfaceHairline,
+          opacity: disabled ? 0.45 : 1,
+          overflow: "hidden",
+          ...lipPadding(lip, sink),
         }}
       >
-        <View className="flex-row items-center justify-center gap-2">
-          {loading ? (
-            <Text className={labelCls} style={{ color: textColor }}>
-              {loadingText}
-            </Text>
-          ) : (
-            <>
-              {icon}
-              {typeof children === "string" ? (
-                <Text className={labelCls} style={{ color: textColor }}>
-                  {children}
-                </Text>
-              ) : (
-                children
-              )}
-            </>
-          )}
+        <Lip depth={depth} />
+        <View
+          className={box}
+          style={{
+            backgroundColor: fill,
+            borderWidth: isSurfaceVariant ? 1 : 0,
+            borderColor: palette.surfaceHairline,
+          }}
+        >
+          <View className="flex-row items-center justify-center gap-2">
+            {loading ? (
+              <Text className={labelCls} style={{ color: textColor }}>
+                {loadingText}
+              </Text>
+            ) : (
+              <>
+                {icon}
+                {typeof children === "string" ? (
+                  <Text className={labelCls} style={{ color: textColor }}>
+                    {children}
+                  </Text>
+                ) : (
+                  children
+                )}
+              </>
+            )}
+          </View>
         </View>
       </View>
     </SheetTouchable>
