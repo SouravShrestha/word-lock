@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.3](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.2...word-lock-monorepo-v1.4.3) (2026-09-29)
+
+
+### Bug Fixes
+
+* **mobile:** stop OAuth callback 404 and stuck disabled buttons on Android ([38f066e](https://github.com/SouravShrestha/word-lock/commit/38f066e6771d9c0f396cc2b1149d1095aea7b6d1))
+
 ## [1.4.2](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.1...word-lock-monorepo-v1.4.2) (2026-09-28)
 
 
