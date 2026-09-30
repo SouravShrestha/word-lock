@@ -5,6 +5,8 @@ import { InviteIcon } from "@/components/icons/InviteIcon";
 import { BackButton } from "@/components/BackButton";
 import { SectionLabel } from "@/components/SectionLabel";
 import { InviteFriends } from "./InviteFriends";
+import { ClockIcon } from "@/components/icons/ClockIcon";
+import { timeControlFor } from "@word-lock/core/game";
 
 export function WaitingLobby({
   roomCode,
@@ -87,6 +89,12 @@ export function WaitingLobby({
               <span className="font-display text-xl font-bold tracking-[0.3em]">#{roomCode}</span>
             </div>
           )}
+
+          {/* The joiner sees the pace before the host starts, not after. */}
+          <p className="-mt-6 flex items-center gap-1.5 tv-caption text-muted-foreground">
+            <ClockIcon className="h-3.5 w-3.5" />
+            {timeControlFor(game.timeControl).label}
+          </p>
 
           <div className="flex w-full max-w-xs items-start justify-between px-4 my-3">
             <PlayerSlot name={game.players.one?.name ?? "You"}>

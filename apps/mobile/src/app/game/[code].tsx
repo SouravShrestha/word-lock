@@ -1,6 +1,5 @@
 import { Text } from "@/components/text";
 import {
-  createGameFn,
   destroyGameFn,
   fetchGameFn,
   forfeitGameFn,
@@ -30,6 +29,7 @@ import { supabase } from "@/lib/supabase";
 
 import { ActionBar } from "@/components/ActionBar";
 import { BoardGrid } from "@/components/BoardGrid";
+import { NewGameSheet } from "@/components/NewGameSheet";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmojiReactionSheet } from "@/components/EmojiReactionSheet";
@@ -349,6 +349,7 @@ function ActiveBoard({
   const [showMenu, setShowMenu] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [hideGameOver, setHideGameOver] = useState(false);
+  const [showNewGame, setShowNewGame] = useState(false);
 
   const historyMoves = useMemo<HistoryMove[]>(() => game.history ?? [], [game.history]);
   const gridLetters = useMemo<string[]>(() => game.grid ?? [], [game.grid]);
@@ -404,15 +405,6 @@ function ActiveBoard({
       setShowForfeitConfirm(false);
       toast.error(error.message);
     },
-  });
-
-  const rematchMutation = useMutation({
-    mutationFn: () => createGameFn({ sessionId: sessionId! }),
-    onSuccess: ({ roomCode: next }: { roomCode: string }) => {
-      setHideGameOver(true);
-      router.push(`/game/${next}`);
-    },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const sendReaction = (emoji: ReactionEmoji) => {
@@ -546,10 +538,21 @@ function ActiveBoard({
               setHideGameOver(true);
               router.push("/");
             }}
-            onRematch={() => rematchMutation.mutate()}
-            rematchPending={rematchMutation.isPending}
+            onRematch={() => {
+              // GameOver is an RN Modal, which a bottom sheet cannot draw over.
+              setHideGameOver(true);
+              setShowNewGame(true);
+            }}
           />
         )}
+        <NewGameSheet
+          open={showNewGame}
+          onClose={() => {
+            setShowNewGame(false);
+            setHideGameOver(false);
+          }}
+          onCreated={() => setHideGameOver(true)}
+        />
       </View>
     </Shell>
   );

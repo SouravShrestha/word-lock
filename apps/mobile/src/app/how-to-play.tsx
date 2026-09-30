@@ -6,6 +6,7 @@ import {
   MIN_WORD_LENGTH,
   RULES,
   TURN_LIMIT_HOURS,
+  bankControlsSentence,
 } from "@word-lock/core/game";
 import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
@@ -103,10 +104,13 @@ export default function HowToPlayScreen() {
               more tiles wins, and an even split is a draw.
             </P>
             <P>
-              Each turn lasts {TURN_LIMIT_HOURS} hours. Run out of time and your turn is passed for
-              you, so a game can never stall forever waiting on someone. You can also forfeit from
-              the in-game menu, which hands the win to your opponent.
+              The host picks the pace when creating a room. A timed game gives each player{" "}
+              {bankControlsSentence()} for the whole game, spent only while it is their turn — run
+              out and you lose. A daily game gives every move {TURN_LIMIT_HOURS} hours instead; run
+              out and your turn is passed for you, so a game can never stall forever waiting on
+              someone.
             </P>
+            <P>You can also forfeit from the in-game menu, which hands the win to your opponent.</P>
           </Section>
 
           <Section title="Stars, leagues and streaks">

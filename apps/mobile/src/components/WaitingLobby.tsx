@@ -2,7 +2,8 @@ import { Text } from "@/components/text";
 import { useState } from "react";
 import { Pressable, Share, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { CheckIcon, CopyIcon, InviteIcon } from "@word-lock/icons/native";
+import { timeControlFor } from "@word-lock/core/game";
+import { CheckIcon, ClockIcon, CopyIcon, InviteIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 
 import { Avatar } from "@/components/Avatar";
@@ -98,6 +99,12 @@ export function WaitingLobby({
             <Text variant="roomCode">#{roomCode}</Text>
           </View>
         )}
+
+        {/* The joiner sees the pace before the host starts, not after. */}
+        <View className="-mt-6 flex-row items-center gap-1.5">
+          <ClockIcon size={14} color={palette.mutedForeground} />
+          <Text variant="body">{timeControlFor(game.timeControl).label}</Text>
+        </View>
 
         <View className="my-3 w-full max-w-xs flex-row items-start justify-between px-4">
           <PlayerSlot name={game.players.one?.name ?? "You"}>
@@ -207,6 +214,7 @@ export function WaitingLobby({
 
 export interface WaitingGame {
   id: string;
+  timeControl?: string | null;
   status: string;
   viewerSlot: 1 | 2 | null;
   players: {

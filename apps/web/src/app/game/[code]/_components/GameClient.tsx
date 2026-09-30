@@ -7,11 +7,11 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 import { Tile, type TileOwner } from "@/components/Tile";
+import { NewGameSheet } from "@/components/NewGameSheet";
 import {
   useSession,
   useAuth,
   useHasPlayableAccount,
-  createGameFn,
   fetchGameFn,
   joinGameFn,
   passTurnFn,
@@ -58,6 +58,7 @@ export function GameClient({ code }: { code: string }) {
   const [showForfeitConfirm, setShowForfeitConfirm] = useState(false);
   const [showPassConfirm, setShowPassConfirm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showNewGame, setShowNewGame] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const { activeReaction, showReaction } = useReactionFlash();
   const { hostLeftCountdown, startHostLeftCountdown } = useHostLeftCountdown(() =>
@@ -313,12 +314,6 @@ export function GameClient({ code }: { code: string }) {
     },
   });
 
-  const rematchMutation = useMutation({
-    mutationFn: () => createGameFn({ sessionId: sessionId! }),
-    onSuccess: ({ roomCode: next }: { roomCode: string }) => router.push(`/game/${next}`),
-    onError: (error: Error) => toast.error(error.message),
-  });
-
   const sendReaction = (emoji: ReactionEmoji) => {
     setShowReactions(false);
     const slot = game?.viewerSlot;
@@ -452,12 +447,12 @@ export function GameClient({ code }: { code: string }) {
           <GameOver
             game={game}
             onExit={() => router.push("/")}
-            onRematch={() => rematchMutation.mutate()}
-            rematchPending={rematchMutation.isPending}
+            onRematch={() => setShowNewGame(true)}
           />
         )}
+        <NewGameSheet open={showNewGame} onClose={() => setShowNewGame(false)} />
 
-        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 316px))" }}>
+        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 321px))" }}>
           <div className="grid w-full grid-cols-5 gap-0 border-border border-t border-l">
             {game.grid.map((letter: string, index: number) => {
               const owners = review.frame?.state.owners ?? game.owners;

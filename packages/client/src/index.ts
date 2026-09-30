@@ -49,7 +49,7 @@ export type { MoveReview } from "./game/use-move-review";
 
 export { useReactionFlash } from "./game/use-reaction-flash";
 export type { ReactionFlash } from "./game/use-reaction-flash";
-export { useSweepTimer } from "./game/use-sweep-timer";
+export { useSweepTimer, SWEEP_DELAY_MS } from "./game/use-sweep-timer";
 export { useHostLeftCountdown } from "./game/use-host-left-countdown";
 export { useInvalidateOnGameComplete } from "./game/use-invalidate-on-game-complete";
 

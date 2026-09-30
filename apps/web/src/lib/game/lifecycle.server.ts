@@ -4,7 +4,13 @@ import { resolvePlayer, type Caller } from "./identity.server";
 import { computeStarOutcome, UNRANKED_OUTCOME } from "./stars.server";
 import { getDictionary } from "./dictionary.server";
 import { loadGame } from "./read.server";
-import { generateGrid, type PlayerAccountRow } from "@word-lock/core/game";
+import {
+  generateGrid,
+  initialClocks,
+  turnDeadlineFor,
+  type PlayerAccountRow,
+  type TimeControl,
+} from "@word-lock/core/game";
 
 export const MAX_ACTIVE_GAMES = 5;
 
@@ -38,7 +44,7 @@ function requireNamedAccount(player: PlayerAccountRow): void {
   if (!player.username) throw new PublicError("Pick a username before playing.", 403);
 }
 
-export async function createGame(caller: Caller) {
+export async function createGame(caller: Caller, timeControl: TimeControl) {
   const player = await resolvePlayer(caller);
   requireNamedAccount(player);
   if ((await countActiveGames(player.id)) >= MAX_ACTIVE_GAMES) {
@@ -48,6 +54,7 @@ export async function createGame(caller: Caller) {
   }
 
   const grid = generateGrid(getDictionary()).join("");
+  const clocks = initialClocks(timeControl);
 
   for (let attempt = 0; attempt < 6; attempt++) {
     const roomCode = makeRoomCode();
@@ -59,6 +66,9 @@ export async function createGame(caller: Caller) {
         player1_id: player.id,
         current_turn_player_id: player.id,
         status: "waiting",
+        time_control: timeControl,
+        p1_clock_ms: clocks[1],
+        p2_clock_ms: clocks[2],
       })
       .select("room_code")
       .maybeSingle();
@@ -100,7 +110,7 @@ export async function startGame(caller: Caller, roomCode: string) {
   const player = await resolvePlayer(caller);
   const { data: game } = await getSupabaseAdmin()
     .from("wl_games")
-    .select("id, status, player1_id, player2_id")
+    .select("id, status, player1_id, player2_id, time_control, p1_clock_ms")
     .eq("room_code", roomCode.toUpperCase())
     .maybeSingle();
 
@@ -109,12 +119,14 @@ export async function startGame(caller: Caller, roomCode: string) {
   if (game.status !== "waiting") throw new PublicError("Game is not in the waiting state.");
   if (!game.player2_id) throw new PublicError("Waiting for an opponent to join.");
 
+  const now = Date.now();
   const { error } = await getSupabaseAdmin()
     .from("wl_games")
     .update({
       status: "active",
       current_turn_player_id: game.player1_id,
-      last_move_at: new Date().toISOString(),
+      last_move_at: new Date(now).toISOString(),
+      turn_deadline: turnDeadlineFor(game.time_control, game.p1_clock_ms, now),
     })
     .eq("id", game.id);
   if (error) throw new Error(error.message);
@@ -167,6 +179,7 @@ export async function forfeitGame(caller: Caller, roomCode: string) {
       winner_id: winnerId,
       end_reason: "forfeit",
       last_move_at: new Date().toISOString(),
+      turn_deadline: null,
       p1_star_delta: outcome.p1Delta,
       p2_star_delta: outcome.p2Delta,
       p1_stars_after: outcome.p1StarsAfter,

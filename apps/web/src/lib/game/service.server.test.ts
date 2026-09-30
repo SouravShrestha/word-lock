@@ -16,6 +16,10 @@ interface FakeGame {
   p2_star_delta: number | null;
   p1_stars_after: number | null;
   p2_stars_after: number | null;
+  time_control: string;
+  p1_clock_ms: number | null;
+  p2_clock_ms: number | null;
+  turn_deadline: string | null;
 }
 
 interface FakePlayer {
@@ -51,6 +55,10 @@ function game(overrides: Partial<FakeGame>): FakeGame {
     p2_star_delta: null,
     p1_stars_after: null,
     p2_stars_after: null,
+    time_control: "daily",
+    p1_clock_ms: null,
+    p2_clock_ms: null,
+    turn_deadline: null,
     ...overrides,
   };
 }
@@ -105,6 +113,20 @@ function makeQuery(rows: FakeRow[], backing: FakeRow[]) {
       );
       return builder;
     },
+    lt(column: string, value: string) {
+      filtered = filtered.filter((r) => String((r as Record<string, unknown>)[column]) < value);
+      return builder;
+    },
+    insert(row: Record<string, unknown>) {
+      const inserted = {
+        id: `row-${backing.length + 1}`,
+        created_at: new Date().toISOString(),
+        ...row,
+      };
+      backing.push(inserted);
+      filtered = [inserted];
+      return builder;
+    },
     update(patch: Record<string, unknown>) {
       pendingUpdate = patch;
       return builder;
@@ -114,6 +136,9 @@ function makeQuery(rows: FakeRow[], backing: FakeRow[]) {
       return builder;
     },
     order() {
+      return builder;
+    },
+    limit() {
       return builder;
     },
     async maybeSingle() {
@@ -423,7 +448,120 @@ describe("taking a seat requires a named account", () => {
     games = [];
 
     const { createGame } = await import("./service.server");
-    await expect(createGame(callerFor(players[0]))).rejects.toThrow("Sign in to play.");
+    await expect(createGame(callerFor(players[0]), "daily")).rejects.toThrow("Sign in to play.");
     expect(games).toHaveLength(0);
+  });
+});
+
+describe("time controls", () => {
+  const MIN = 60_000;
+  const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
+  const fromNow = (ms: number) => new Date(Date.now() + ms).toISOString();
+
+  beforeEach(() => {
+    rpcCalls = [];
+    moves = [];
+    players = [
+      player({ id: "p1", session_id: "s1", user_id: "u1", username: "one" }),
+      player({ id: "p2", session_id: "s2", user_id: "u2", username: "two" }),
+    ];
+  });
+
+  function timed(overrides: Partial<FakeGame> = {}) {
+    return game({
+      id: "g1",
+      room_code: "TIMED",
+      time_control: "10m",
+      p1_clock_ms: 10 * MIN,
+      p2_clock_ms: 7 * MIN,
+      ...overrides,
+    });
+  }
+
+  it("charges a timed turn to the mover and hands the opponent their own bank", async () => {
+    games = [timed({ last_move_at: ago(2 * MIN), turn_deadline: fromNow(8 * MIN) })];
+
+    const { passTurn } = await import("./service.server");
+    await passTurn(callerFor(players[0]), "TIMED");
+
+    const g = games[0];
+    expect(g.current_turn_player_id).toBe("p2");
+    expect(g.p1_clock_ms).toBeGreaterThan(8 * MIN - 1000);
+    expect(g.p1_clock_ms).toBeLessThanOrEqual(8 * MIN);
+    expect(g.p2_clock_ms).toBe(7 * MIN);
+    const deadlineIn = new Date(g.turn_deadline!).getTime() - Date.now();
+    expect(deadlineIn).toBeGreaterThan(7 * MIN - 1000);
+    expect(deadlineIn).toBeLessThanOrEqual(7 * MIN);
+  });
+
+  it("loses a timed game on time, ranked like a forfeit", async () => {
+    games = [timed({ last_move_at: ago(11 * MIN), turn_deadline: ago(MIN) })];
+
+    const { timeoutGame } = await import("./service.server");
+    await timeoutGame(callerFor(players[1]), "TIMED");
+
+    const g = games[0];
+    expect(g.status).toBe("completed");
+    expect(g.end_reason).toBe("timeout");
+    expect(g.winner_id).toBe("p2");
+    expect(g.p1_clock_ms).toBe(0);
+    expect(g.p1_star_delta).not.toBeNull();
+    expect(moves).toHaveLength(0);
+  });
+
+  it("refuses to time out a turn that still has time", async () => {
+    games = [timed({ turn_deadline: fromNow(MIN) })];
+
+    const { timeoutGame } = await import("./service.server");
+    await expect(timeoutGame(callerFor(players[1]), "TIMED")).rejects.toThrow(
+      "Turn has not expired yet.",
+    );
+    expect(games[0].status).toBe("active");
+  });
+
+  it("ends the game instead of accepting a move from a player who is out of time", async () => {
+    games = [timed({ last_move_at: ago(11 * MIN), turn_deadline: ago(MIN) })];
+
+    const { passTurn } = await import("./service.server");
+    await expect(passTurn(callerFor(players[0]), "TIMED")).rejects.toThrow("Your time ran out.");
+    expect(games[0].end_reason).toBe("timeout");
+    expect(moves).toHaveLength(0);
+  });
+
+  it("still passes an expired daily turn rather than ending the game", async () => {
+    games = [
+      game({
+        id: "g1",
+        room_code: "DAILY",
+        last_move_at: ago(25 * 60 * MIN),
+        turn_deadline: ago(60 * MIN),
+      }),
+    ];
+
+    const { timeoutGame } = await import("./service.server");
+    await timeoutGame(callerFor(players[1]), "DAILY");
+
+    const g = games[0];
+    expect(g.status).toBe("active");
+    expect(g.current_turn_player_id).toBe("p2");
+    expect(moves).toHaveLength(1);
+    const deadlineIn = new Date(g.turn_deadline!).getTime() - Date.now();
+    expect(deadlineIn).toBeGreaterThan(24 * 60 * MIN - 1000);
+  });
+
+  it("sweeps expired turns of both kinds by their stored deadline", async () => {
+    games = [
+      timed({ id: "g1", room_code: "TIMED", turn_deadline: ago(MIN) }),
+      game({ id: "g2", room_code: "DAILY", turn_deadline: ago(MIN) }),
+      timed({ id: "g3", room_code: "FRESH", turn_deadline: fromNow(MIN) }),
+    ];
+
+    const { sweepExpiredTurns } = await import("./service.server");
+    await expect(sweepExpiredTurns()).resolves.toEqual({ swept: 2 });
+
+    const byRoom = Object.fromEntries(games.map((g) => [g.room_code, g]));
+    expect(byRoom.TIMED.end_reason).toBe("timeout");
+    expect(byRoom.DAILY.current_turn_player_id).toBe("p2");
+    expect(byRoom.FRESH.status).toBe("active");
   });
 });

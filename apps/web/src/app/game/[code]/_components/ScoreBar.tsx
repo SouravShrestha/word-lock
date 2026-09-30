@@ -1,38 +1,27 @@
 import { useEffect, useState } from "react";
 
-import { timeLeftLabel } from "@word-lock/core/game";
+import { clockLabelFor } from "@word-lock/core/game";
 import { ClockIcon } from "@/components/icons/ClockIcon";
 import { Avatar } from "@/components/Avatar";
 import { cn } from "@/lib/utils";
-
-function TurnClock({ deadline, status }: { deadline: string | null; status: string }) {
-  const [, setTick] = useState(0);
-
-  useEffect(() => {
-    if (status !== "active") return;
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(id);
-  }, [status]);
-
-  const timerLabel = status === "active" && deadline ? timeLeftLabel(deadline) : null;
-
-  return (
-    <div className="flex shrink-0 flex-col items-center gap-1.5">
-      <ClockIcon className="h-4 w-4 text-foreground" />
-      <p className="font-display tv-caption font-medium tabular-nums tracking-wide leading-none">
-        {timerLabel ?? (status === "completed" ? "Game over" : "-")}
-      </p>
-    </div>
-  );
-}
 
 function formatScore(score: number) {
   return String(score).padStart(2, "0");
 }
 
+/**
+ * One player's corner of the bar, a 2×2 grid:
+ *
+ *   [avatar] [clock]        [clock] [avatar]
+ *   [name]   [score]        [score] [name]
+ *
+ * The far player's chip is the mirror image, so each clock sits beside its own
+ * avatar and the two scores face each other across the middle.
+ */
 function PlayerChip({
   player,
   score,
+  clock,
   active,
   slot,
   mirrored,
@@ -40,6 +29,7 @@ function PlayerChip({
 }: {
   player: { name: string; avatar: string } | null;
   score: number;
+  clock: string;
   active: boolean;
   slot: 1 | 2;
   mirrored: boolean;
@@ -47,10 +37,16 @@ function PlayerChip({
 }) {
   const ring = slot === 1 ? "ring-p1" : "ring-p2";
   const scoreColor = slot === 1 ? "text-p1" : "text-p2";
+  const identityCol = mirrored ? "col-start-2" : "col-start-1";
+  const numbersCol = mirrored ? "col-start-1" : "col-start-2";
 
   return (
-    <div className={cn("flex min-w-0 flex-1 items-center gap-2", mirrored && "flex-row-reverse")}>
-      <div className="relative flex min-w-0 flex-col items-center gap-1.5">
+    <div
+      className={cn(
+        "grid min-w-0 grid-cols-[auto_auto] grid-rows-[auto_auto] items-center gap-x-3 gap-y-1.5",
+      )}
+    >
+      <div className={cn("relative row-start-1 flex justify-center", identityCol)}>
         {reaction && (
           <span
             key={reaction.key}
@@ -68,19 +64,33 @@ function PlayerChip({
             active ? "ring-[3px] ring-offset-2" : "ring-2 ring-offset-2 opacity-60",
           )}
         />
-        <p
-          title={player?.name ?? undefined}
-          className={cn(
-            "mt-1.5 max-w-full truncate text-center tv-caption leading-none",
-            active ? "text-foreground" : "text-muted-foreground",
-          )}
-        >
-          {player?.name ?? "-"}
-        </p>
       </div>
       <p
         className={cn(
-          "font-display tv-screen-title leading-none tabular-nums mx-4",
+          "row-start-1 flex items-center gap-1 font-display tv-caption font-medium tabular-nums leading-none tracking-wide",
+          numbersCol,
+          mirrored ? "justify-start" : "justify-end",
+          active ? scoreColor : "text-muted-foreground",
+        )}
+      >
+        <ClockIcon className="h-3.5 w-3.5 shrink-0" />
+        {clock}
+      </p>
+      <p
+        title={player?.name ?? undefined}
+        className={cn(
+          "row-start-2 max-w-24 truncate text-center tv-caption leading-none",
+          identityCol,
+          active ? "text-foreground" : "text-muted-foreground",
+        )}
+      >
+        {player?.name ?? "-"}
+      </p>
+      <p
+        className={cn(
+          "row-start-2 font-display text-2xl font-bold leading-none tabular-nums",
+          numbersCol,
+          mirrored ? "text-left" : "text-right",
           active ? scoreColor : "text-muted-foreground",
         )}
       >
@@ -106,8 +116,17 @@ export function ScoreBar({
   const nearSlot: 1 | 2 = game.viewerSlot === 2 ? 2 : 1;
   const farSlot: 1 | 2 = nearSlot === 1 ? 2 : 1;
 
+  // One ticker for both clocks, only while a turn is actually running.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (game.status !== "active") return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [game.status]);
+
   const chipFor = (slot: 1 | 2) => ({
     slot,
+    clock: clockLabelFor(game, slot, slot === 1 ? p1Active : p2Active, now),
     player: slot === 1 ? game.players.one : game.players.two,
     score: (scores ?? game.scores)[slot],
     active: slot === 1 ? p1Active : p2Active,
@@ -116,9 +135,8 @@ export function ScoreBar({
 
   return (
     <div className="neo px-2 pt-2 pb-2 bg-transparent">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-6 px-2">
         <PlayerChip {...chipFor(nearSlot)} mirrored={false} />
-        <TurnClock deadline={game.turnDeadline} status={game.status} />
         <PlayerChip {...chipFor(farSlot)} mirrored />
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { Text } from "@/components/text";
-import { createGameFn, fetchLobby, timeoutGameFn, useSession } from "@word-lock/client";
+import { SWEEP_DELAY_MS, fetchLobby, timeoutGameFn, useSession } from "@word-lock/client";
 import { timeLeftLabel } from "@word-lock/core/game";
 import { HeartIcon, PlayIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, View } from "react-native";
@@ -12,11 +12,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/Button";
 import { HomeBackdrop } from "@/components/HomeBackdrop";
 import { HowToPlaySheet } from "@/components/HowToPlaySheet";
+import { NewGameSheet } from "@/components/NewGameSheet";
 import { Lip, lipPadding } from "@/components/lip";
 import { SectionLabel } from "@/components/SectionLabel";
 import { StarsPill, StreakPill } from "@/components/StatPills";
 import { Wordmark } from "@/components/Wordmark";
-import { toast } from "@/components/Toast";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/theme/ThemeProvider";
 
@@ -25,18 +25,13 @@ export default function HomeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [rulesOpen, setRulesOpen] = useState(false);
+  const [newGameOpen, setNewGameOpen] = useState(false);
   const insets = useSafeAreaInsets();
 
   const { data } = useQuery({
     queryKey: ["lobby", sessionId],
     enabled: ready,
     queryFn: () => fetchLobby({ sessionId: sessionId! }),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: () => createGameFn({ sessionId: sessionId! }),
-    onSuccess: ({ roomCode }: { roomCode: string }) => router.push(`/game/${roomCode}`),
-    onError: (error: Error) => toast.error(error.message),
   });
 
   useEffect(() => {
@@ -91,12 +86,11 @@ export default function HomeScreen() {
             <View className="flex-1">
               <Button
                 variant="mint"
-                disabled={!ready || createMutation.isPending}
-                loading={createMutation.isPending}
-                onPress={() => createMutation.mutate()}
+                disabled={!ready}
+                onPress={() => setNewGameOpen(true)}
                 icon={<PlayIcon size={12} color="#ffffff" />}
               >
-                {createMutation.isPending ? "Creating" : "New Game"}
+                New Game
               </Button>
             </View>
             <View className="flex-1">
@@ -121,6 +115,7 @@ export default function HomeScreen() {
       </View>
 
       <HowToPlaySheet open={rulesOpen} onClose={() => setRulesOpen(false)} />
+      <NewGameSheet open={newGameOpen} onClose={() => setNewGameOpen(false)} />
     </View>
   );
 }
@@ -177,7 +172,7 @@ function GameCard({ game }: { game: LobbyGame }) {
   useEffect(() => {
     if (game.status !== "active" || !game.turnDeadline) return;
 
-    const msLeft = new Date(game.turnDeadline).getTime() - Date.now();
+    const msLeft = new Date(game.turnDeadline).getTime() + SWEEP_DELAY_MS - Date.now();
 
     const triggerSweep = () => {
       if (!sessionId) return;
