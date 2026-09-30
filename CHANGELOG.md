@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.5.0...word-lock-monorepo-v1.6.0) (2026-09-30)
+
+
+### Features
+
+* enable autoIncrement for production builds in eas.json ([96f4809](https://github.com/SouravShrestha/word-lock/commit/96f48091192ac3e128e50997c2722d0dc3fabbf9))
+
 ## [1.5.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.4...word-lock-monorepo-v1.5.0) (2026-09-30)
 
 
