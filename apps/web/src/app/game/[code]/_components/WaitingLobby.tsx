@@ -5,7 +5,6 @@ import { InviteIcon } from "@/components/icons/InviteIcon";
 import { BackButton } from "@/components/BackButton";
 import { SectionLabel } from "@/components/SectionLabel";
 import { InviteFriends } from "./InviteFriends";
-import { ClockIcon } from "@/components/icons/ClockIcon";
 import { timeControlFor } from "@word-lock/core/game";
 
 export function WaitingLobby({
@@ -71,13 +70,13 @@ export function WaitingLobby({
       </div>
 
       <div className="flex flex-1 flex-col overflow-y-auto justify-center">
-        <div className="flex flex-col items-center gap-10 px-5 py-10">
+        <div className="flex flex-col items-center gap-10 px-5 -mt-16">
           {isHost ? (
             <button
               type="button"
               onClick={handleCopy}
               aria-label="Copy room code"
-              className="soft-btn btn-surface select-none py-3 pl-7 pr-5"
+              className="soft-btn btn-surface select-none py-3 pl-7 pr-5 border-2 border-border"
             >
               <span className="font-display text-xl font-bold tracking-[0.3em]">{roomCode}</span>
               <span className="flex items-center justify-center text-muted-foreground">
@@ -85,18 +84,18 @@ export function WaitingLobby({
               </span>
             </button>
           ) : (
-            <div className="select-none py-3">
+            <div className="select-none py-3 border-2 border-border px-7 rounded-lg">
               <span className="font-display text-xl font-bold tracking-[0.3em]">#{roomCode}</span>
             </div>
           )}
 
           {/* The joiner sees the pace before the host starts, not after. */}
           <p className="-mt-6 flex items-center gap-1.5 tv-caption text-muted-foreground">
-            <ClockIcon className="h-3.5 w-3.5" />
-            {timeControlFor(game.timeControl).label}
+            This is a <span className="font-bold">{timeControlFor(game.timeControl).label} </span>
+            game
           </p>
 
-          <div className="flex w-full max-w-xs items-start justify-between px-4 my-3">
+          <div className="flex w-full max-w-xs items-start justify-between px-4 mt-0 mb-3">
             <PlayerSlot name={game.players.one?.name ?? "You"}>
               <Avatar avatar={game.players.one?.avatar} className="h-16 w-16" />
             </PlayerSlot>

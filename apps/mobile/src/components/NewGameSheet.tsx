@@ -1,6 +1,12 @@
 import { createGameFn, useSession } from "@word-lock/client";
 import { TIME_CONTROLS, type TimeControl } from "@word-lock/core/game";
-import { ClockIcon, CrossIcon, StarIcon, StreakIcon, SunIcon } from "@word-lock/icons/native";
+import {
+  BulletIcon,
+  ClockIcon,
+  CrossIcon,
+  LightningIcon,
+  SunFullIcon,
+} from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -21,13 +27,13 @@ const DAILY = TIME_CONTROLS.filter((c) => c.group === "daily");
 function iconFor(id: TimeControl, color: string): ReactNode {
   switch (id) {
     case "10m":
-      return <StreakIcon size={24} />;
+      return <BulletIcon size={24} />;
     case "30m":
-      return <ClockIcon size={24} color={color} />;
+      return <LightningIcon size={24} />;
     case "60m":
-      return <StarIcon size={24} color={color} />;
+      return <ClockIcon size={24} />;
     case "daily":
-      return <SunIcon size={20} color={color} />;
+      return <SunFullIcon size={20} />;
   }
 }
 
@@ -71,20 +77,16 @@ export function NewGameSheet({
   return (
     <BottomSheet open={open} onClose={onClose} label="New game" scrollable={false}>
       <View className="flex-row items-center justify-between gap-4">
-        <Text variant="sheetTitle">New game</Text>
+        <Text variant="sheetTitle">Start a game</Text>
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
-
-      <Text variant="body" className="mt-6">
-        Each player&apos;s clock
-      </Text>
-      <View className="mt-3 flex-row gap-3">
+      <View className="mt-8 flex-row gap-3">
         {BANK.map((c) => (
           <View key={c.id} className="flex-1">
             <Button
-              variant={selected === c.id ? "mint" : "surface"}
+              variant={selected === c.id ? "sky" : "surface"}
               size="sm"
               accessibilityState={{ selected: selected === c.id }}
               onPress={() => setSelected(c.id)}
@@ -98,13 +100,10 @@ export function NewGameSheet({
         ))}
       </View>
 
-      <Text variant="body" className="mt-6">
-        Take your time
-      </Text>
       {DAILY.map((c) => (
         <View key={c.id} className="mt-3">
           <Button
-            variant={selected === c.id ? "mint" : "surface"}
+            variant={selected === c.id ? "sky" : "surface"}
             size="sm"
             accessibilityState={{ selected: selected === c.id }}
             onPress={() => setSelected(c.id)}
@@ -117,7 +116,7 @@ export function NewGameSheet({
 
       <View className="mt-8">
         <Button
-          variant="sky"
+          variant="mint"
           size="sheet"
           disabled={!ready || createMutation.isPending}
           loading={createMutation.isPending}

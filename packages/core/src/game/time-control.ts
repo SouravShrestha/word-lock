@@ -95,14 +95,13 @@ export function isTurnExpired(deadline: string | null, now: number): boolean {
   return now > new Date(deadline).getTime() + CLOCK_GRACE_MS;
 }
 
-/** `9:59`, or `1:00:00` once an hour or more is left. */
+/** A bank clock is always `mm:ss`, including the one-hour control (`60:00`). */
 export function formatClock(ms: number): string {
   const total = Math.max(0, Math.ceil(ms / 1000));
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
+  const minutes = Math.floor(total / 60);
   const seconds = total % 60;
   const pad = (n: number) => String(n).padStart(2, "0");
-  return hours > 0 ? `${hours}:${pad(minutes)}:${pad(seconds)}` : `${minutes}:${pad(seconds)}`;
+  return `${pad(minutes)}:${pad(seconds)}`;
 }
 
 /**
@@ -135,14 +134,14 @@ export function clockLabelFor(
   return bank && stored !== null ? formatClock(stored) : "-";
 }
 
-/** `23h 59m`, dropping to `59m 59s` in the last hour. */
+/** `23:59:59` */
 function formatDailyClock(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
   const seconds = total % 60;
   const pad = (n: number) => String(n).padStart(2, "0");
-  return hours > 0 ? `${hours}h ${pad(minutes)}m` : `${minutes}m ${pad(seconds)}s`;
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
 /** "10 mins, 30 mins or 1 hour" — the timed choices, for prose. */

@@ -78,13 +78,13 @@ export function WaitingLobby({
         <BackButton onPress={() => setShowConfirm(true)} label="Exit lobby" />
       </View>
 
-      <View className="flex-1 items-center justify-center gap-10 px-5 py-10">
+      <View className="flex-1 items-center justify-center gap-10 px-5 -mt-16">
         {isHost ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Copy room code"
             onPress={handleCopy}
-            className="flex-row items-center gap-3 rounded-lg py-3 pl-7 pr-5"
+            className="flex-row items-center gap-3 rounded-lg py-3 pl-7 pr-5 border-2 border-border"
             style={{ backgroundColor: palette.surface }}
           >
             <Text variant="roomCode">{roomCode}</Text>
@@ -95,18 +95,20 @@ export function WaitingLobby({
             )}
           </Pressable>
         ) : (
-          <View className="py-3">
+          <View className="py-3 pl-3 pr-2 border-2 border-border rounded-lg">
             <Text variant="roomCode">#{roomCode}</Text>
           </View>
         )}
 
         {/* The joiner sees the pace before the host starts, not after. */}
         <View className="-mt-6 flex-row items-center gap-1.5">
-          <ClockIcon size={14} color={palette.mutedForeground} />
-          <Text variant="body">{timeControlFor(game.timeControl).label}</Text>
+          <Text variant="body">
+            This is a <Text className="font-bold">{timeControlFor(game.timeControl).label} </Text>
+            game
+          </Text>
         </View>
 
-        <View className="my-3 w-full max-w-xs flex-row items-start justify-between px-4">
+        <View className="mt-0 mb-3 w-full max-w-xs flex-row items-start justify-between px-4">
           <PlayerSlot name={game.players.one?.name ?? "You"}>
             <Avatar avatar={game.players.one?.avatar} size={64} />
           </PlayerSlot>

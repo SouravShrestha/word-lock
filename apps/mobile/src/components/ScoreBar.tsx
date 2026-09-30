@@ -1,8 +1,7 @@
 import { Text } from "@/components/text";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import { clockLabelFor } from "@word-lock/core/game";
-import { ClockIcon } from "@word-lock/icons/native";
+import { clockLabelFor, isBankControl } from "@word-lock/core/game";
 import { colors } from "@word-lock/tokens/native";
 
 import { Avatar } from "@/components/Avatar";
@@ -13,14 +12,10 @@ function formatScore(score: number) {
 }
 
 /**
- * One player's corner of the bar — the native mirror of the web chip:
+ * One player's corner of the bar — the native mirror of the web chip.
+ * Grouped as columns:
  *
- *   [avatar] [clock]        [clock] [avatar]
- *   [name]   [score]        [score] [name]
- *
- * RN has no CSS grid, so it is two rows sharing a fixed identity-column width
- * (the name's own cap), which is what keeps each clock level with its avatar
- * and each score level with its name.
+ *   [avatar/name] [time/score]      [time/score] [avatar/name]
  */
 function PlayerChip({
   player,
@@ -30,6 +25,7 @@ function PlayerChip({
   slot,
   mirrored,
   reaction,
+  isBank,
 }: {
   player: { name: string; avatar?: string | null } | null;
   score: number;
@@ -38,51 +34,60 @@ function PlayerChip({
   slot: 1 | 2;
   mirrored: boolean;
   reaction?: { key: number; emoji: string } | null;
+  isBank: boolean;
 }) {
   const { resolvedTheme } = useTheme();
   const palette = colors[resolvedTheme];
   const ring = slot === 1 ? palette.p1 : palette.p2;
-  const numberColor = active ? ring : palette.mutedForeground;
-  const row = `flex-row items-center gap-3 ${mirrored ? "flex-row-reverse" : ""}`;
+  const scoreColor = active ? ring : palette.mutedForeground;
+  const cardColor = active ? ring + "30" : palette.card;
+  const borderColor = active ? ring + "40" : palette.border;
+  const timeColor = active ? ring : palette.mutedForeground;
+  const row = `flex-row items-center gap-2 ${mirrored ? "flex-row-reverse" : ""}`;
+  const clockWidth = isBank ? "w-16" : "w-20";
 
   return (
-    <View className="gap-2">
-      <View className={row} style={{ height: 44 }}>
-        <View className="w-16 items-center">
-          {reaction && (
-            <Text variant="autoGen20" key={reaction.key} className="absolute top-1.5 z-10">
-              {reaction.emoji}
-            </Text>
-          )}
-          <View
-            className="rounded-full"
-            style={{
-              padding: active ? 3 : 2,
-              borderWidth: active ? 3 : 2,
-              borderColor: ring,
-              opacity: active ? 1 : 0.6,
-            }}
-          >
-            <Avatar avatar={player?.avatar} size={32} />
-          </View>
-        </View>
-        <View className={`items-center gap-1 ${mirrored ? "flex-row-reverse" : "flex-row"}`}>
-          <ClockIcon size={14} color={numberColor} />
-          <Text variant="timer" style={{ color: numberColor }}>
-            {clock}
+    <View className={`${row} -mx-5 justify-between`}>
+      <View className="w-20 items-center gap-1">
+        {reaction && (
+          <Text variant="autoGen20" key={reaction.key} className="absolute top-2 z-10 text-4xl">
+            {reaction.emoji}
           </Text>
+        )}
+        <View
+          className="rounded-full"
+          style={{
+            padding: active ? 3 : 2,
+            borderWidth: active ? 3 : 2,
+            borderColor: ring,
+            opacity: active ? 1 : 0.6,
+          }}
+        >
+          <Avatar avatar={player?.avatar} size={40} />
         </View>
-      </View>
-      <View className={row}>
         <Text
           variant="body"
           numberOfLines={1}
-          className="w-16 text-center text-xs leading-none"
+          className="text-center text-sm leading-none mt-2"
           style={{ color: active ? palette.foreground : palette.mutedForeground }}
         >
           {player?.name ?? "-"}
         </Text>
-        <Text variant="score" className="text-2xl leading-none" style={{ color: numberColor }}>
+      </View>
+      <View className={mirrored ? "items-center gap-1" : "items-center gap-2"}>
+        <View
+          className={`${clockWidth} items-center rounded-md pb-2 pt-2.5 border-2`}
+          style={{ backgroundColor: cardColor, borderColor: borderColor }}
+        >
+          <Text variant="score" className="text-sm leading-none" style={{ color: timeColor }}>
+            {clock}
+          </Text>
+        </View>
+        <Text
+          variant="score"
+          className="text-2xl leading-none mt-1.5"
+          style={{ color: scoreColor }}
+        >
           {formatScore(score)}
         </Text>
       </View>
@@ -132,11 +137,12 @@ export function ScoreBar({
     score: (scores ?? game.scores)[slot],
     active: slot === 1 ? p1Active : p2Active,
     reaction: reaction?.slot === slot ? reaction : null,
+    isBank: isBankControl(game.timeControl),
   });
 
   return (
-    <View className="px-2 py-2">
-      <View className="flex-row items-center justify-between gap-4">
+    <View className="px-2 py-3">
+      <View className="flex-row items-center justify-between gap-2 px-2">
         <PlayerChip {...chipFor(nearSlot)} mirrored={false} />
         <PlayerChip {...chipFor(farSlot)} mirrored />
       </View>

@@ -10,18 +10,15 @@ import { TIME_CONTROLS, type TimeControl } from "@word-lock/core/game";
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { CrossIcon } from "@/components/icons/CrossIcon";
-import { StreakIcon } from "@/components/icons/StreakIcon";
-import { ClockIcon } from "@/components/icons/ClockIcon";
-import { StarIcon } from "@/components/icons/StarIcon";
-import { SunIcon } from "@/components/icons/SunIcon";
+import { BulletIcon, ClockIcon, LightningIcon, SunFullIcon } from "@word-lock/icons";
 import { cn } from "@/lib/utils";
 
 // Placeholder artwork until the modes get icons of their own.
 const ICONS: Record<TimeControl, ReactNode> = {
-  "10m": <StreakIcon className="h-6 w-6" />,
-  "30m": <ClockIcon className="h-6 w-6" />,
-  "60m": <StarIcon className="h-6 w-6" />,
-  daily: <SunIcon className="h-5 w-5" />,
+  "10m": <BulletIcon size={24} />,
+  "30m": <LightningIcon size={24} />,
+  "60m": <ClockIcon size={24} />,
+  daily: <SunFullIcon size={20} />,
 };
 
 const BANK = TIME_CONTROLS.filter((c) => c.group === "bank");
@@ -62,12 +59,12 @@ export function NewGameSheet({
     "aria-pressed": selected === id,
     onClick: () => setSelected(id),
   });
-  const tone = (id: TimeControl) => (selected === id ? "btn-mint" : "btn-surface");
+  const tone = (id: TimeControl) => (selected === id ? "btn-sky" : "btn-surface");
 
   return (
     <BottomSheet open={open} onClose={onClose} label="New game" zClassName={zClassName}>
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg">New game</h2>
+        <h2 className="text-lg">Start a game</h2>
         <button
           type="button"
           onClick={onClose}
@@ -77,9 +74,7 @@ export function NewGameSheet({
           <CrossIcon className="h-3.5 w-3.5" />
         </button>
       </div>
-
-      <p className="mt-6 tv-caption text-muted-foreground">Each player&apos;s clock</p>
-      <div className="mt-3 flex gap-3">
+      <div className="mt-8 flex gap-3">
         {BANK.map((c) => (
           <button
             key={c.id}
@@ -95,7 +90,6 @@ export function NewGameSheet({
         ))}
       </div>
 
-      <p className="mt-6 tv-caption text-muted-foreground">Take your time</p>
       {DAILY.map((c) => (
         <button
           key={c.id}
@@ -114,7 +108,7 @@ export function NewGameSheet({
         type="button"
         onClick={() => createMutation.mutate()}
         disabled={!ready || createMutation.isPending}
-        className="soft-btn btn-sky mt-8 w-full py-3.5 tv-body-base tracking-wide disabled:opacity-60"
+        className="soft-btn btn-mint mt-8 w-full py-3.5 tv-body-base tracking-wide disabled:opacity-60"
       >
         {createMutation.isPending ? "Creating" : "Create room"}
       </button>

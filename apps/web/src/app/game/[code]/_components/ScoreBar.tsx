@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { clockLabelFor } from "@word-lock/core/game";
-import { ClockIcon } from "@/components/icons/ClockIcon";
+import { clockLabelFor, isBankControl } from "@word-lock/core/game";
 import { Avatar } from "@/components/Avatar";
 import { cn } from "@/lib/utils";
 
@@ -10,13 +9,10 @@ function formatScore(score: number) {
 }
 
 /**
- * One player's corner of the bar, a 2×2 grid:
+ * One player's corner of the bar.
+ * Grouped as columns:
  *
- *   [avatar] [clock]        [clock] [avatar]
- *   [name]   [score]        [score] [name]
- *
- * The far player's chip is the mirror image, so each clock sits beside its own
- * avatar and the two scores face each other across the middle.
+ *   [avatar/name] [time/score]      [time/score] [avatar/name]
  */
 function PlayerChip({
   player,
@@ -26,6 +22,7 @@ function PlayerChip({
   slot,
   mirrored,
   reaction,
+  isBank,
 }: {
   player: { name: string; avatar: string } | null;
   score: number;
@@ -34,68 +31,75 @@ function PlayerChip({
   slot: 1 | 2;
   mirrored: boolean;
   reaction?: { key: number; emoji: string } | null;
+  isBank: boolean;
 }) {
   const ring = slot === 1 ? "ring-p1" : "ring-p2";
-  const scoreColor = slot === 1 ? "text-p1" : "text-p2";
-  const identityCol = mirrored ? "col-start-2" : "col-start-1";
-  const numbersCol = mirrored ? "col-start-1" : "col-start-2";
+  const scoreColor = active ? (slot === 1 ? "text-p1" : "text-p2") : "text-muted-foreground";
+  const cardColor = active ? (slot === 1 ? "bg-p1/30" : "bg-p2/30") : "bg-card";
+  const borderColor = active ? (slot === 1 ? "border-p1/40" : "border-p2/40") : "border-border";
+  const timeColor = active ? (slot === 1 ? "text-p1" : "text-p2") : "text-muted-foreground";
+  const row = cn("flex items-center gap-2", mirrored && "flex-row-reverse");
+  const clockWidth = isBank ? "w-16" : "w-20";
 
   return (
-    <div
-      className={cn(
-        "grid min-w-0 grid-cols-[auto_auto] grid-rows-[auto_auto] items-center gap-x-3 gap-y-1.5",
-      )}
-    >
-      <div className={cn("relative row-start-1 flex justify-center", identityCol)}>
-        {reaction && (
-          <span
-            key={reaction.key}
-            aria-hidden
-            className="animate-in fade-in slide-in-from-bottom-2 zoom-in-50 absolute top-0 z-10 text-2xl duration-200"
-          >
-            {reaction.emoji}
-          </span>
-        )}
-        <Avatar
-          avatar={player?.avatar}
-          className={cn(
-            "h-8 w-8 shrink-0 ring-offset-card transition-opacity duration-200",
-            ring,
-            active ? "ring-[3px] ring-offset-2" : "ring-2 ring-offset-2 opacity-60",
+    <div className={cn(row, "-mx-3 justify-between")}>
+      <div className="w-20 flex flex-col items-center gap-1">
+        <div className="relative flex justify-center">
+          {reaction && (
+            <span
+              key={reaction.key}
+              aria-hidden
+              className="animate-in fade-in slide-in-from-bottom-2 zoom-in-50 absolute top-2 z-10 text-4xl duration-200"
+            >
+              {reaction.emoji}
+            </span>
           )}
-        />
+          <Avatar
+            avatar={player?.avatar}
+            className={cn(
+              "h-12 w-12 shrink-0 ring-offset-card transition-opacity duration-200",
+              ring,
+              active ? "ring-[3px] ring-offset-2" : "ring-2 ring-offset-2 opacity-60",
+            )}
+          />
+        </div>
+        <p
+          title={player?.name ?? undefined}
+          className={cn(
+            "mt-2 text-center text-sm font-semibold leading-none",
+            active ? "text-foreground" : "text-muted-foreground",
+          )}
+        >
+          {player?.name ?? "-"}
+        </p>
       </div>
-      <p
-        className={cn(
-          "row-start-1 flex items-center gap-1 font-display tv-caption font-medium tabular-nums leading-none tracking-wide",
-          numbersCol,
-          mirrored ? "justify-start" : "justify-end",
-          active ? scoreColor : "text-muted-foreground",
-        )}
-      >
-        <ClockIcon className="h-3.5 w-3.5 shrink-0" />
-        {clock}
-      </p>
-      <p
-        title={player?.name ?? undefined}
-        className={cn(
-          "row-start-2 max-w-24 truncate text-center tv-caption leading-none",
-          identityCol,
-          active ? "text-foreground" : "text-muted-foreground",
-        )}
-      >
-        {player?.name ?? "-"}
-      </p>
-      <p
-        className={cn(
-          "row-start-2 font-display text-2xl font-bold leading-none tabular-nums",
-          numbersCol,
-          mirrored ? "text-left" : "text-right",
-          active ? scoreColor : "text-muted-foreground",
-        )}
-      >
-        {formatScore(score)}
-      </p>
+      <div className={cn("flex flex-col", mirrored ? "items-center gap-1" : "items-center gap-2")}>
+        <div
+          className={cn(
+            clockWidth,
+            "flex flex-col items-center rounded-md pb-2 pt-2.5 border-2",
+            cardColor,
+            borderColor,
+          )}
+        >
+          <p
+            className={cn(
+              "font-display text-sm font-bold tabular-nums leading-none tracking-tight",
+              timeColor,
+            )}
+          >
+            {clock}
+          </p>
+        </div>
+        <p
+          className={cn(
+            "mt-1.5 font-display text-4xl font-bold leading-none tabular-nums tracking-tight",
+            scoreColor,
+          )}
+        >
+          {formatScore(score)}
+        </p>
+      </div>
     </div>
   );
 }
@@ -131,11 +135,12 @@ export function ScoreBar({
     score: (scores ?? game.scores)[slot],
     active: slot === 1 ? p1Active : p2Active,
     reaction: reaction?.slot === slot ? reaction : null,
+    isBank: isBankControl(game.timeControl),
   });
 
   return (
-    <div className="neo px-2 pt-2 pb-2 bg-transparent">
-      <div className="flex items-center justify-between gap-6 px-2">
+    <div className="neo bg-transparent px-2 py-3">
+      <div className="flex items-center justify-between gap-2 px-2">
         <PlayerChip {...chipFor(nearSlot)} mirrored={false} />
         <PlayerChip {...chipFor(farSlot)} mirrored />
       </div>

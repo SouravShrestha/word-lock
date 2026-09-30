@@ -48,11 +48,11 @@ describe("time controls", () => {
     expect(isTurnExpired(null, T0)).toBe(false);
   });
 
-  it("formats clocks as m:ss, h:mm:ss from an hour", () => {
+  it("formats bank clocks consistently as mm:ss", () => {
     expect(formatClock(600_000)).toBe("10:00");
-    expect(formatClock(59_001)).toBe("1:00");
-    expect(formatClock(3_600_000)).toBe("1:00:00");
-    expect(formatClock(-5)).toBe("0:00");
+    expect(formatClock(59_001)).toBe("01:00");
+    expect(formatClock(3_600_000)).toBe("60:00");
+    expect(formatClock(-5)).toBe("00:00");
   });
 });
 
@@ -65,16 +65,16 @@ describe("clockLabelFor", () => {
   };
 
   it("counts the player on turn down to the deadline", () => {
-    expect(clockLabelFor(bank, 1, true, T0)).toBe("1:30");
+    expect(clockLabelFor(bank, 1, true, T0)).toBe("01:30");
   });
 
   it("shows the idle player's stored bank", () => {
-    expect(clockLabelFor(bank, 2, false, T0)).toBe("7:00");
+    expect(clockLabelFor(bank, 2, false, T0)).toBe("07:00");
   });
 
   it("shows banks before and after the game", () => {
     expect(clockLabelFor({ ...bank, status: "waiting" }, 1, false, T0)).toBe("10:00");
-    expect(clockLabelFor({ ...bank, status: "completed" }, 2, false, T0)).toBe("7:00");
+    expect(clockLabelFor({ ...bank, status: "completed" }, 2, false, T0)).toBe("07:00");
   });
 
   it("gives daily games a clock only on the player on turn", () => {
@@ -84,8 +84,10 @@ describe("clockLabelFor", () => {
       turnDeadline: iso(T0 + 5 * 3_600_000 + 7 * 60_000),
       clocks: { 1: null, 2: null },
     };
-    expect(clockLabelFor(daily, 1, true, T0)).toBe("5h 07m");
+    expect(clockLabelFor(daily, 1, true, T0)).toBe("05:07:00");
     expect(clockLabelFor(daily, 2, false, T0)).toBe("-");
-    expect(clockLabelFor({ ...daily, turnDeadline: iso(T0 + 65_000) }, 1, true, T0)).toBe("1m 05s");
+    expect(clockLabelFor({ ...daily, turnDeadline: iso(T0 + 65_000) }, 1, true, T0)).toBe(
+      "00:01:05",
+    );
   });
 });

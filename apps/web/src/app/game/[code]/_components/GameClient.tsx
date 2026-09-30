@@ -452,7 +452,7 @@ export function GameClient({ code }: { code: string }) {
         )}
         <NewGameSheet open={showNewGame} onClose={() => setShowNewGame(false)} />
 
-        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 321px))" }}>
+        <div className="mx-auto w-full" style={{ maxWidth: "min(100%, calc(100dvh - 363px))" }}>
           <div className="grid w-full grid-cols-5 gap-0 border-border border-t border-l">
             {game.grid.map((letter: string, index: number) => {
               const owners = review.frame?.state.owners ?? game.owners;
