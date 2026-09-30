@@ -2,10 +2,10 @@ import { Text } from "@/components/text";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Modal, Pressable, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "@word-lock/tokens/native";
 
 import { useTheme } from "@/theme/ThemeProvider";
-import { BlurView } from "expo-blur";
 
 import { createGameFn, fetchGameFn } from "@word-lock/client";
 import type { RecentGameEntry } from "@word-lock/core/game";
@@ -20,13 +20,9 @@ import { toast } from "@/components/Toast";
  * reuses its own, down to the "New Game" action creating a fresh lobby
  * rather than replaying this one.
  *
- * Rendered as RN's own `Modal` (`transparent`, `animationType="fade"`)
- * rather than `BottomSheet` — the web version is explicit that this is a
- * centered overlay, not a sheet, and a `Modal` is this platform's closest
- * equivalent to a `fixed inset-0 flex items-center justify-center` div: its
- * own layer, dismissible by backdrop press, with the hardware back button
- * (Android) closing it for free via `onRequestClose` — this platform's
- * Escape-key equivalent.
+ * This is a full-window modal, so it covers the tab bar as well as the history
+ * screen. It shares the quit confirmation's translucent backdrop rather than
+ * relying on Android's target-based blur implementation.
  */
 export function GameDetailPopup({
   entry,
@@ -61,58 +57,55 @@ export function GameDetailPopup({
   const palette = colors[resolvedTheme];
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable className="flex-1 items-center justify-center px-4" onPress={onClose}>
-        <View className="absolute inset-0">
-          <BlurView
-            intensity={15}
-            tint={resolvedTheme === "dark" ? "dark" : "light"}
-            style={{ flex: 1 }}
+    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+      {/* Android renders each Modal in its own native root. */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View className="flex-1 items-center justify-center bg-black/60 px-4">
+          <Pressable
+            onPress={onClose}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            className="absolute inset-0"
           />
-          <View className="absolute inset-0 bg-background/70" />
-        </View>
 
-        {isLoading && (
-          <View className="w-full max-w-sm overflow-hidden rounded-sm">
-            <BlurView
-              intensity={25}
-              tint={resolvedTheme === "dark" ? "dark" : "light"}
-              className="p-5"
-              style={{ backgroundColor: `${palette.surface}80` }}
+          {isLoading && (
+            <View
+              className="w-full max-w-sm rounded-sm p-5"
+              style={{ backgroundColor: `${palette.surface}e6` }}
             >
               <Text variant="bodyBase" className="py-2 text-center">
                 Loading game
               </Text>
-            </BlurView>
-          </View>
-        )}
+            </View>
+          )}
 
-        {!!error && (
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl p-5"
-            style={{ backgroundColor: palette.surface }}
-          >
-            <Text variant="body" className="text-center text-destructive">
-              {error instanceof Error ? error.message : "Failed to load game"}
-            </Text>
-          </Pressable>
-        )}
+          {!!error && (
+            <View
+              accessibilityRole="none"
+              className="w-full max-w-sm rounded-2xl p-5"
+              style={{ backgroundColor: palette.surface }}
+            >
+              <Text variant="body" className="text-center text-destructive">
+                {error instanceof Error ? error.message : "Failed to load game"}
+              </Text>
+            </View>
+          )}
 
-        {!isLoading && !error && game && (
-          <Pressable className="w-full max-w-sm" onPress={(e) => e.stopPropagation()}>
-            <GameResultCard
-              game={game}
-              onExit={onClose}
-              action={{
-                label: "New Game",
-                onPress: () => newGameMutation.mutate(),
-                pending: newGameMutation.isPending,
-              }}
-            />
-          </Pressable>
-        )}
-      </Pressable>
+          {!isLoading && !error && game && (
+            <View className="w-full max-w-sm">
+              <GameResultCard
+                game={game}
+                onExit={onClose}
+                action={{
+                  label: "New Game",
+                  onPress: () => newGameMutation.mutate(),
+                  pending: newGameMutation.isPending,
+                }}
+              />
+            </View>
+          )}
+        </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
