@@ -23,7 +23,7 @@ function lastCall() {
 describe("every game endpoint attaches a timezone", () => {
   const calls: Array<[string, () => Promise<unknown>]> = [
     ["lobby", () => game.fetchLobby({ sessionId: "s" })],
-    ["create", () => game.createGameFn({ sessionId: "s" })],
+    ["create", () => game.createGameFn({ sessionId: "s", timeControl: "10m" })],
     ["join", () => game.joinGameFn({ sessionId: "s", roomCode: "ABCDE" })],
     ["fetch", () => game.fetchGameFn({ sessionId: "s", roomCode: "ABCDE" })],
     [

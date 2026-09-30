@@ -9,12 +9,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { GameDetailPopup } from "@/components/GameDetailPopup";
 import { MatchRow } from "@/components/MatchRow";
+import { NewGameSheet } from "@/components/NewGameSheet";
 import { SectionLabel } from "@/components/SectionLabel";
 import { Shimmer } from "@/components/Shimmer";
 
 export default function HistoryScreen() {
   const { sessionId, ready } = useSession();
   const [selected, setSelected] = useState<RecentGameEntry | null>(null);
+  const [newGameOpen, setNewGameOpen] = useState(false);
 
   const { data, isLoading } = useQuery<PlayerStats>({
     queryKey: ["profile", sessionId],
@@ -57,8 +59,17 @@ export default function HistoryScreen() {
       </ScrollView>
 
       {selected && sessionId && (
-        <GameDetailPopup entry={selected} sessionId={sessionId} onClose={() => setSelected(null)} />
+        <GameDetailPopup
+          entry={selected}
+          sessionId={sessionId}
+          onClose={() => setSelected(null)}
+          onNewGame={() => {
+            setSelected(null);
+            setNewGameOpen(true);
+          }}
+        />
       )}
+      <NewGameSheet open={newGameOpen} onClose={() => setNewGameOpen(false)} />
     </View>
   );
 }

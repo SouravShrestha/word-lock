@@ -2,31 +2,27 @@
 
 ## [1.4.4](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.3...word-lock-monorepo-v1.4.4) (2026-09-29)
 
-
 ### Bug Fixes
 
-* **ci:** update mobile workflow to build and upload AAB instead of APK ([4019eba](https://github.com/SouravShrestha/word-lock/commit/4019eba8c19f0936a2469e60b9ad1d26388d13ad))
+- **ci:** update mobile workflow to build and upload AAB instead of APK ([4019eba](https://github.com/SouravShrestha/word-lock/commit/4019eba8c19f0936a2469e60b9ad1d26388d13ad))
 
 ## [1.4.3](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.2...word-lock-monorepo-v1.4.3) (2026-09-29)
 
-
 ### Bug Fixes
 
-* **mobile:** stop OAuth callback 404 and stuck disabled buttons on Android ([38f066e](https://github.com/SouravShrestha/word-lock/commit/38f066e6771d9c0f396cc2b1149d1095aea7b6d1))
+- **mobile:** stop OAuth callback 404 and stuck disabled buttons on Android ([38f066e](https://github.com/SouravShrestha/word-lock/commit/38f066e6771d9c0f396cc2b1149d1095aea7b6d1))
 
 ## [1.4.2](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.1...word-lock-monorepo-v1.4.2) (2026-09-28)
 
-
 ### Bug Fixes
 
-* force production deployment ([#17](https://github.com/SouravShrestha/word-lock/issues/17)) ([6a44570](https://github.com/SouravShrestha/word-lock/commit/6a44570f36f3ad4d0df59dbcc07ad4d5cdf341e7))
+- force production deployment ([#17](https://github.com/SouravShrestha/word-lock/issues/17)) ([6a44570](https://github.com/SouravShrestha/word-lock/commit/6a44570f36f3ad4d0df59dbcc07ad4d5cdf341e7))
 
 ## [1.4.1](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.0...word-lock-monorepo-v1.4.1) (2026-09-28)
 
-
 ### Bug Fixes
 
-* **ci:** install expo-dev-client for mobile development builds ([#14](https://github.com/SouravShrestha/word-lock/issues/14)) ([7d3c1ec](https://github.com/SouravShrestha/word-lock/commit/7d3c1ec8834ae54414841734cabaf37d6e93b988))
+- **ci:** install expo-dev-client for mobile development builds ([#14](https://github.com/SouravShrestha/word-lock/issues/14)) ([7d3c1ec](https://github.com/SouravShrestha/word-lock/commit/7d3c1ec8834ae54414841734cabaf37d6e93b988))
 
 ## [1.4.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.3.0...word-lock-monorepo-v1.4.0) (2026-09-26)
 

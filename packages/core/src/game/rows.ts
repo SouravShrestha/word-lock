@@ -37,6 +37,10 @@ export interface GameRow {
   p2_star_delta: number | null;
   p1_stars_after: number | null;
   p2_stars_after: number | null;
+  time_control: string;
+  p1_clock_ms: number | null;
+  p2_clock_ms: number | null;
+  turn_deadline: string | null;
 }
 
 export interface MoveRow {

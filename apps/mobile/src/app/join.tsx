@@ -69,8 +69,8 @@ export default function JoinScreen() {
                 className="h-12 flex-1 items-center justify-center rounded-md"
                 style={{
                   backgroundColor: palette.surface,
-                  borderWidth: isCursor ? 2 : 0,
-                  borderColor: palette.sky,
+                  borderWidth: isCursor ? 2 : 2,
+                  borderColor: isCursor ? palette.sky : palette.border,
                 }}
               >
                 <Text variant="sheetTitle">{char ?? ""}</Text>

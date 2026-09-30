@@ -59,8 +59,8 @@ export function JoinClient() {
             return (
               <div
                 key={i}
-                className={`surface flex h-12 flex-1 items-center justify-center font-display text-xl font-bold transition-shadow ${
-                  isCursor ? "ring-2 ring-sky" : ""
+                className={`surface flex h-12 flex-1 items-center justify-center font-display text-xl font-bold transition-shadow border-2 ${
+                  isCursor ? "border-sky" : "border-border"
                 }`}
               >
                 {char ?? null}

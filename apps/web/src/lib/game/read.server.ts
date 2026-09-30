@@ -2,6 +2,8 @@ import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { UNNAMED_PLAYER } from "@word-lock/core/account";
 import {
   computeBoardState,
+  timeControlFor,
+  DAILY_TURN_MS,
   type EngineMove,
   type PlayerSlot,
   type GamePlayerRow,
@@ -10,7 +12,17 @@ import {
   type PlayerRow,
 } from "@word-lock/core/game";
 
-export const TURN_LIMIT_MS = 24 * 60 * 60 * 1000;
+/**
+ * When the current turn expires. Every write that starts a turn stores it, but a
+ * game already active before migration 015 was backfilled only if it was active
+ * at the time, so fall back to the one limit that existed then.
+ */
+export function turnDeadlineOf(game: GameRow): string {
+  return (
+    game.turn_deadline ??
+    new Date(new Date(game.last_move_at).getTime() + DAILY_TURN_MS).toISOString()
+  );
+}
 
 export type {
   PlayerRow,
@@ -77,7 +89,9 @@ export function serializeGame(
     winnerId: game.winner_id,
     lastMoveAt: game.last_move_at,
     currentTurnPlayerId: game.current_turn_player_id,
-    turnDeadline: new Date(new Date(game.last_move_at).getTime() + TURN_LIMIT_MS).toISOString(),
+    turnDeadline: turnDeadlineOf(game),
+    timeControl: timeControlFor(game.time_control).id,
+    clocks: { 1: game.p1_clock_ms, 2: game.p2_clock_ms },
     players: {
       one: p1 ? { id: p1.id, name: p1.username ?? UNNAMED_PLAYER, avatar: p1.avatar } : null,
       two: p2 ? { id: p2.id, name: p2.username ?? UNNAMED_PLAYER, avatar: p2.avatar } : null,

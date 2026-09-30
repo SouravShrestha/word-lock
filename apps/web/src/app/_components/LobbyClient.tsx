@@ -1,13 +1,12 @@
 "use client";
-import { useSession, fetchLobby, createGameFn, timeoutGameFn } from "@word-lock/client";
+import { useSession, fetchLobby, timeoutGameFn, SWEEP_DELAY_MS } from "@word-lock/client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 
 import { HowToPlay } from "@/components/HowToPlay";
+import { NewGameSheet } from "@/components/NewGameSheet";
 import { HomeBackdrop } from "@/components/HomeBackdrop";
 import { Wordmark } from "@/components/Wordmark";
 import { SectionLabel } from "@/components/SectionLabel";
@@ -20,19 +19,13 @@ import { timeLeftLabel } from "@word-lock/core/game";
 
 export function LobbyClient() {
   const { sessionId, ready } = useSession();
-  const router = useRouter();
   const queryClient = useQueryClient();
+  const [newGameOpen, setNewGameOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["lobby", sessionId],
     enabled: ready,
     queryFn: () => fetchLobby({ sessionId: sessionId! }),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: () => createGameFn({ sessionId: sessionId! }),
-    onSuccess: ({ roomCode }) => router.push(`/game/${roomCode}`),
-    onError: (error: Error) => toast.error(error.message),
   });
 
   useEffect(() => {
@@ -87,12 +80,12 @@ export function LobbyClient() {
           <div className="mt-16 flex w-full max-w-sm flex-row gap-4 px-5">
             <button
               type="button"
-              onClick={() => createMutation.mutate()}
-              disabled={!ready || createMutation.isPending}
+              onClick={() => setNewGameOpen(true)}
+              disabled={!ready}
               className="soft-btn btn-mint flex flex-1 items-center justify-center gap-2 px-4 py-3.5 tv-body-base"
             >
               <PlayIcon className="h-3 w-3" />
-              {createMutation.isPending ? "Creating" : "New Game"}
+              New Game
             </button>
             <Link
               href="/join"
@@ -114,6 +107,7 @@ export function LobbyClient() {
       </div>
 
       <BottomNav />
+      <NewGameSheet open={newGameOpen} onClose={() => setNewGameOpen(false)} />
     </main>
   );
 }
@@ -152,7 +146,7 @@ function GameCard({ game, idx, totalGames }: { game: any; idx: number; totalGame
   useEffect(() => {
     if (game.status !== "active" || !game.turnDeadline) return;
 
-    const msLeft = new Date(game.turnDeadline).getTime() - Date.now();
+    const msLeft = new Date(game.turnDeadline).getTime() + SWEEP_DELAY_MS - Date.now();
 
     const triggerSweep = () => {
       if (!sessionId) return;

@@ -1,4 +1,5 @@
 import { browserTimezone } from "@word-lock/core/account";
+import type { TimeControl } from "@word-lock/core/game";
 
 import { post } from "./transport";
 
@@ -10,7 +11,7 @@ export async function fetchLobby(data: { sessionId: string }) {
   return fetcher("lobby", data);
 }
 
-export async function createGameFn(data: { sessionId: string }) {
+export async function createGameFn(data: { sessionId: string; timeControl: TimeControl }) {
   return fetcher("create", data);
 }
 

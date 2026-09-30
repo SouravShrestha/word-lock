@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { GameResultCard } from "@/components/GameResultCard";
-import { createGameFn, fetchGameFn } from "@word-lock/client";
+import { NewGameSheet } from "@/components/NewGameSheet";
+import { fetchGameFn } from "@word-lock/client";
 import type { RecentGameEntry } from "@word-lock/core/game";
 
 /**
@@ -16,7 +15,7 @@ import type { RecentGameEntry } from "@word-lock/core/game";
  * The body is `GameResultCard` — the same component the end-of-game screen uses,
  * so a game looks the same the moment it ends and a month later, down to the
  * "New Game" button: reading an old result is the same itch to play again as
- * finishing one, so it opens a fresh room exactly as the end-of-game screen does.
+ * finishing one, so it opens the same new-game sheet the end-of-game screen does.
  *
  * Exit is the card's own button rather than a corner cross: this is a result to
  * be read and left, not a panel layered over something the player was doing.
@@ -30,7 +29,7 @@ export function GameDetailPopup({
   sessionId: string;
   onClose: () => void;
 }) {
-  const router = useRouter();
+  const [newGameOpen, setNewGameOpen] = useState(false);
 
   const {
     data: game,
@@ -42,26 +41,17 @@ export function GameDetailPopup({
   });
 
   /*
-   * A new game, not a replay of this one: the same create-and-go the end-of-game
-   * screen runs. The old game is left untouched in the record, and the fresh
-   * lobby is where the invite link for the next opponent comes from — nobody is
-   * seated automatically, since a game closed weeks ago has no channel left to
-   * tell the other side about it.
+   * A new game, not a replay of this one. The old game is left untouched in the
+   * record, and the fresh lobby is where the invite link for the next opponent
+   * comes from — nobody is seated automatically, since a game closed weeks ago
+   * has no channel left to tell the other side about it.
    */
-  const newGameMutation = useMutation({
-    mutationFn: () => createGameFn({ sessionId }),
-    onSuccess: ({ roomCode }: { roomCode: string }) => {
-      onClose();
-      router.push(`/game/${roomCode}`);
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      // The sheet on top hears the same Escape and closes itself.
+      if (e.key === "Escape" && !newGameOpen) onClose();
     },
-    [onClose],
+    [onClose, newGameOpen],
   );
 
   useEffect(() => {
@@ -73,7 +63,7 @@ export function GameDetailPopup({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 px-4 backdrop-blur-sm"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget && !newGameOpen) onClose();
       }}
     >
       {isLoading && (
@@ -94,11 +84,12 @@ export function GameDetailPopup({
           onExit={onClose}
           action={{
             label: "New Game",
-            onClick: () => newGameMutation.mutate(),
-            pending: newGameMutation.isPending,
+            onClick: () => setNewGameOpen(true),
           }}
         />
       )}
+
+      <NewGameSheet open={newGameOpen} onClose={() => setNewGameOpen(false)} onCreated={onClose} />
     </div>
   );
 }

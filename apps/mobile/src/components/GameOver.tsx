@@ -1,5 +1,6 @@
 import { Text } from "@/components/text";
 import { Modal, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAccount } from "@word-lock/client";
 import { leagueChange, leagueForStars } from "@word-lock/core/account";
 import { LeagueIcon, LEAGUE_TEXT_COLOR } from "@word-lock/icons/native";
@@ -19,18 +20,23 @@ export function GameOver({
 }) {
   return (
     <Modal visible transparent animationType="fade" statusBarTranslucent>
-      <View className="flex-1 items-center justify-center bg-background/80 px-4">
-        <View className="w-full max-w-sm">
-          <GameResultCard
-            game={game}
-            onExit={onExit}
-            action={
-              onRematch ? { label: "New Game", onPress: onRematch, pending: rematchPending } : null
-            }
-            note={<LeagueMove game={game} />}
-          />
+      {/* Android Modals are separate native roots; see GameDetailPopup. */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View className="flex-1 items-center justify-center bg-black/60 px-4">
+          <View className="w-full max-w-sm">
+            <GameResultCard
+              game={game}
+              onExit={onExit}
+              action={
+                onRematch
+                  ? { label: "New Game", onPress: onRematch, pending: rematchPending }
+                  : null
+              }
+              note={<LeagueMove game={game} />}
+            />
+          </View>
         </View>
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

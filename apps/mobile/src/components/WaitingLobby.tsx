@@ -2,7 +2,8 @@ import { Text } from "@/components/text";
 import { useState } from "react";
 import { Pressable, Share, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { CheckIcon, CopyIcon, InviteIcon } from "@word-lock/icons/native";
+import { timeControlFor } from "@word-lock/core/game";
+import { CheckIcon, ClockIcon, CopyIcon, InviteIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 
 import { Avatar } from "@/components/Avatar";
@@ -77,13 +78,13 @@ export function WaitingLobby({
         <BackButton onPress={() => setShowConfirm(true)} label="Exit lobby" />
       </View>
 
-      <View className="flex-1 items-center justify-center gap-10 px-5 py-10">
+      <View className="flex-1 items-center justify-center gap-10 px-5 -mt-16">
         {isHost ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Copy room code"
             onPress={handleCopy}
-            className="flex-row items-center gap-3 rounded-lg py-3 pl-7 pr-5"
+            className="flex-row items-center gap-3 rounded-lg py-3 pl-7 pr-5 border-2 border-border"
             style={{ backgroundColor: palette.surface }}
           >
             <Text variant="roomCode">{roomCode}</Text>
@@ -94,12 +95,20 @@ export function WaitingLobby({
             )}
           </Pressable>
         ) : (
-          <View className="py-3">
+          <View className="py-3 pl-3 pr-2 border-2 border-border rounded-lg">
             <Text variant="roomCode">#{roomCode}</Text>
           </View>
         )}
 
-        <View className="my-3 w-full max-w-xs flex-row items-start justify-between px-4">
+        {/* The joiner sees the pace before the host starts, not after. */}
+        <View className="-mt-6 flex-row items-center gap-1.5">
+          <Text variant="body">
+            This is a <Text className="font-bold">{timeControlFor(game.timeControl).label} </Text>
+            game
+          </Text>
+        </View>
+
+        <View className="mt-0 mb-3 w-full max-w-xs flex-row items-start justify-between px-4">
           <PlayerSlot name={game.players.one?.name ?? "You"}>
             <Avatar avatar={game.players.one?.avatar} size={64} />
           </PlayerSlot>
@@ -207,6 +216,7 @@ export function WaitingLobby({
 
 export interface WaitingGame {
   id: string;
+  timeControl?: string | null;
   status: string;
   viewerSlot: 1 | 2 | null;
   players: {

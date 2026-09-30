@@ -213,14 +213,20 @@ function verdict(game: ResultGame) {
  *
  * A forfeit is worded from the viewer's side: the player who walked out saw the
  * same screen as the one left behind, and telling them their opponent left would
- * be plainly wrong. `null` and any unrecognised reason fall through to "Board
- * filled", which is also what a turn timeout ends up recording.
+ * be plainly wrong; running out of a timed game's clock is worded the same way.
+ * `null` and any unrecognised reason fall through to "Board filled", which is
+ * also what an expired daily move ends up recording.
  */
 function reasonLabel(game: ResultGame) {
   if (game.endReason === "forfeit") {
     const viewerWon = game.viewerSlot !== null && game.winnerId === playerId(game, game.viewerSlot);
     if (game.viewerSlot === null) return "Forfeited";
     return viewerWon ? "Opponent left" : "You left the game";
+  }
+  if (game.endReason === "timeout") {
+    const viewerWon = game.viewerSlot !== null && game.winnerId === playerId(game, game.viewerSlot);
+    if (game.viewerSlot === null) return "Out of time";
+    return viewerWon ? "Opponent ran out of time" : "You ran out of time";
   }
   if (game.endReason === "double-pass") return "Both players passed";
   return "Board filled";

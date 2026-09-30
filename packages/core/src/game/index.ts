@@ -8,4 +8,5 @@ export * from "./star-history";
 export * from "./stars";
 export * from "./stats";
 export * from "./streak";
+export * from "./time-control";
 export * from "./viewer";

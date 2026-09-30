@@ -274,8 +274,10 @@ export type Database = {
           grid: string;
           id: string;
           last_move_at: string;
+          p1_clock_ms: number | null;
           p1_star_delta: number | null;
           p1_stars_after: number | null;
+          p2_clock_ms: number | null;
           p2_star_delta: number | null;
           p2_stars_after: number | null;
           player1_id: string;
@@ -283,6 +285,8 @@ export type Database = {
           rematch_game_id: string | null;
           room_code: string;
           status: Database["public"]["Enums"]["wl_game_status"];
+          time_control: string;
+          turn_deadline: string | null;
           winner_id: string | null;
         };
         Insert: {
@@ -292,8 +296,10 @@ export type Database = {
           grid: string;
           id?: string;
           last_move_at?: string;
+          p1_clock_ms?: number | null;
           p1_star_delta?: number | null;
           p1_stars_after?: number | null;
+          p2_clock_ms?: number | null;
           p2_star_delta?: number | null;
           p2_stars_after?: number | null;
           player1_id: string;
@@ -301,6 +307,8 @@ export type Database = {
           rematch_game_id?: string | null;
           room_code: string;
           status?: Database["public"]["Enums"]["wl_game_status"];
+          time_control?: string;
+          turn_deadline?: string | null;
           winner_id?: string | null;
         };
         Update: {
@@ -310,8 +318,10 @@ export type Database = {
           grid?: string;
           id?: string;
           last_move_at?: string;
+          p1_clock_ms?: number | null;
           p1_star_delta?: number | null;
           p1_stars_after?: number | null;
+          p2_clock_ms?: number | null;
           p2_star_delta?: number | null;
           p2_stars_after?: number | null;
           player1_id?: string;
@@ -319,6 +329,8 @@ export type Database = {
           rematch_game_id?: string | null;
           room_code?: string;
           status?: Database["public"]["Enums"]["wl_game_status"];
+          time_control?: string;
+          turn_deadline?: string | null;
           winner_id?: string | null;
         };
         Relationships: [

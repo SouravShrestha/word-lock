@@ -205,6 +205,11 @@ function reasonLabel(game: ResultGame) {
     if (game.viewerSlot === null) return "Forfeited";
     return viewerWon ? "Opponent left" : "You left the game";
   }
+  if (game.endReason === "timeout") {
+    const viewerWon = game.viewerSlot !== null && game.winnerId === playerId(game, game.viewerSlot);
+    if (game.viewerSlot === null) return "Out of time";
+    return viewerWon ? "Opponent ran out of time" : "You ran out of time";
+  }
   if (game.endReason === "double-pass") return "Both players passed";
   return "Board filled";
 }

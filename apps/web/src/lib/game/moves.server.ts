@@ -4,9 +4,13 @@ import { resolvePlayer, type Caller } from "./identity.server";
 import { touchPlayStreak } from "./streak.server";
 import { computeStarOutcome } from "./stars.server";
 import { isWord } from "./dictionary.server";
-import { loadGame, toEngineMoves, TURN_LIMIT_MS, type GameRow, type MoveRow } from "./read.server";
+import { loadGame, toEngineMoves, turnDeadlineOf, type GameRow, type MoveRow } from "./read.server";
 import {
+  chargeClock,
   computeBoardState,
+  isBankControl,
+  isTurnExpired,
+  turnDeadlineFor,
   validateMove,
   MOVE_REJECTION_MESSAGES,
   type PlayerSlot,
@@ -29,9 +33,24 @@ export async function claimTurn(game: GameRow, expectedPlayerId: string): Promis
   return claimedAt;
 }
 
-export async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
+/**
+ * The mover's bank after the turn that just ended, as the column to write.
+ * `turnStartedAt` is taken by the caller before `claimTurn`, which moves
+ * `last_move_at` on as its lock and so no longer says when the turn began.
+ */
+function chargedClock(game: GameRow, moverId: string, turnStartedAt: string, nowMs: number) {
+  const slot = moverId === game.player1_id ? 1 : 2;
+  const bank = slot === 1 ? game.p1_clock_ms : game.p2_clock_ms;
+  const charged = isBankControl(game.time_control) ? chargeClock(bank, turnStartedAt, nowMs) : bank;
+  return { slot, charged, patch: slot === 1 ? { p1_clock_ms: charged } : { p2_clock_ms: charged } };
+}
+
+export async function finishOrAdvance(game: GameRow, moves: MoveRow[], turnStartedAt: string) {
   const state = computeBoardState(game.grid.split(""), toEngineMoves(game, moves));
-  const now = new Date().toISOString();
+  const nowMs = Date.now();
+  const now = new Date(nowMs).toISOString();
+  const last = moves[moves.length - 1];
+  const mover = chargedClock(game, last.player_id, turnStartedAt, nowMs);
 
   if (state.finished) {
     const winnerId =
@@ -46,6 +65,8 @@ export async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
         winner_id: winnerId,
         end_reason: state.endReason,
         last_move_at: now,
+        turn_deadline: null,
+        ...mover.patch,
         p1_star_delta: outcome.p1Delta,
         p2_star_delta: outcome.p2Delta,
         p1_stars_after: outcome.p1StarsAfter,
@@ -60,13 +81,104 @@ export async function finishOrAdvance(game: GameRow, moves: MoveRow[]) {
     return;
   }
 
-  const last = moves[moves.length - 1];
   const next =
     last.player_id === game.player1_id ? (game.player2_id ?? game.player1_id) : game.player1_id;
+  const nextBank =
+    next === last.player_id
+      ? mover.charged
+      : next === game.player1_id
+        ? game.p1_clock_ms
+        : game.p2_clock_ms;
   await getSupabaseAdmin()
     .from("wl_games")
-    .update({ current_turn_player_id: next, last_move_at: now })
+    .update({
+      current_turn_player_id: next,
+      last_move_at: now,
+      turn_deadline: turnDeadlineFor(game.time_control, nextBank, nowMs),
+      ...mover.patch,
+    })
     .eq("id", game.id);
+}
+
+/**
+ * A timed game whose player on turn ran out: the opponent wins, ranked exactly
+ * like a forfeit. `claimTurn` first, so a move racing the flag either lands
+ * before this (and the claim fails) or is rejected after it.
+ */
+async function loseOnTime(game: GameRow, loserId: string): Promise<boolean> {
+  try {
+    await claimTurn(game, loserId);
+  } catch {
+    return false;
+  }
+
+  const winnerId = loserId === game.player1_id ? game.player2_id : game.player1_id;
+  const { outcome, commit } = await computeStarOutcome(game, winnerId);
+
+  const { data: completed } = await getSupabaseAdmin()
+    .from("wl_games")
+    .update({
+      status: "completed",
+      winner_id: winnerId,
+      end_reason: "timeout",
+      last_move_at: new Date().toISOString(),
+      turn_deadline: null,
+      ...(loserId === game.player1_id ? { p1_clock_ms: 0 } : { p2_clock_ms: 0 }),
+      p1_star_delta: outcome.p1Delta,
+      p2_star_delta: outcome.p2Delta,
+      p1_stars_after: outcome.p1StarsAfter,
+      p2_stars_after: outcome.p2StarsAfter,
+    })
+    .eq("id", game.id)
+    .neq("status", "completed")
+    .select("id")
+    .maybeSingle();
+
+  if (completed) await commit();
+  return Boolean(completed);
+}
+
+/**
+ * The one path for a turn whose deadline has passed, shared by the client-fired
+ * timeout and the cron sweep. A timed game is lost on time; a daily game passes
+ * the move for the player, as every game did before time controls existed.
+ */
+export async function expireTurn(game: GameRow, moves: MoveRow[]): Promise<boolean> {
+  const playerId = game.current_turn_player_id;
+  if (!playerId) return false;
+
+  if (isBankControl(game.time_control)) return loseOnTime(game, playerId);
+
+  const turnStartedAt = game.last_move_at;
+  try {
+    await claimTurn(game, playerId);
+  } catch {
+    return false;
+  }
+
+  const { data: inserted, error } = await getSupabaseAdmin()
+    .from("wl_moves")
+    .insert({ game_id: game.id, player_id: playerId, word: "", tile_indices: [], passed: true })
+    .select("*")
+    .single();
+  if (error || !inserted) return false;
+
+  await finishOrAdvance(game, [...moves, inserted as MoveRow], turnStartedAt);
+  return true;
+}
+
+/**
+ * A move from a player whose bank already ran out ends the game instead of
+ * landing. Daily games have no such rule: a late move there is still a move
+ * until someone sweeps the turn.
+ */
+async function rejectIfOutOfTime(game: GameRow, playerId: string) {
+  if (game.status !== "active" || game.current_turn_player_id !== playerId) return;
+  if (!isBankControl(game.time_control)) return;
+  if (!isTurnExpired(turnDeadlineOf(game), Date.now())) return;
+
+  await loseOnTime(game, playerId);
+  throw new PublicError("Your time ran out.");
 }
 
 export async function submitMove(
@@ -80,6 +192,8 @@ export async function submitMove(
   if (!loaded) throw new PublicError("No game found with that code. ");
   const { game, moves } = loaded;
 
+  await rejectIfOutOfTime(game, player.id);
+
   const state = computeBoardState(game.grid.split(""), toEngineMoves(game, moves));
   const rejection = validateMove({
     grid: game.grid.split(""),
@@ -92,6 +206,7 @@ export async function submitMove(
   });
   if (rejection) throw new PublicError(MOVE_REJECTION_MESSAGES[rejection]);
 
+  const turnStartedAt = game.last_move_at;
   await claimTurn(game, player.id);
 
   const { data: inserted, error } = await getSupabaseAdmin()
@@ -107,7 +222,7 @@ export async function submitMove(
     .single();
   if (error) throw new Error(error.message);
 
-  await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  await finishOrAdvance(game, [...moves, inserted as MoveRow], turnStartedAt);
   await touchPlayStreak(player, caller.timezone);
   return { ok: true };
 }
@@ -121,6 +236,8 @@ export async function passTurn(caller: Caller, roomCode: string) {
   if (game.status !== "active") throw new PublicError("This game isn't active.");
   if (game.current_turn_player_id !== player.id) throw new PublicError("It's not your turn yet.");
 
+  await rejectIfOutOfTime(game, player.id);
+  const turnStartedAt = game.last_move_at;
   await claimTurn(game, player.id);
 
   const { data: inserted, error } = await getSupabaseAdmin()
@@ -130,7 +247,7 @@ export async function passTurn(caller: Caller, roomCode: string) {
     .single();
   if (error) throw new Error(error.message);
 
-  await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  await finishOrAdvance(game, [...moves, inserted as MoveRow], turnStartedAt);
   await touchPlayStreak(player, caller.timezone);
   return { ok: true };
 }
@@ -176,31 +293,10 @@ export async function timeoutGame(caller: Caller, roomCode: string) {
     throw new PublicError("You are not a participant in this game.");
   }
   if (!game.current_turn_player_id) throw new PublicError("No active turn.");
-
-  const msLeft =
-    new Date(new Date(game.last_move_at).getTime() + TURN_LIMIT_MS).getTime() - Date.now();
-  if (msLeft > 0) throw new PublicError("Turn has not expired yet.");
-
-  try {
-    await claimTurn(game, game.current_turn_player_id);
-  } catch {
-    return { ok: true };
+  if (!isTurnExpired(turnDeadlineOf(game), Date.now())) {
+    throw new PublicError("Turn has not expired yet.");
   }
 
-  const { data: inserted, error } = await getSupabaseAdmin()
-    .from("wl_moves")
-    .insert({
-      game_id: game.id,
-      player_id: game.current_turn_player_id,
-      word: "",
-      tile_indices: [],
-      passed: true,
-    })
-    .select("*")
-    .single();
-
-  if (error) throw new Error(error.message);
-
-  await finishOrAdvance(game, [...moves, inserted as MoveRow]);
+  await expireTurn(game, moves);
   return { ok: true };
 }

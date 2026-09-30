@@ -142,8 +142,8 @@ export function Button({
           className={box}
           style={{
             backgroundColor: fill,
-            borderWidth: isSurfaceVariant ? 1 : 0,
-            borderColor: palette.surfaceHairline,
+            borderWidth: 1,
+            borderColor: isSurfaceVariant ? palette.surfaceHairline : "transparent",
           }}
         >
           <View className="flex-row items-center justify-center gap-2">
