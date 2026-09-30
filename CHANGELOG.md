@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.4...word-lock-monorepo-v1.5.0) (2026-09-30)
+
+
+### Features
+
+* add new icons and update time control features with score bar redesigns ([bf5069b](https://github.com/SouravShrestha/word-lock/commit/bf5069b7cc1d6b0670d1b628e8ebd5f70195a6c4))
+* time controls picked per room via a new-game sheet ([a1d2319](https://github.com/SouravShrestha/word-lock/commit/a1d231933462c2bb107b8cde58ebc9769b8762b6))
+
+
+### Bug Fixes
+
+* **mobile:** wrap Modals with GestureHandlerRootView for Android ([0326eea](https://github.com/SouravShrestha/word-lock/commit/0326eea958efabf8f10e8c3f1d28848a9aed6888))
+
 ## [1.4.4](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.4.3...word-lock-monorepo-v1.4.4) (2026-09-29)
 
 ### Bug Fixes
