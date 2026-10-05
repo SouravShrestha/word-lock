@@ -201,22 +201,20 @@ export default function GameScreen() {
   }, [game?.id, authReady, canReceiveReactions, showReaction]);
 
   useEffect(() => {
+    // Backgrounding is deliberately NOT treated like the web's pagehide: the
+    // share sheet alone sends iOS to "inactive", and handing the invite to
+    // WhatsApp sends the app to "background". Tearing the lobby down then
+    // destroyed the very room the host was inviting someone to. The lobby is
+    // only torn down by an explicit leave or by this screen unmounting.
     const onChange = (state: AppStateStatus) => {
       if (state === "active") {
         queryClient.invalidateQueries({ queryKey });
-        return;
-      }
-      if (isHostWaitingRef.current && sessionId) {
-        destroyGameFn({ roomCode, sessionId }).catch(() => {});
-      }
-      if (isNonHostWaitingRef.current && sessionId) {
-        leaveLobbyFn({ roomCode, sessionId }).catch(() => {});
       }
     };
 
     const subscription = AppState.addEventListener("change", onChange);
     return () => subscription.remove();
-  }, [queryClient, queryKey, roomCode, sessionId]);
+  }, [queryClient, queryKey]);
 
   useEffect(() => {
     const pending = pendingDestroyTimers.get(roomCode);

@@ -1,1 +1,1 @@
-export const LEADERBOARD_SIZE = 20;
+export const LEADERBOARD_SIZE = 10;
