@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.6.0...word-lock-monorepo-v1.7.0) (2026-10-06)
+
+
+### Features
+
+* reduce leaderboard size and fix app backgrounding behavior ([0c4e755](https://github.com/SouravShrestha/word-lock/commit/0c4e7557d0558f8f4b7f31a7496fa9f30e936c1d))
+
 ## [1.6.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.5.0...word-lock-monorepo-v1.6.0) (2026-09-30)
 
 
