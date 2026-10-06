@@ -66,7 +66,28 @@ function gridIsWellFormed(grid: string[]): boolean {
     counts[letter] = (counts[letter] ?? 0) + 1;
     if (counts[letter] > MAX_SAME_LETTER) return false;
   }
+  if (!everyQHasU(counts)) return false;
   return vowels >= MIN_VOWELS;
+}
+
+/**
+ * A Q is near-useless without a U to pair it with, so every Q on the board
+ * must be matched by at least one U.
+ */
+function everyQHasU(counts: Record<string, number>): boolean {
+  return (counts["Q"] ?? 0) <= (counts["U"] ?? 0);
+}
+
+/** Turns any Q that has no U to pair with into a U. Used by the fallback grid. */
+function pairQsWithUs(grid: string[]): string[] {
+  let unpaired = grid.filter((l) => l === "Q").length - grid.filter((l) => l === "U").length;
+  for (let i = grid.length - 1; i >= 0 && unpaired > 0; i--) {
+    if (grid[i] === "Q") {
+      grid[i] = "U";
+      unpaired -= 2; // one fewer Q, one more U
+    }
+  }
+  return grid;
 }
 
 export function generateGrid(
@@ -88,7 +109,7 @@ export function generateGrid(
     grid.push(vowels[Math.floor(rand() * vowels.length)]);
   }
   while (grid.length < TILE_COUNT) grid.push(randomLetter(rand));
-  return grid;
+  return pairQsWithUs(grid);
 }
 
 export function neighborsOf(index: number): number[] {
