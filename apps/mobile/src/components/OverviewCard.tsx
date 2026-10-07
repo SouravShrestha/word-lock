@@ -1,6 +1,7 @@
 import { Text } from "@/components/text";
 import { useAccount, useLeaderboard } from "@word-lock/client";
-import { leagueById } from "@word-lock/core/account";
+import { browserTimezone, leagueById } from "@word-lock/core/account";
+import { currentStreak, localDate } from "@word-lock/core/game";
 import {
   LeagueIcon,
   LEAGUE_TEXT_COLOR,
@@ -23,7 +24,14 @@ export function OverviewCard() {
   const me = leaderboard?.me ?? null;
   const stars = account?.stars ?? 0;
   const league = account?.league ?? "bronze";
-  const streak = account?.playStreak ?? 0;
+  const streak = currentStreak(
+    {
+      play_streak: account?.playStreak ?? 0,
+      last_played_on: account?.lastPlayedOn ?? null,
+      last_freeze_on: account?.lastFreezeOn ?? null,
+    },
+    localDate(new Date(), browserTimezone()),
+  );
 
   return (
     <View className="flex-row flex-wrap gap-x-3 gap-y-5 px-4 pb-4 pt-5">

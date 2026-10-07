@@ -13,6 +13,7 @@ export interface AccountSummary {
   playStreak: number;
   bestPlayStreak: number;
   lastPlayedOn: string | null;
+  lastFreezeOn: string | null;
 }
 
 export interface LeaderboardEntry {

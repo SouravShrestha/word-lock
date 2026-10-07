@@ -5,7 +5,8 @@ import { LeagueIcon, LEAGUE_TEXT_CLASS } from "@/components/icons/LeagueIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
 import { StreakIcon } from "@/components/icons/StreakIcon";
 import { RankIcon } from "@/components/icons/RankIcon";
-import { leagueById, progressToNext } from "@word-lock/core/account";
+import { browserTimezone, leagueById, progressToNext } from "@word-lock/core/account";
+import { currentStreak, localDate } from "@word-lock/core/game";
 import { cn } from "@/lib/utils";
 
 /**
@@ -27,7 +28,14 @@ export function OverviewCard() {
   const me = leaderboard?.me ?? null;
   const stars = account?.stars ?? 0;
   const league = account?.league ?? "bronze";
-  const streak = account?.playStreak ?? 0;
+  const streak = currentStreak(
+    {
+      play_streak: account?.playStreak ?? 0,
+      last_played_on: account?.lastPlayedOn ?? null,
+      last_freeze_on: account?.lastFreezeOn ?? null,
+    },
+    localDate(new Date(), browserTimezone()),
+  );
   const progress = progressToNext(stars);
 
   return (

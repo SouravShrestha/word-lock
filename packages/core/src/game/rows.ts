@@ -18,6 +18,7 @@ export interface PlayerAccountRow extends PlayerRow {
   play_streak: number;
   best_play_streak: number;
   last_played_on: string | null;
+  last_freeze_on: string | null;
   timezone: string | null;
 }
 

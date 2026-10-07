@@ -28,6 +28,7 @@ export async function touchPlayStreak(
       play_streak: player.play_streak,
       best_play_streak: player.best_play_streak,
       last_played_on: player.last_played_on,
+      last_freeze_on: player.last_freeze_on,
     },
     today,
   );
@@ -44,6 +45,7 @@ export async function touchPlayStreak(
         play_streak: next.play_streak,
         best_play_streak: next.best_play_streak,
         last_played_on: next.last_played_on,
+        last_freeze_on: next.last_freeze_on,
       })
       .eq("id", player.id);
   } catch {

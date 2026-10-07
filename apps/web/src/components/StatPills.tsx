@@ -6,14 +6,22 @@ import { StreakIcon } from "@/components/icons/StreakIcon";
 import { LeagueIcon, LEAGUE_TEXT_CLASS } from "@/components/icons/LeagueIcon";
 import { StreakSheet } from "@/components/StreakSheet";
 import { useAccount } from "@word-lock/client";
-import { leagueById } from "@word-lock/core/account";
+import { browserTimezone, leagueById } from "@word-lock/core/account";
+import { currentStreak, localDate } from "@word-lock/core/game";
 import { cn } from "@/lib/utils";
 
 export function StreakPill() {
   const { data } = useAccount();
   const [open, setOpen] = useState(false);
 
-  const value = data?.playStreak ?? 0;
+  const stored = data?.playStreak ?? 0;
+  const lastPlayedOn = data?.lastPlayedOn ?? null;
+  const lastFreezeOn = data?.lastFreezeOn ?? null;
+  const today = localDate(new Date(), browserTimezone());
+  const value = currentStreak(
+    { play_streak: stored, last_played_on: lastPlayedOn, last_freeze_on: lastFreezeOn },
+    today,
+  );
 
   return (
     <>
@@ -29,8 +37,9 @@ export function StreakPill() {
       <StreakSheet
         open={open}
         onClose={() => setOpen(false)}
-        playStreak={value}
-        lastPlayedOn={data?.lastPlayedOn ?? null}
+        playStreak={stored}
+        lastPlayedOn={lastPlayedOn}
+        lastFreezeOn={lastFreezeOn}
       />
     </>
   );

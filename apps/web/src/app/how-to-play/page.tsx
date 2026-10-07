@@ -9,6 +9,7 @@ import {
   TURN_LIMIT_HOURS,
   bankControlsSentence,
   BASE_STARS,
+  FREEZE_COOLDOWN_DAYS,
   MIN_STARS,
 } from "@word-lock/core/game";
 
@@ -135,7 +136,10 @@ export default function HowToPlayPage() {
           <P>
             Leagues are worked out from your stars rather than stored, so you move between them the
             moment your total crosses a boundary. Separately, a streak counts the days in a row you
-            have finished at least one game, measured against your own device&apos;s time zone.
+            have played at least one turn, measured against your own device&apos;s time zone. Miss a
+            single day and a Streak Freeze keeps it alive; play the next day to thaw it out. A
+            freeze then takes {FREEZE_COOLDOWN_DAYS} days to recharge, and missing two days in a row
+            ends the streak.
           </P>
         </Section>
 
