@@ -89,6 +89,11 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: "grape", value: "#ff6fd8", note: "Theme-invariant." },
       { name: "streak", value: "#FC9502", note: "Theme-invariant streak color." },
       {
+        name: "freeze",
+        value: "#8fd3fe",
+        note: "Theme-invariant ice blue for a day a Streak Freeze covered.",
+      },
+      {
         name: "on-accent",
         value: "#0f1419",
         note: "Theme-invariant. Light and dark both declared this, identically.",

@@ -55,6 +55,8 @@ export interface AccountSummary {
    * alone says nothing about which days it covers.
    */
   lastPlayedOn: string | null;
+  /** The most recent missed day a Streak Freeze covered, same format, or null. */
+  lastFreezeOn: string | null;
 }
 
 /** Everything the profile and the username prompt need, in one round trip. */
@@ -73,6 +75,7 @@ export async function getAccountSummary(caller: Caller): Promise<AccountSummary>
     playStreak: player.play_streak,
     bestPlayStreak: player.best_play_streak,
     lastPlayedOn: player.last_played_on,
+    lastFreezeOn: player.last_freeze_on,
   };
 }
 

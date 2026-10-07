@@ -1,6 +1,12 @@
 import { Text } from "@/components/text";
 import { browserTimezone } from "@word-lock/core/account";
-import { isGracePeriodActive, localDate, streakWeek } from "@word-lock/core/game";
+import {
+  freezeLabel,
+  localDate,
+  streakHeadline,
+  streakMessage,
+  streakWeek,
+} from "@word-lock/core/game";
 import { CrossIcon, StreakIcon, TickIcon } from "@word-lock/icons/native";
 import { colors, radius } from "@word-lock/tokens/native";
 import { View } from "react-native";
@@ -14,31 +20,26 @@ export function StreakSheet({
   onClose,
   playStreak,
   lastPlayedOn,
+  lastFreezeOn,
 }: {
   open: boolean;
   onClose: () => void;
   playStreak: number;
   lastPlayedOn: string | null;
+  lastFreezeOn: string | null;
 }) {
   const { resolvedTheme } = useTheme();
   const palette = colors[resolvedTheme];
 
   const today = localDate(new Date(), browserTimezone());
-  const days = streakWeek({ play_streak: playStreak, last_played_on: lastPlayedOn }, today);
-  const playedToday = lastPlayedOn === today;
-  const isGrace = isGracePeriodActive(
-    { play_streak: playStreak, last_played_on: lastPlayedOn },
-    today,
-  );
-
-  const footer =
-    playStreak === 0
-      ? "Play a game today to start your streak."
-      : playedToday
-        ? "You're on a roll! Come back tomorrow to keep your streak going."
-        : isGrace
-          ? "Play a game today to keep your streak going, you used a grace!"
-          : "Play a game today to keep your streak going.";
+  const state = {
+    play_streak: playStreak,
+    last_played_on: lastPlayedOn,
+    last_freeze_on: lastFreezeOn,
+  };
+  const days = streakWeek(state, today);
+  const freeze = freezeLabel(state, today);
+  const footer = streakMessage(state, today);
 
   return (
     <BottomSheet open={open} onClose={onClose} label="Streak" scrollable={false}>
@@ -54,7 +55,7 @@ export function StreakSheet({
         </View>
 
         <Text variant="autoGen26" className="mt-6">
-          {playStreak === 1 ? "1 Day Streak!" : `${playStreak} Day Streak!`}
+          {streakHeadline(state, today)}
         </Text>
 
         <View accessibilityRole="list" className="mt-6 w-full flex-row items-end justify-between">
@@ -78,11 +79,15 @@ export function StreakSheet({
                 }}
               >
                 <View
-                  accessibilityLabel={`${day.date}${day.played ? " played" : " not played"}`}
+                  accessibilityLabel={`${day.date}${day.played ? " played" : day.frozen ? " frozen" : " not played"}`}
                   className="h-8 w-8 items-center justify-center"
                   style={{
                     borderRadius: radius.md,
-                    backgroundColor: day.played ? palette.leaf : palette.surface2,
+                    backgroundColor: day.played
+                      ? palette.leaf
+                      : day.frozen
+                        ? palette.freeze
+                        : palette.surface2,
                   }}
                 >
                   {day.played && <TickIcon size={14} color="#ffffff" />}
@@ -91,6 +96,14 @@ export function StreakSheet({
             </View>
           ))}
         </View>
+
+        {freeze && (
+          <View className="mt-4 rounded-full px-3 py-1" style={{ backgroundColor: palette.freeze }}>
+            <Text className="font-sans text-xs font-bold" style={{ color: palette.onAccent }}>
+              {freeze}
+            </Text>
+          </View>
+        )}
 
         <Text variant="body" className="mt-8 leading-relaxed">
           {footer}

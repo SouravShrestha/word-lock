@@ -5,7 +5,13 @@ import { TickIcon } from "@/components/icons/TickIcon";
 import { StreakIcon } from "@/components/icons/StreakIcon";
 import { BottomSheet } from "@/components/BottomSheet";
 import { browserTimezone } from "@word-lock/core/account";
-import { isGracePeriodActive, localDate, streakWeek } from "@word-lock/core/game";
+import {
+  freezeLabel,
+  localDate,
+  streakHeadline,
+  streakMessage,
+  streakWeek,
+} from "@word-lock/core/game";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,28 +27,23 @@ export function StreakSheet({
   onClose,
   playStreak,
   lastPlayedOn,
+  lastFreezeOn,
 }: {
   open: boolean;
   onClose: () => void;
   playStreak: number;
   lastPlayedOn: string | null;
+  lastFreezeOn: string | null;
 }) {
   const today = localDate(new Date(), browserTimezone());
-  const days = streakWeek({ play_streak: playStreak, last_played_on: lastPlayedOn }, today);
-  const playedToday = lastPlayedOn === today;
-  const isGrace = isGracePeriodActive(
-    { play_streak: playStreak, last_played_on: lastPlayedOn },
-    today,
-  );
-
-  const footer =
-    playStreak === 0
-      ? "Play a game today to start your streak."
-      : playedToday
-        ? "You're on a roll! Come back tomorrow to keep your streak going."
-        : isGrace
-          ? "Play a game today to keep your streak going, you used a grace!"
-          : "Play a game today to keep your streak going.";
+  const state = {
+    play_streak: playStreak,
+    last_played_on: lastPlayedOn,
+    last_freeze_on: lastFreezeOn,
+  };
+  const days = streakWeek(state, today);
+  const freeze = freezeLabel(state, today);
+  const footer = streakMessage(state, today);
 
   return (
     <BottomSheet open={open} onClose={onClose} label="Streak">
@@ -62,7 +63,7 @@ export function StreakSheet({
         <StreakIcon className="h-28 w-28 pl-5" />
 
         <p className="mt-6 text-2xl font-bold">
-          {playStreak === 1 ? "1 Day Streak!" : `${playStreak} Day Streak!`}
+          {streakHeadline(state, today)}
         </p>
 
         <ol className="mt-6 flex items-end gap-2">
@@ -79,10 +80,10 @@ export function StreakSheet({
               <span
                 // The label letters repeat across a week, so the cell carries
                 // the full date and outcome for screen readers.
-                aria-label={`${day.date}${day.played ? " played" : " not played"}`}
+                aria-label={`${day.date}${day.played ? " played" : day.frozen ? " frozen" : " not played"}`}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-md",
-                  day.played ? "bg-leaf text-white" : "bg-surface-2",
+                  day.played ? "bg-leaf text-white" : day.frozen ? "bg-freeze" : "bg-surface-2",
                   // reads as "this is the one you can still fill in".
                   day.isToday && "ring-2 ring-streak ring-offset-2 ring-offset-background",
                 )}
@@ -92,6 +93,12 @@ export function StreakSheet({
             </li>
           ))}
         </ol>
+
+        {freeze && (
+          <p className="mt-4 rounded-full bg-freeze px-3 py-1 tv-caption font-bold text-on-accent">
+            {freeze}
+          </p>
+        )}
 
         <p className="mt-8 text-center tv-body leading-relaxed text-muted-foreground">{footer}</p>
       </div>

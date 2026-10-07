@@ -80,6 +80,7 @@
   --color-on-accent: var(--on-accent);
   --color-hairline: var(--hairline);
   --color-streak: var(--streak);
+  --color-freeze: var(--freeze);
 
   /* In-game panel fill (grid tiles, word preview, played-words strip). Was
    * written as `bg-card/30` at every call site; an alpha of the card colour

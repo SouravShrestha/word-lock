@@ -8,7 +8,7 @@ import { PublicError } from "@/lib/http/errors";
 import type { PlayerAccountRow } from "@word-lock/core/game";
 
 const PLAYER_COLUMNS =
-  "id, session_id, created_at, user_id, username, avatar, stars, peak_stars, star_games, play_streak, best_play_streak, last_played_on, timezone";
+  "id, session_id, created_at, user_id, username, avatar, stars, peak_stars, star_games, play_streak, best_play_streak, last_played_on, last_freeze_on, timezone";
 
 export interface Caller {
   sessionId: string;

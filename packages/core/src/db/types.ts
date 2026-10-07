@@ -422,6 +422,7 @@ export type Database = {
           best_play_streak: number;
           created_at: string;
           id: string;
+          last_freeze_on: string | null;
           last_played_on: string | null;
           peak_stars: number;
           play_streak: number;
@@ -437,6 +438,7 @@ export type Database = {
           best_play_streak?: number;
           created_at?: string;
           id?: string;
+          last_freeze_on?: string | null;
           last_played_on?: string | null;
           peak_stars?: number;
           play_streak?: number;
@@ -452,6 +454,7 @@ export type Database = {
           best_play_streak?: number;
           created_at?: string;
           id?: string;
+          last_freeze_on?: string | null;
           last_played_on?: string | null;
           peak_stars?: number;
           play_streak?: number;
