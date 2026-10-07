@@ -62,9 +62,7 @@ export function StreakSheet({
       <div className="mt-8 flex flex-col items-center">
         <StreakIcon className="h-28 w-28 pl-5" />
 
-        <p className="mt-6 text-2xl font-bold">
-          {streakHeadline(state, today)}
-        </p>
+        <p className="mt-6 text-2xl font-bold">{streakHeadline(state, today)}</p>
 
         <ol className="mt-6 flex items-end gap-2">
           {days.map((day) => (

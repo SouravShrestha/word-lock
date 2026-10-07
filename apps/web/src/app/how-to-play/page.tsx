@@ -137,9 +137,9 @@ export default function HowToPlayPage() {
             Leagues are worked out from your stars rather than stored, so you move between them the
             moment your total crosses a boundary. Separately, a streak counts the days in a row you
             have played at least one turn, measured against your own device&apos;s time zone. Miss a
-            single day and a Streak Freeze keeps it alive; play the next day to thaw it out. A freeze
-            then takes {FREEZE_COOLDOWN_DAYS} days to recharge, and missing two days in a row ends
-            the streak.
+            single day and a Streak Freeze keeps it alive; play the next day to thaw it out. A
+            freeze then takes {FREEZE_COOLDOWN_DAYS} days to recharge, and missing two days in a row
+            ends the streak.
           </P>
         </Section>
 
