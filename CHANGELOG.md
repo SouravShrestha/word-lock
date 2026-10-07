@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.7.0...word-lock-monorepo-v1.8.0) (2026-10-07)
+
+
+### Features
+
+* **streak:** Streak Freeze with ice-blue days and clearer streak copy ([0b2afa6](https://github.com/SouravShrestha/word-lock/commit/0b2afa622a32c8e72fa67d4ed4ec3a93242972a6))
+
 ## [1.7.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.6.0...word-lock-monorepo-v1.7.0) (2026-10-06)
 
 
