@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.9.0](https://github.com/SouravShrestha/word-lock/compare/v1.8.0...v1.9.0) (2026-11-17)
+
+
+### Features
+
+* add dark theme toggle and blur effects with mobile UI refinements ([9357202](https://github.com/SouravShrestha/word-lock/commit/93572021007e086952b3f45bad9341b3c9b491b0))
+* add grace period support for streaks and update UI footer ([1aa5cbd](https://github.com/SouravShrestha/word-lock/commit/1aa5cbdceddb65337066f5a422bf84ca1fc9277b))
+* add new icons and update time control features with score bar redesigns ([bf5069b](https://github.com/SouravShrestha/word-lock/commit/bf5069b7cc1d6b0670d1b628e8ebd5f70195a6c4))
+* add TopLoader component for mobile and ignore ESLint during web builds ([c4c69b0](https://github.com/SouravShrestha/word-lock/commit/c4c69b05b549870d3c7854cce431c7b76b279b33))
+* **auth,legal:** add public routes, privacy policy, and auth gating ([07d1409](https://github.com/SouravShrestha/word-lock/commit/07d1409775a5618397d059c182f345271d62b05e))
+* **auth:** add account system with auth, profiles, leaderboards, and game history ([7a0aeb3](https://github.com/SouravShrestha/word-lock/commit/7a0aeb378678efe1de80c90ab08cfee5b18783e2))
+* **avatar:** add player avatar system with customization and persistence ([a70be30](https://github.com/SouravShrestha/word-lock/commit/a70be30038874293a5b4d9f46c72f9183e469cb1))
+* enable autoIncrement for production builds in eas.json ([96f4809](https://github.com/SouravShrestha/word-lock/commit/96f48091192ac3e128e50997c2722d0dc3fabbf9))
+* **game:** add in-game reactions, redesigned bottom bar, and board layout refinements ([5ba815b](https://github.com/SouravShrestha/word-lock/commit/5ba815bd4b7cc89c2d814b42a9b21b3937f9dadc))
+* **game:** add move review system with playback controls and board replay ([54c5eae](https://github.com/SouravShrestha/word-lock/commit/54c5eaeb2355c50f8f109e8fa349cd51a1cb34f6))
+* **game:** add rematch functionality and refactor game over screen ([9eaa2e4](https://github.com/SouravShrestha/word-lock/commit/9eaa2e464f8d666daa3e57f1bd5c523786fe607e))
+* **game:** add word history display to game over screen ([654949b](https://github.com/SouravShrestha/word-lock/commit/654949b205bb7a37e24d4a23ec3143c68457db0d))
+* initial project setup ([93c9af3](https://github.com/SouravShrestha/word-lock/commit/93c9af33aefc1f92d8069c85bfb3914a62bce577))
+* **mobile:** update design tokens and navigation styling ([ead3aba](https://github.com/SouravShrestha/word-lock/commit/ead3aba0fec7e3d30941009d8e311de5e07ca031))
+* **profile:** add user profile page with game statistics ([d2585e9](https://github.com/SouravShrestha/word-lock/commit/d2585e931fcdfaf1201f737278dc5c856cba0712))
+* **profile:** redesign settings with sheet stack, add app metadata and star history tracking ([68951fd](https://github.com/SouravShrestha/word-lock/commit/68951fd63b22f6985bba3ec8c0309c6faa010066))
+* reduce leaderboard size and fix app backgrounding behavior ([0c4e755](https://github.com/SouravShrestha/word-lock/commit/0c4e7557d0558f8f4b7f31a7496fa9f30e936c1d))
+* **streak:** Streak Freeze with ice-blue days and clearer streak copy ([0b2afa6](https://github.com/SouravShrestha/word-lock/commit/0b2afa622a32c8e72fa67d4ed4ec3a93242972a6))
+* time controls picked per room via a new-game sheet ([a1d2319](https://github.com/SouravShrestha/word-lock/commit/a1d231933462c2bb107b8cde58ebc9769b8762b6))
+* UI changes ([9901b4d](https://github.com/SouravShrestha/word-lock/commit/9901b4d3d6fb6e93a15e2efacade69143915abae))
+* **ui:** redesign home lobby with new visual style and branding ([ab0230c](https://github.com/SouravShrestha/word-lock/commit/ab0230cc0d1cbd2f43d0ccb2b80b491df946c057))
+* update mobile app icons and add horizontal scroll for played words in GameResultCard ([0599114](https://github.com/SouravShrestha/word-lock/commit/059911461fa7018871e4cbe5481520a97d96f1cb))
+
+
+### Bug Fixes
+
+* adjust pointer-events handling for buttons and bottom sheet backdrop ([2c095f0](https://github.com/SouravShrestha/word-lock/commit/2c095f081a4c8dc3d4dc33f2f9c5cc0f4333ffae))
+* **ci:** install expo-dev-client for mobile development builds ([#14](https://github.com/SouravShrestha/word-lock/issues/14)) ([7d3c1ec](https://github.com/SouravShrestha/word-lock/commit/7d3c1ec8834ae54414841734cabaf37d6e93b988))
+* **ci:** update mobile workflow to build and upload AAB instead of APK ([4019eba](https://github.com/SouravShrestha/word-lock/commit/4019eba8c19f0936a2469e60b9ad1d26388d13ad))
+* correct SVG viewBox in WordLockLogo and update mobile gitignore ([f06e4d0](https://github.com/SouravShrestha/word-lock/commit/f06e4d0182dc17c2654f9bb7c697712d05731b07))
+* **dictionary:** regenerate wordlist from words_alpha.txt with 3-12 letter cap ([39f33d8](https://github.com/SouravShrestha/word-lock/commit/39f33d8fc7c2b823e56ff0ec94b4dc9a2b3c4d08))
+* force production deployment ([#17](https://github.com/SouravShrestha/word-lock/issues/17)) ([6a44570](https://github.com/SouravShrestha/word-lock/commit/6a44570f36f3ad4d0df59dbcc07ad4d5cdf341e7))
+* **mobile:** stop OAuth callback 404 and stuck disabled buttons on Android ([38f066e](https://github.com/SouravShrestha/word-lock/commit/38f066e6771d9c0f396cc2b1149d1095aea7b6d1))
+* **mobile:** wrap Modals with GestureHandlerRootView for Android ([0326eea](https://github.com/SouravShrestha/word-lock/commit/0326eea958efabf8f10e8c3f1d28848a9aed6888))
+* security, correctness, perf and hygiene pass across the app ([895def9](https://github.com/SouravShrestha/word-lock/commit/895def9eb5606ed17db58e7e43e56d72aaa5a400))
+
 ## [1.8.0](https://github.com/SouravShrestha/word-lock/compare/word-lock-monorepo-v1.7.0...word-lock-monorepo-v1.8.0) (2026-10-07)
 
 
