@@ -4,11 +4,11 @@ import { useAccount, useSession, fetchProfileFn } from "@word-lock/client";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { BottomNav, BOTTOM_NAV_SPACER, NAV_SHELL } from "@/components/BottomNav";
-import { SectionLabel } from "@/components/SectionLabel";
-import { LeagueIcon, LEAGUE_TEXT_CLASS } from "@/components/icons/LeagueIcon";
+import { useRouter } from "next/navigation";
+
+import { BackButton } from "@/components/BackButton";
+import { StarIcon } from "@/components/icons/StarIcon";
 import type { PlayerStats, RecentGameEntry } from "@word-lock/core/game";
-import { cn } from "@/lib/utils";
 import { GameDetailPopup } from "@/app/profile/_components/GameDetailPopup";
 import { HistorySkeleton } from "./HistorySkeleton";
 import { MatchRow } from "./MatchRow";
@@ -17,13 +17,19 @@ import { MatchRow } from "./MatchRow";
  * Match history: a headline that says where you stand, then every finished game
  * newest first.
  *
- * The header carries the two numbers a player checks before scrolling — stars
+ * The header carries the two numbers a player checks before scrolling — medals
  * and wins — so the list underneath can stay one line per game instead of
  * repeating the running totals in every row.
  */
 export function HistoryClient() {
   const { sessionId, ready } = useSession();
   const [selected, setSelected] = useState<RecentGameEntry | null>(null);
+  const [leaving, setLeaving] = useState(false);
+  const router = useRouter();
+  const goBack = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) router.push("/");
+    else setLeaving(true);
+  };
 
   const { data, isLoading } = useQuery<PlayerStats>({
     queryKey: ["profile", sessionId],
@@ -34,15 +40,23 @@ export function HistoryClient() {
   const games = data?.recentGames ?? [];
 
   return (
-    <main className={NAV_SHELL}>
-      <div className={`flex flex-1 flex-col overflow-y-auto px-5 ${BOTTOM_NAV_SPACER}`}>
+    <main
+      className={`relative mx-auto flex h-dvh w-full max-w-2xl flex-col overflow-hidden${leaving ? " slide-to-right" : ""}`}
+      onAnimationEnd={(e) => {
+        if (leaving && e.target === e.currentTarget) router.push("/");
+      }}
+    >
+      <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+        <div className="pt-5">
+          <BackButton onClick={goBack} />
+        </div>
         {!ready || isLoading ? (
           <HistorySkeleton />
         ) : (
           <>
             <Headline wins={data?.overview.wins ?? 0} />
 
-            <SectionLabel className="mt-7">Match history</SectionLabel>
+            <div className="mt-7 h-px bg-hairline opacity-60" />
 
             {games.length === 0 ? (
               <div className="mt-6 p-6 text-center">
@@ -53,8 +67,8 @@ export function HistoryClient() {
               </div>
             ) : (
               /* Full-bleed rows: the negative margin cancels the page gutter so a
-                 row's press area runs edge to edge, as it does on the leaderboard. */
-              <ul className="-mx-5 mt-3 flex flex-col pt-1 pb-8">
+                 row's press area runs edge to edge. */
+              <ul className="-mx-5 mt-3 flex flex-col gap-3 pt-1 pb-8">
                 {games.map((entry) => (
                   <li key={entry.gameId}>
                     <MatchRow entry={entry} onSelect={setSelected} />
@@ -66,8 +80,6 @@ export function HistoryClient() {
         )}
       </div>
 
-      <BottomNav />
-
       {selected && sessionId && (
         <GameDetailPopup entry={selected} sessionId={sessionId} onClose={() => setSelected(null)} />
       )}
@@ -76,24 +88,19 @@ export function HistoryClient() {
 }
 
 /**
- * Title plus the two standing numbers. The league badge stands in for the star
- * glyph, the way {@link StarsPill} does — it reads as "this is the ladder
- * number" and says which band the number sits in.
+ * Title plus the player's medal count.
  */
 function Headline({ wins }: { wins: number }) {
   const { data: account } = useAccount();
-  const league = account?.league ?? "bronze";
 
   return (
     <header className="pt-8">
       <h1 className="font-display tv-screen-title">Your matches</h1>
 
       <div className="mt-2 flex items-center gap-4 tv-label text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
-          <LeagueIcon league={league} className="h-6 w-7" />
-          <span className={cn("tabular-nums", LEAGUE_TEXT_CLASS[league])}>
-            {account?.stars ?? 0}
-          </span>
+        <span className="inline-flex items-center gap-1.5 text-mint">
+          <StarIcon className="h-6 w-6" />
+          <span className="tabular-nums">{account?.stars ?? 0}</span>
         </span>
       </div>
     </header>

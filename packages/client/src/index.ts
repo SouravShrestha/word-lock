@@ -5,9 +5,9 @@ export {
   type ApiConfig,
   claimAccountFn,
   checkUsernameFn,
+  reviewLoginFn,
   deleteAccountFn,
   fetchAccountFn,
-  fetchLeaderboardFn,
   setAvatarFn,
   setUsernameFn,
   createGameFn,
@@ -24,9 +24,6 @@ export {
   submitMoveFn,
   timeoutGameFn,
   type AccountSummary,
-  type LeaderboardEntry,
-  type LeaderboardStanding,
-  type LeaderboardView,
   type UsernameAvailability,
 } from "./api/index";
 
@@ -42,7 +39,6 @@ export type { AuthAdapter, AuthContextValue, EmailSignInOutcome } from "./auth/a
 
 export { QUERY_DEFAULTS, shouldRetry } from "./queries/retry";
 export { useAccount, useHasPlayableAccount } from "./queries/use-account";
-export { useLeaderboard } from "./queries/use-leaderboard";
 
 export { useMoveReview } from "./game/use-move-review";
 export type { MoveReview } from "./game/use-move-review";

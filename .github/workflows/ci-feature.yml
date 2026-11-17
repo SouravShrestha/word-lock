@@ -13,6 +13,9 @@ permissions:
   contents: read
 
 jobs:
+  db-test:
+    uses: ./.github/workflows/db-test.yml
+
   ci-feature:
     runs-on: ubuntu-latest
     environment: test
@@ -24,11 +27,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Restore dependencies
         run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
 
       - name: Typecheck
         run: npm run typecheck
@@ -36,34 +42,14 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # Falls back to next.config.ts's own "http://localhost:3000" when
-          # unset, same as before this was wired through — set
-          # NEXT_PUBLIC_SITE_URL as a repo/environment variable or secret
-          # (e.g. https://test.wordlock.cbsdev.me, matching wrangler.toml's
-          # [env.test] APP_HOSTNAME) so metadataBase, the sitemap and robots.txt
-          # stop inlining localhost into this environment's build.
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || vars.NEXT_PUBLIC_SITE_URL }}
-
       - name: Build for Cloudflare Workers (OpenNext)
         run: npx @opennextjs/cloudflare@latest build
         working-directory: apps/web
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # Unset falls back to localhost; match wrangler.toml's [env.test] APP_HOSTNAME.
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || vars.NEXT_PUBLIC_SITE_URL }}
 
       - name: Lint
         run: npm run lint
-
-      - name: Deploy to Cloudflare Workers TEST
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --env test
-          workingDirectory: apps/web

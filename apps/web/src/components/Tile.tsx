@@ -25,7 +25,7 @@ const getOwnerStyles = (owner: TileOwner, selected: boolean) => {
 const getLockedCircleFill = (owner: TileOwner) => {
   if (owner === 1) return "bg-p1 text-white";
   if (owner === 2) return "bg-p2 text-white";
-  return "bg-card/20";
+  return "bg-neutral-tile-deep";
 };
 
 export function Tile({
@@ -45,7 +45,7 @@ export function Tile({
       aria-pressed={selected}
       aria-label={`Letter ${letter}${locked ? ", locked" : ""}`}
       className={cn(
-        "tile-face relative aspect-square w-full text-[clamp(0.85rem,3.5vw,1.25rem)] border-r border-b border-border",
+        "tile-face relative aspect-square w-full text-[clamp(0.85rem,3.5vw,1.25rem)] border-r border-b border-border bg-clip-padding",
         getOwnerStyles(owner, selected),
         disabled && "cursor-default",
       )}

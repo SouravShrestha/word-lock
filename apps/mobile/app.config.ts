@@ -45,6 +45,7 @@ export default (): ExpoConfig => ({
     "expo-status-bar",
     "expo-web-browser",
     "expo-image",
+    "./plugins/withSceneDelegate",
   ],
   experiments: {
     typedRoutes: true,

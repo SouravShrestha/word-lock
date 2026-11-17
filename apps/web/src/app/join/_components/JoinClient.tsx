@@ -1,12 +1,12 @@
 "use client";
 import { useSession, joinGameFn } from "@word-lock/client";
 
-import { useState } from "react";
+import { roomCodeAfterPaste } from "@word-lock/core/game";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 
 import { BackButton } from "@/components/BackButton";
-import { SectionLabel } from "@/components/SectionLabel";
 import { RoomCodeKeyboard } from "@/components/ui/room-code-keyboard";
 
 const CODE_LENGTH = 5;
@@ -37,6 +37,18 @@ export function JoinClient() {
     if (joinMutation.error) joinMutation.reset();
   };
 
+  // Every paste lands here: Ctrl/Cmd+V anywhere, or long-press/right-click > Paste on the boxes.
+  // preventDefault stops the browser inserting the text into the overlay input itself.
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      setJoinCode(roomCodeAfterPaste(joinCode, e.clipboardData?.getData("text") ?? ""));
+      joinMutation.reset();
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  });
+
   const handleSubmit = () => {
     if (joinCode.length === CODE_LENGTH) {
       joinMutation.mutate();
@@ -50,9 +62,17 @@ export function JoinClient() {
       </div>
 
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col overflow-hidden px-5">
-        <SectionLabel className="mt-8">Join a room</SectionLabel>
-
-        <div className="mx-auto mb-8 mt-8 flex w-full max-w-[300px] gap-2.5">
+        <div className="relative mx-auto mb-8 mt-20 flex w-full max-w-[300px] gap-2.5">
+          {/* Invisible input so a long-press offers the system Paste menu. inputMode="none" keeps the
+              OS keyboard away; typing still goes through RoomCodeKeyboard, so onChange is a no-op. */}
+          <input
+            value={joinCode}
+            onChange={() => {}}
+            inputMode="none"
+            autoComplete="off"
+            aria-label="Room code"
+            className="absolute inset-0 z-10 w-full bg-transparent text-transparent caret-transparent outline-none"
+          />
           {Array.from({ length: CODE_LENGTH }, (_, i) => {
             const char = joinCode[i];
             const isCursor = i === joinCode.length;

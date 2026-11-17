@@ -8,20 +8,17 @@ import { toast } from "sonner";
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { HowToPlaySheet } from "@/components/HowToPlaySheet";
-import { LeagueGuideSheet } from "@/components/LeagueGuideSheet";
-import { SectionLabel } from "@/components/SectionLabel";
-import { Toggle } from "@/components/Toggle";
 import { CrossIcon } from "@/components/icons/CrossIcon";
-import { browserTimezone } from "@word-lock/core/account";
-import { PRIVACY_URL, TERMS_URL, siteUrl, supportMailto } from "@/lib/app-meta";
-import { AboutSheet } from "./AboutSheet";
-import { AcknowledgementsSheet } from "./AcknowledgementsSheet";
-import { SettingsField, SettingsGroup, SettingsRow } from "./SettingsRow";
-
-type Nested = "rules" | "leagues" | "about" | "credits" | null;
-
-const NESTED_Z = "z-[90]";
+import {
+  AppearanceIcon,
+  FeedbackIcon,
+  MailIcon,
+  ProfileIcon,
+  ShieldCheckIcon,
+} from "@word-lock/icons";
+import { PRIVACY_URL, SUPPORT_EMAIL, siteUrl, supportMailto } from "@/lib/app-meta";
+import { AppearanceSheet, THEME_LABELS } from "./AppearanceSheet";
+import { SettingsInfoRow, SettingsRow } from "./SettingsRow";
 
 function signInMethod(provider?: string): string {
   if (provider === "google") return "Google";
@@ -30,7 +27,7 @@ function signInMethod(provider?: string): string {
 }
 
 export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   const { ready, user, signOut } = useAuth();
   const { sessionId } = useSession();
   const { data: account } = useAccount();
@@ -38,7 +35,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
   const [mounted, setMounted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [nested, setNested] = useState<Nested>(null);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- the resolved theme is only known on the client
@@ -91,11 +88,10 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         onClose={onClose}
         label="Settings"
         showHandle={false}
-        dismissable={nested === null && !confirming}
+        dismissable={!confirming && !appearanceOpen}
         className="h-dvh max-h-dvh rounded-t-none pt-[calc(1.5rem+env(safe-area-inset-top))]"
       >
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg">Settings</h2>
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={onClose}
@@ -106,87 +102,53 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
           </button>
         </div>
 
-        <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-6">
-          <section className="flex flex-col gap-3">
-            <SectionLabel>Preferences</SectionLabel>
-            <SettingsGroup>
-              <div className="flex items-center gap-3.5 px-2 py-4">
-                <div className="min-w-0 flex-1">
-                  <p className="tv-body">Dark theme</p>
-                  <p className="mt-0.5 tv-caption text-muted-foreground">Easier on the eyes</p>
-                </div>
-                <Toggle
-                  label="Dark theme"
-                  checked={mounted && theme === "dark"}
-                  onChange={(next) => setTheme(next ? "dark" : "light")}
-                />
-              </div>
+        <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-2">
+          <SettingsInfoRow
+            icon={<ProfileIcon size={16} />}
+            label="Username"
+            value={account?.username ? `@${account.username}` : "…"}
+          />
+          <SettingsInfoRow
+            icon={<MailIcon size={16} />}
+            label="Email"
+            value={ready ? (user?.email ?? "Logged in") : "…"}
+          />
+          <SettingsRow
+            icon={<AppearanceIcon size={16} />}
+            label="Appearance"
+            value={mounted ? (THEME_LABELS[theme ?? "system"] ?? "System") : "…"}
+            onClick={() => setAppearanceOpen(true)}
+          />
 
-              <SettingsField
-                label="Time zone"
-                value={mounted ? (browserTimezone() ?? "UTC") : "…"}
-                hint="Taken from your device."
-              />
-            </SettingsGroup>
-          </section>
-
-          <section className="flex flex-col gap-3">
-            <SectionLabel>Account</SectionLabel>
-            <SettingsGroup>
-              <SettingsField
-                label="Username"
-                value={account?.username ? `@${account.username}` : "…"}
-                hint="Usernames are permanent and can't be changed."
-              />
-              <SettingsField label="Email" value={ready ? (user?.email ?? "Logged in") : "…"} />
-            </SettingsGroup>
-          </section>
-
-          <section className="flex flex-col gap-3">
-            <SectionLabel>Guides</SectionLabel>
-            <SettingsGroup>
-              <SettingsRow label="How to play" onClick={() => setNested("rules")} />
-              <SettingsRow label="League tiers" onClick={() => setNested("leagues")} />
-            </SettingsGroup>
-          </section>
-
-          <section className="flex flex-col gap-3">
-            <SectionLabel>Support</SectionLabel>
-            <SettingsGroup>
-              <SettingsRow label="About" onClick={() => setNested("about")} />
-              {PRIVACY_URL ? <SettingsRow label="Privacy policy" href={PRIVACY_URL} /> : null}
-              {TERMS_URL ? <SettingsRow label="Terms of service" href={TERMS_URL} /> : null}
-              <SettingsRow label="Email us" href={supportMailto()} />
-              <SettingsRow label="Acknowledgements" onClick={() => setNested("credits")} />
-            </SettingsGroup>
-          </section>
+          {PRIVACY_URL ? (
+            <SettingsRow
+              icon={<ShieldCheckIcon size={18} />}
+              label="Privacy policy"
+              href={PRIVACY_URL}
+            />
+          ) : null}
+          <SettingsRow
+            icon={<FeedbackIcon size={18} />}
+            label="Email us"
+            value={SUPPORT_EMAIL}
+            href={supportMailto()}
+          />
 
           <button
             type="button"
             onClick={() => setConfirming(true)}
             disabled={busy || !ready}
-            className="soft-btn btn-surface-2 w-full py-3 tv-body tracking-wide disabled:opacity-60"
+            className="press mt-8 w-full rounded-2xl border border-border py-4 text-base disabled:opacity-60"
           >
             {busy ? "Logging out" : "Log out"}
           </button>
         </div>
       </BottomSheet>
 
-      <HowToPlaySheet
-        open={nested === "rules"}
-        onClose={() => setNested(null)}
-        zClassName={NESTED_Z}
-      />
-      <LeagueGuideSheet
-        open={nested === "leagues"}
-        onClose={() => setNested(null)}
-        zClassName={NESTED_Z}
-      />
-      <AboutSheet open={nested === "about"} onClose={() => setNested(null)} zClassName={NESTED_Z} />
-      <AcknowledgementsSheet
-        open={nested === "credits"}
-        onClose={() => setNested(null)}
-        zClassName={NESTED_Z}
+      <AppearanceSheet
+        open={appearanceOpen}
+        onClose={() => setAppearanceOpen(false)}
+        zClassName="z-[90]"
       />
 
       <ConfirmDialog
@@ -197,7 +159,7 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
           <>
             An account is needed to play, so you&apos;ll be locked out until you log back in.
             <br />
-            Your stars, streak and match history are kept safe on your account.
+            Your medals, streak and match history are kept safe on your account.
           </>
         }
         confirmLabel="Log out"

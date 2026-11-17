@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { copyText } from "@/lib/copy-text";
 import { Check, Copy } from "@/components/icons";
 import { InviteIcon } from "@/components/icons/InviteIcon";
 
@@ -8,9 +9,11 @@ export function InviteFriends({ shareUrl, roomCode }: { shareUrl: string; roomCo
   const [copied, setCopied] = useState<"link" | "code" | null>(null);
 
   const copy = (what: "link" | "code") => {
-    navigator.clipboard?.writeText(what === "link" ? shareUrl : roomCode);
-    setCopied(what);
-    setTimeout(() => setCopied(null), 2000);
+    copyText(what === "link" ? shareUrl : roomCode).then((ok) => {
+      if (!ok) return;
+      setCopied(what);
+      setTimeout(() => setCopied(null), 2000);
+    });
   };
 
   const message = `Join my Word lock game: ${shareUrl}`;

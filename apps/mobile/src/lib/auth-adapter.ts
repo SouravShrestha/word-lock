@@ -1,7 +1,7 @@
 import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 
-import type { AuthAdapter, EmailSignInOutcome } from "@word-lock/client";
+import { reviewLoginFn, type AuthAdapter, type EmailSignInOutcome } from "@word-lock/client";
 
 import { supabase } from "@/lib/supabase";
 
@@ -68,6 +68,14 @@ export const nativeAuthAdapter: AuthAdapter = {
 
   verifyEmailCode: async (email: string, code: string): Promise<void> => {
     const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
-    if (error) throw new Error(error.message);
+    if (!error) return;
+    // Store-review account: the server knows its fixed code, the app does not.
+    const review = await reviewLoginFn({ email, code }).catch(() => null);
+    if (!review) throw new Error(error.message);
+    const { error: reviewError } = await supabase.auth.verifyOtp({
+      token_hash: review.tokenHash,
+      type: "email",
+    });
+    if (reviewError) throw new Error(reviewError.message);
   },
 };

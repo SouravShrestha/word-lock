@@ -1,16 +1,11 @@
 import { createGameFn, useSession } from "@word-lock/client";
 import { TIME_CONTROLS, type TimeControl } from "@word-lock/core/game";
-import {
-  BulletIcon,
-  ClockIcon,
-  CrossIcon,
-  LightningIcon,
-  SunFullIcon,
-} from "@word-lock/icons/native";
+import { CrossIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 import { useMutation } from "@tanstack/react-query";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 
 import { BottomSheet } from "@/components/BottomSheet";
@@ -20,22 +15,11 @@ import { Text, textClass } from "@/components/text";
 import { toast } from "@/components/Toast";
 import { useTheme } from "@/theme/ThemeProvider";
 
-const BANK = TIME_CONTROLS.filter((c) => c.group === "bank");
-const DAILY = TIME_CONTROLS.filter((c) => c.group === "daily");
+import MODE_5M from "../../assets/christmas/modes/mode-5m.webp";
+import MODE_10M from "../../assets/christmas/modes/mode-10m.webp";
+import MODE_15M from "../../assets/christmas/modes/mode-15m.webp";
 
-// Placeholder artwork until the modes get icons of their own.
-function iconFor(id: TimeControl, color: string): ReactNode {
-  switch (id) {
-    case "10m":
-      return <BulletIcon size={24} />;
-    case "30m":
-      return <LightningIcon size={24} />;
-    case "60m":
-      return <ClockIcon size={24} />;
-    case "daily":
-      return <SunFullIcon size={20} />;
-  }
-}
+const ICONS: Record<TimeControl, number> = { "5m": MODE_5M, "10m": MODE_10M, "15m": MODE_15M };
 
 /**
  * Native counterpart of `apps/web`'s `NewGameSheet.tsx`: every "New Game"
@@ -76,14 +60,13 @@ export function NewGameSheet({
 
   return (
     <BottomSheet open={open} onClose={onClose} label="New game" scrollable={false}>
-      <View className="flex-row items-center justify-between gap-4">
-        <Text variant="sheetTitle">Start a game</Text>
+      <View className="flex-row justify-end">
         <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
           <CrossIcon size={14} color="#ffffff" />
         </IconButton>
       </View>
-      <View className="mt-8 flex-row gap-3">
-        {BANK.map((c) => (
+      <View className="mt-10 flex-row gap-3">
+        {TIME_CONTROLS.map((c) => (
           <View key={c.id} className="flex-1">
             <Button
               variant={selected === c.id ? "sky" : "surface"}
@@ -91,8 +74,12 @@ export function NewGameSheet({
               accessibilityState={{ selected: selected === c.id }}
               onPress={() => setSelected(c.id)}
             >
-              <View className="items-center gap-2 py-1.5">
-                {iconFor(c.id, labelColor(c.id))}
+              <View className="items-center gap-3 py-4">
+                <Image
+                  source={ICONS[c.id]}
+                  contentFit="contain"
+                  style={{ width: 28, height: 28 }}
+                />
                 {label(c.id, c.label)}
               </View>
             </Button>
@@ -100,21 +87,7 @@ export function NewGameSheet({
         ))}
       </View>
 
-      {DAILY.map((c) => (
-        <View key={c.id} className="mt-3">
-          <Button
-            variant={selected === c.id ? "sky" : "surface"}
-            size="sm"
-            accessibilityState={{ selected: selected === c.id }}
-            onPress={() => setSelected(c.id)}
-            icon={iconFor(c.id, labelColor(c.id))}
-          >
-            <View className="py-1.5">{label(c.id, c.label)}</View>
-          </Button>
-        </View>
-      ))}
-
-      <View className="mt-8">
+      <View className="mt-10">
         <Button
           variant="mint"
           size="sheet"
@@ -123,7 +96,7 @@ export function NewGameSheet({
           loadingText="Creating"
           onPress={() => createMutation.mutate()}
         >
-          Create room
+          Start game
         </Button>
       </View>
     </BottomSheet>

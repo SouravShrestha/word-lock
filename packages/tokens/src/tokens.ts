@@ -20,7 +20,7 @@ export interface TokenGroup {
   tokens: Token[];
 }
 
-export const RADIUS = "0.6rem";
+export const RADIUS = "1rem";
 
 export const TOKEN_GROUPS: TokenGroup[] = [
   {
@@ -32,26 +32,29 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: "card-foreground", value: { light: "oklch(0.14 0 0)", dark: "#f2f5f7" } },
       { name: "popover", value: { light: "oklch(0.98 0.015 95)", dark: "#3e4852" } },
       { name: "popover-foreground", value: { light: "oklch(0.14 0 0)", dark: "#f2f5f7" } },
-      { name: "primary", value: { light: "oklch(0.9 0.19 100)", dark: "oklch(0.88 0.19 100)" } },
+      { name: "primary", value: "#FFC400" },
       { name: "primary-foreground", value: { light: "oklch(0.14 0 0)", dark: "oklch(0 0 0)" } },
       { name: "secondary", value: { light: "oklch(0.93 0.02 95)", dark: "#2f3740" } },
       { name: "secondary-foreground", value: { light: "oklch(0.14 0 0)", dark: "#f2f5f7" } },
       { name: "muted", value: { light: "oklch(0.93 0.02 95)", dark: "#2f3740" } },
       { name: "muted-foreground", value: { light: "oklch(0.45 0.01 95)", dark: "#8793a0" } },
-      { name: "accent", value: { light: "oklch(0.82 0.15 195)", dark: "oklch(0.78 0.15 195)" } },
+      { name: "accent", value: "#FF7A00" },
       { name: "accent-foreground", value: { light: "oklch(0.14 0 0)", dark: "oklch(0 0 0)" } },
-      { name: "destructive", value: { light: "oklch(0.6 0.24 27)", dark: "oklch(0.62 0.24 27)" } },
+      { name: "destructive", value: "#FF3A1A" },
       {
         name: "destructive-foreground",
         value: { light: "oklch(1 0 0)", dark: "oklch(0.98 0 0)" },
       },
       { name: "border", value: { light: "rgb(15 20 25 / 12%)", dark: "#37464f" } },
-      { name: "nav-active", value: { light: "#ddf4ff", dark: "#202f36" } },
-      { name: "nav-active-border", value: { light: "#84d8ff", dark: "#3f85a7" } },
+      {
+        name: "nav-active",
+        value: { light: "rgb(139 30 255 / 12%)", dark: "rgb(139 30 255 / 22%)" },
+      },
+      { name: "nav-active-border", value: "#8B1EFF" },
       { name: "input", value: { light: "rgb(15 20 25 / 12%)", dark: "#37464f" } },
       {
         name: "ring",
-        value: "#29a8f0",
+        value: "#8B1EFF",
         note: "Theme-invariant. Light and dark both declared this, identically.",
       },
     ],
@@ -59,17 +62,18 @@ export const TOKEN_GROUPS: TokenGroup[] = [
   {
     heading: "Board and player colours.",
     tokens: [
-      { name: "p1", value: { light: "oklch(0.66 0.25 20)", dark: "oklch(0.68 0.22 20)" } },
-      { name: "p1-deep", value: { light: "oklch(0.56 0.25 20)", dark: "oklch(0.58 0.22 20)" } },
-      { name: "p1-soft", value: { light: "oklch(0.93 0.05 20)", dark: "oklch(0.22 0.05 20)" } },
-      { name: "p2", value: { light: "oklch(0.65 0.19 255)", dark: "oklch(0.68 0.17 255)" } },
-      { name: "p2-deep", value: { light: "oklch(0.55 0.19 255)", dark: "oklch(0.58 0.17 255)" } },
-      { name: "p2-soft", value: { light: "oklch(0.93 0.05 255)", dark: "oklch(0.22 0.05 255)" } },
+      { name: "p1", value: "#E40049" },
+      { name: "p1-deep", value: "#E40049" },
+      { name: "p1-soft", value: { light: "#FFBFD2", dark: "#8A0A36" } },
+      { name: "p2", value: { light: "#1F7BFF", dark: "#3D8DFF" } },
+      { name: "p2-deep", value: { light: "#0057D9", dark: "#2F78F0" } },
+      { name: "p2-soft", value: { light: "#BFD8FF", dark: "#0F4396" } },
       { name: "neutral-tile", value: { light: "oklch(0.98 0.015 95)", dark: "#3e4852" } },
       { name: "neutral-tile-deep", value: { light: "oklch(0.94 0.025 95)", dark: "#2f3740" } },
-      { name: "sun", value: "oklch(0.9 0.19 100)", note: "Theme-invariant." },
-      { name: "sun-deep", value: "oklch(0.82 0.19 100)", note: "Theme-invariant." },
-      { name: "leaf", value: { light: "oklch(0.8 0.21 145)", dark: "oklch(0.78 0.2 145)" } },
+      { name: "sun", value: "#FFC400", note: "Theme-invariant." },
+      { name: "sun-deep", value: "#FFA600", note: "Theme-invariant." },
+      { name: "leaf", value: "#58CC02", note: "Theme-invariant green for a played streak day." },
+      { name: "leaf-deep", value: "#3F9A00", note: "Theme-invariant. Today ring on a played day." },
       {
         name: "tile-text",
         value: { light: "oklch(1 0 0)", dark: { ref: "background" } },
@@ -82,16 +86,21 @@ export const TOKEN_GROUPS: TokenGroup[] = [
     tokens: [
       { name: "surface", value: { light: "oklch(0.98 0.015 95)", dark: "#3e4852" } },
       { name: "surface-2", value: { light: "oklch(0.94 0.025 95)", dark: "#4a5560" } },
-      { name: "sky", value: "#29a8f0", note: "Theme-invariant." },
-      { name: "blush", value: "#ff86d0", note: "Theme-invariant." },
-      { name: "mint", value: "#17c98a", note: "Theme-invariant." },
-      { name: "aqua", value: "#55d4e8", note: "Theme-invariant." },
-      { name: "grape", value: "#ff6fd8", note: "Theme-invariant." },
-      { name: "streak", value: "#FC9502", note: "Theme-invariant streak color." },
+      { name: "sky", value: "#8B1EFF", note: "Theme-invariant." },
+      { name: "blush", value: "#8B1EFF", note: "Theme-invariant." },
+      { name: "mint", value: "#FF7A00", note: "Theme-invariant." },
+      { name: "aqua", value: "#8B1EFF", note: "Theme-invariant." },
+      { name: "grape", value: "#8B1EFF", note: "Theme-invariant." },
+      { name: "streak", value: "#FF7A00", note: "Theme-invariant streak color." },
       {
         name: "freeze",
-        value: "#8fd3fe",
+        value: "#1CB0F6",
         note: "Theme-invariant ice blue for a day a Streak Freeze covered.",
+      },
+      {
+        name: "freeze-deep",
+        value: "#0E86C2",
+        note: "Theme-invariant. Today ring on a frozen day.",
       },
       {
         name: "on-accent",
@@ -115,15 +124,15 @@ export const TOKEN_GROUPS: TokenGroup[] = [
     heading:
       'Solid "lip" colours painted under each button fill by the soft-btn utility. Not exposed to Tailwind as colours — consumed directly as var(--depth-*).',
     tokens: [
-      { name: "depth-sky", value: "#3b6fe8" },
-      { name: "depth-blush", value: "#cc6ba6" },
-      { name: "depth-sun", value: "#e0a600" },
-      { name: "depth-mint", value: "#0f9e6b" },
-      { name: "depth-aqua", value: "#2aa8bf" },
-      { name: "depth-grape", value: "#d93fae" },
+      { name: "depth-sky", value: "#4B008B" },
+      { name: "depth-blush", value: "#4B008B" },
+      { name: "depth-sun", value: "#FFA600" },
+      { name: "depth-mint", value: "#FF3A1A" },
+      { name: "depth-aqua", value: "#4B008B" },
+      { name: "depth-grape", value: "#4B008B" },
       { name: "depth-surface", value: { light: "#d4d4d4", dark: "#2a3138" } },
       { name: "depth-surface-2", value: { light: "#c2c2c2", dark: "#333c45" } },
-      { name: "depth-danger", value: "oklch(0.45 0.2 27)" },
+      { name: "depth-danger", value: "#E40049" },
     ],
   },
 ];

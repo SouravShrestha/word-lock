@@ -42,7 +42,7 @@ export function ProfileIdentity({
             className="absolute -bottom-0.5 -right-0.5 h-6 w-6 items-center justify-center rounded-full"
             style={{ backgroundColor: palette.sky }}
           >
-            <PencilIcon size={12} color={palette.background} />
+            <PencilIcon size={12} color="#fff" />
           </View>
         </View>
       </Pressable>

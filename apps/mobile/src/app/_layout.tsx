@@ -69,6 +69,8 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="game/[code]" />
             <Stack.Screen name="join" />
+            <Stack.Screen name="profile" options={{ animation: "slide_from_right" }} />
+            <Stack.Screen name="history" options={{ animation: "slide_from_right" }} />
             <Stack.Screen name="how-to-play" />
             <Stack.Screen name="legal/privacy" />
           </Stack>

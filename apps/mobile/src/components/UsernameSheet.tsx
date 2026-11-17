@@ -74,7 +74,6 @@ export function UsernameSheet() {
     mutationFn: () => setUsernameFn({ sessionId: sessionId!, username: normalized }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["account"] });
-      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
     },
   });
 
@@ -109,7 +108,7 @@ export function UsernameSheet() {
     >
       <View className="items-center gap-2">
         <SmileyFaceIcon size={56} />
-        <Text variant="heading" className="mt-5 leading-tight">
+        <Text variant="heading" className="mt-5 leading-tight text-center">
           What shall we call you?
         </Text>
         <Text variant="body" className="leading-relaxed">

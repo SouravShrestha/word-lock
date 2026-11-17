@@ -37,7 +37,7 @@ export default function TermsScreen() {
           <Section title="Your conduct">
             <List
               items={[
-                "Play fairly — no automation, scripting, or exploiting bugs to affect your stars, league or another player's game.",
+                "Play fairly — no automation, scripting, or exploiting bugs to affect your medals or another player's game.",
                 "Choose a username that isn't impersonating someone else, isn't offensive, and doesn't infringe anyone's rights.",
                 "Don't attempt to disrupt the service for other players, including other accounts on a shared device.",
               ]}
@@ -54,8 +54,8 @@ export default function TermsScreen() {
 
           <Section title="No warranty">
             <P>
-              Word lock is provided as-is. Stars, leagues and match history are for the game itself
-              — they carry no monetary value and aren&apos;t redeemable for anything.
+              Word lock is provided as-is. Medals and match history are for the game itself — they
+              carry no monetary value and aren&apos;t redeemable for anything.
             </P>
           </Section>
 

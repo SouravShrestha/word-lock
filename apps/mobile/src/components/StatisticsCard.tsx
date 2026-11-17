@@ -48,7 +48,9 @@ export function StatisticsCard({
       <View className="flex-row items-baseline justify-between gap-3 px-4 pt-2">
         <View className="flex-row items-baseline gap-2">
           <Text variant="stat">{stars}</Text>
-          <TrendLabel delta={delta} />
+          <View style={{ transform: [{ translateY: -4 }] }}>
+            <TrendLabel delta={delta} />
+          </View>
         </View>
         <Text variant="caption">Peak {account?.peakStars ?? stars}</Text>
       </View>
@@ -87,7 +89,7 @@ export function StatisticsCard({
         ) : (
           <View className="h-56 items-center justify-center px-6">
             <Text variant="body" className="text-center">
-              Play a few ranked games and your star history will show up here.
+              Play a few ranked games and your medal history will show up here.
             </Text>
           </View>
         )}

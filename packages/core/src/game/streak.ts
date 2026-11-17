@@ -127,20 +127,21 @@ export function streakHeadline(state: StreakView, today: string): string {
   }
 }
 
-/** Footer copy for the streak sheet, identical on both platforms. */
+/** Footer copy for the streak sheet, identical on both platforms: one sentence per line. */
 export function streakMessage(state: StreakView, today: string): string {
+  return streakSentences(state, today).replace(/([.!]) /g, "$1\n");
+}
+
+function streakSentences(state: StreakView, today: string): string {
   const days = `${state.play_streak}-day streak`;
   const next = state.play_streak + 1;
-  const fresh = "No worries, play a game today and start a fresh one!";
   switch (streakStatus(state, today)) {
     case "none":
-      return "Every streak starts with one game. Play today and light the fire!";
+      return "Your streak is hungry. Feed it a game today.";
     case "lost":
-      return state.last_played_on !== null && daysBetween(state.last_played_on, today) === 2
-        ? `Your ${days} has ended. You missed yesterday while your Streak Freeze was still recharging. ${fresh}`
-        : `Your ${days} has ended. You missed more than one day, and a Streak Freeze only covers one. ${fresh}`;
+      return `Your ${days} has ended. No worries, play a game today and start a fresh one!`;
     case "played-today":
-      return `Nice! Today is in the bag. See you tomorrow to make it ${next}!`;
+      return "Boom, today’s done! Come back tomorrow to continue your streak";
     case "frozen":
       return `Brrr! A Streak Freeze saved you yesterday. Play a game today to thaw your ${days} and keep it rolling!`;
     case "active":

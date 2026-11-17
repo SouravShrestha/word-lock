@@ -2,16 +2,9 @@
 
 import { CrossIcon } from "@/components/icons/CrossIcon";
 import { TickIcon } from "@/components/icons/TickIcon";
-import { StreakIcon } from "@/components/icons/StreakIcon";
 import { BottomSheet } from "@/components/BottomSheet";
 import { browserTimezone } from "@word-lock/core/account";
-import {
-  freezeLabel,
-  localDate,
-  streakHeadline,
-  streakMessage,
-  streakWeek,
-} from "@word-lock/core/game";
+import { currentStreak, localDate, streakMessage, streakWeek } from "@word-lock/core/game";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,13 +35,11 @@ export function StreakSheet({
     last_freeze_on: lastFreezeOn,
   };
   const days = streakWeek(state, today);
-  const freeze = freezeLabel(state, today);
   const footer = streakMessage(state, today);
 
   return (
     <BottomSheet open={open} onClose={onClose} label="Streak">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg">Streak</h2>
+      <div className="flex items-center justify-end gap-4">
         <button
           type="button"
           onClick={onClose}
@@ -59,12 +50,16 @@ export function StreakSheet({
         </button>
       </div>
 
-      <div className="mt-8 flex flex-col items-center">
-        <StreakIcon className="h-28 w-28 pl-5" />
+      <div className="mt-8 flex items-center justify-between px-6">
+        <div className="font-display font-bold leading-none text-streak">
+          <p className="text-6xl">{String(currentStreak(state, today)).padStart(2, "0")}</p>
+          <p className="mt-2 text-lg">day streak!</p>
+        </div>
+        <img src="/christmas/streak.png" alt="" className="h-24 w-[83px] object-contain" />
+      </div>
 
-        <p className="mt-6 text-2xl font-bold">{streakHeadline(state, today)}</p>
-
-        <ol className="mt-6 flex items-end gap-2">
+      <div className="mt-12 flex flex-col items-center">
+        <ol className="flex items-end gap-2">
           {days.map((day) => (
             <li key={day.date} className="flex flex-col items-center gap-1.5">
               <span
@@ -83,7 +78,13 @@ export function StreakSheet({
                   "flex h-9 w-9 items-center justify-center rounded-md",
                   day.played ? "bg-leaf text-white" : day.frozen ? "bg-freeze" : "bg-surface-2",
                   // reads as "this is the one you can still fill in".
-                  day.isToday && "ring-2 ring-streak ring-offset-2 ring-offset-background",
+                  day.isToday && "ring-2 ring-offset-2 ring-offset-background",
+                  day.isToday &&
+                    (day.played
+                      ? "ring-leaf-deep"
+                      : day.frozen
+                        ? "ring-freeze-deep"
+                        : "ring-streak"),
                 )}
               >
                 {day.played && <TickIcon className="h-4 w-4" />}
@@ -92,13 +93,9 @@ export function StreakSheet({
           ))}
         </ol>
 
-        {freeze && (
-          <p className="mt-4 rounded-full bg-freeze px-3 py-1 tv-caption font-bold text-on-accent">
-            {freeze}
-          </p>
-        )}
-
-        <p className="mt-8 text-center tv-body leading-relaxed text-muted-foreground">{footer}</p>
+        <p className="mt-8 w-full whitespace-pre-line pr-6 text-right tv-body leading-relaxed text-muted-foreground">
+          {footer}
+        </p>
       </div>
     </BottomSheet>
   );

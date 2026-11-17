@@ -2,7 +2,6 @@ import { Text } from "@/components/text";
 import { useState } from "react";
 import { Pressable, Share, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { timeControlFor } from "@word-lock/core/game";
 import { CheckIcon, ClockIcon, CopyIcon, InviteIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 
@@ -99,14 +98,6 @@ export function WaitingLobby({
             <Text variant="roomCode">#{roomCode}</Text>
           </View>
         )}
-
-        {/* The joiner sees the pace before the host starts, not after. */}
-        <View className="-mt-6 flex-row items-center gap-1.5">
-          <Text variant="body">
-            This is a <Text className="font-bold">{timeControlFor(game.timeControl).label} </Text>
-            game
-          </Text>
-        </View>
 
         <View className="mt-0 mb-3 w-full max-w-xs flex-row items-start justify-between px-4">
           <PlayerSlot name={game.players.one?.name ?? "You"}>

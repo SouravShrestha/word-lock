@@ -6,18 +6,20 @@ import { useTheme } from "next-themes";
 import { BottomSheet } from "@/components/BottomSheet";
 import { CrossIcon } from "@/components/icons/CrossIcon";
 import { HowToPlaySheet } from "@/components/HowToPlaySheet";
-import { Toggle } from "@/components/Toggle";
 import { ChevronRightIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { AppearanceSheet, THEME_LABELS } from "@/app/profile/_components/AppearanceSheet";
 
 function MenuRow({
   label,
   hint,
+  value,
   onClick,
   className,
 }: {
   label: string;
   hint?: string;
+  value?: string;
   onClick: () => void;
   className?: string;
 }) {
@@ -33,6 +35,11 @@ function MenuRow({
           <span className="mt-0.5 block tv-caption text-muted-foreground">{hint}</span>
         ) : null}
       </span>
+      {value ? (
+        <span className="max-w-[60%] truncate text-sm font-normal text-muted-foreground">
+          {value}
+        </span>
+      ) : null}
       <ChevronRightIcon aria-hidden size={16} className="shrink-0 opacity-60" strokeWidth={2.5} />
     </button>
   );
@@ -49,8 +56,8 @@ export function GameMenuSheet({
   canForfeit: boolean;
   onForfeit: () => void;
 }) {
-  const [showRules, setShowRules] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const [nested, setNested] = useState<"rules" | "appearance" | null>(null);
+  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -64,11 +71,10 @@ export function GameMenuSheet({
         open={open}
         onClose={onClose}
         label="Game menu"
-        dismissable={!showRules}
-        showHandle={!showRules}
+        dismissable={!nested}
+        showHandle={!nested}
       >
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg">Game menu</h2>
+        <div className="flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}
@@ -80,25 +86,16 @@ export function GameMenuSheet({
         </div>
 
         <div className="mt-6 flex flex-col">
-          <div className="flex items-center gap-3.5 px-2 py-4">
-            <span className="min-w-0 flex-1">
-              <span className="block tv-body tracking-wide">Dark theme</span>
-              <span className="mt-0.5 block tv-caption text-muted-foreground">
-                Easier on the eyes
-              </span>
-            </span>
-            <Toggle
-              label="Dark theme"
-              checked={mounted && theme === "dark"}
-              onChange={(next) => setTheme(next ? "dark" : "light")}
-            />
-          </div>
-
-          <MenuRow label="How to play" onClick={() => setShowRules(true)} />
+          <MenuRow
+            label="Appearance"
+            value={mounted ? (THEME_LABELS[theme ?? "system"] ?? "System") : "…"}
+            onClick={() => setNested("appearance")}
+          />
+          <MenuRow label="How to play" onClick={() => setNested("rules")} />
           {canForfeit && (
             <MenuRow
               label="Quit game"
-              hint="Your opponent wins and you lose stars."
+              hint="Your opponent wins and you lose medals."
               onClick={() => {
                 onClose();
                 onForfeit();
@@ -109,7 +106,16 @@ export function GameMenuSheet({
         </div>
       </BottomSheet>
 
-      <HowToPlaySheet open={showRules} onClose={() => setShowRules(false)} zClassName="z-[90]" />
+      <HowToPlaySheet
+        open={nested === "rules"}
+        onClose={() => setNested(null)}
+        zClassName="z-[90]"
+      />
+      <AppearanceSheet
+        open={nested === "appearance"}
+        onClose={() => setNested(null)}
+        zClassName="z-[90]"
+      />
     </>
   );
 }

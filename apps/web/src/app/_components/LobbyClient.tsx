@@ -1,213 +1,134 @@
 "use client";
-import { useSession, fetchLobby, timeoutGameFn, SWEEP_DELAY_MS } from "@word-lock/client";
+import { useAccount, useSession } from "@word-lock/client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 
-import { HowToPlay } from "@/components/HowToPlay";
+import { Avatar } from "@/components/Avatar";
+import { HowToPlaySheet } from "@/components/HowToPlaySheet";
 import { NewGameSheet } from "@/components/NewGameSheet";
-import { HomeBackdrop } from "@/components/HomeBackdrop";
-import { Wordmark } from "@/components/Wordmark";
-import { SectionLabel } from "@/components/SectionLabel";
-import { PlayIcon } from "@/components/icons/PlayIcon";
-import { HeartIcon } from "@/components/icons/HeartIcon";
-import { BottomNav, NAV_SHELL, NAV_CONTENT_INSET } from "@/components/BottomNav";
-import { StreakPill, StarsPill } from "@/components/StatPills";
-import { supabase } from "@/integrations/supabase/client";
-import { timeLeftLabel } from "@word-lock/core/game";
+import { StreakBadge, MedalBadge } from "@/components/StatPills";
+import { cn } from "@/lib/utils";
+
+/*
+ * Flat button with a hard lip in a darker shade of its own fill (set per button
+ * via `--lip`). Pressing sinks the face into the lip, like `soft-btn`.
+ */
+const CHUNKY =
+  "flex items-center justify-center font-display font-semibold text-[#1A1110] transition-[transform,box-shadow] duration-75 disabled:cursor-not-allowed disabled:opacity-45";
+const CHUNKY_MD =
+  "h-[48px] flex-1 rounded-[20px] text-[17px] shadow-[0_5px_0_0_var(--lip)] active:enabled:translate-y-1 active:enabled:shadow-[0_1px_0_0_var(--lip)]";
 
 export function LobbyClient() {
-  const { sessionId, ready } = useSession();
-  const queryClient = useQueryClient();
+  const { ready } = useSession();
+  const { data: account } = useAccount();
   const [newGameOpen, setNewGameOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
-  const { data } = useQuery({
-    queryKey: ["lobby", sessionId],
-    enabled: ready,
-    queryFn: () => fetchLobby({ sessionId: sessionId! }),
-  });
-
+  // Lock document scroll while home is mounted. Home is deliberately not `fixed`: iOS Safari
+  // tints the status bar from a full-screen fixed layer and never re-samples it on a theme change.
   useEffect(() => {
-    if (ready) queryClient.invalidateQueries({ queryKey: ["lobby"] });
-  }, [ready, queryClient]);
-
-  useEffect(() => {
-    if (!ready) return;
-
-    const channel = supabase
-      .channel("lobby-games")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "wl_games",
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["lobby", sessionId] });
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
+    const els = [document.documentElement, document.body];
+    els.forEach((e) => (e.style.overflow = "hidden"));
+    // overflow alone doesn't stop the rubber-band, so swallow any drag that isn't
+    // inside something that can actually scroll (e.g. a tall sheet's panel).
+    const block = (e: TouchEvent) => {
+      for (let n = e.target as HTMLElement | null; n && n !== document.body; n = n.parentElement) {
+        const oy = getComputedStyle(n).overflowY;
+        if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight) return;
+      }
+      e.preventDefault();
     };
-  }, [ready, queryClient, sessionId]);
-
-  const games = useMemo(() => data?.games ?? [], [data?.games]);
-  const activeGames = useMemo(() => games.filter((g: any) => g.status === "active"), [games]);
-
-  const hasGames = activeGames.length > 0;
+    document.addEventListener("touchmove", block, { passive: false });
+    return () => {
+      els.forEach((e) => (e.style.overflow = ""));
+      document.removeEventListener("touchmove", block);
+    };
+  }, []);
 
   return (
-    <main className={NAV_SHELL}>
-      <HomeBackdrop />
-
-      <div className="flex items-center justify-between px-6 pt-5">
-        <StreakPill />
-        <StarsPill />
+    <main className="relative mx-auto flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden">
+      <div className="flex items-start justify-between px-8 pt-[calc(1.25rem+env(safe-area-inset-top))]">
+        <div className="flex flex-col items-start gap-6">
+          <StreakBadge />
+          <MedalBadge />
+        </div>
+        <Link href="/profile" aria-label="Profile" className="rounded-full active:opacity-70">
+          <Avatar avatar={account?.avatar} className="h-12 w-12" />
+        </Link>
       </div>
 
-      <div
-        className={`flex flex-1 flex-col overflow-y-hidden pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-24 ${hasGames ? "mt-10" : ""}`}
-      >
-        <section
-          className={`flex flex-col items-center ${hasGames ? "pb-8 pt-4" : "flex-1 justify-center pb-8"}`}
+      <section className="flex flex-1 flex-col items-center justify-center pb-[calc(11rem+env(safe-area-inset-bottom))]">
+        <Link href="/" className="inline-flex" aria-label="Word-lock home">
+          {/* Light theme gets logo-dark, dark theme gets logo. The hidden one is lazy, so it only loads when its theme shows. */}
+          {/* eslint-disable @next/next/no-img-element */}
+          <img
+            src="/christmas/logo-dark.webp"
+            alt=""
+            width={600}
+            height={446}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            className="h-[145px] w-[195px] select-none object-contain dark:hidden"
+          />
+          <img
+            src="/christmas/logo.webp"
+            alt=""
+            width={600}
+            height={446}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            className="hidden h-[145px] w-[195px] select-none object-contain dark:block"
+          />
+          {/* eslint-enable @next/next/no-img-element */}
+        </Link>
+
+        <div className="mt-11 flex w-full max-w-sm flex-row gap-5 px-6">
+          <Chunky
+            onClick={() => setNewGameOpen(true)}
+            disabled={!ready}
+            className={cn(CHUNKY_MD, "bg-[#FFC400] [--lip:#FFA600]")}
+          >
+            New game
+          </Chunky>
+          <Link
+            href="/join"
+            className={cn(
+              CHUNKY,
+              CHUNKY_MD,
+              "bg-[#EBDFC0] [--lip:#C2B085] dark:bg-[#FBF6EC] dark:[--lip:#D8CDB4]",
+            )}
+          >
+            Join
+          </Link>
+        </div>
+      </section>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-end px-7 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-2">
+        <Chunky
+          onClick={() => setRulesOpen(true)}
+          className="pointer-events-auto h-10 rounded-[18px] bg-[#FFC400] px-5 text-sm [--lip:#FFA600] shadow-[0_3px_0_0_var(--lip)] active:enabled:translate-y-0.5 active:enabled:shadow-[0_1px_0_0_var(--lip)]"
         >
-          <Wordmark />
-
-          <div className="mt-16 flex w-full max-w-sm flex-row gap-4 px-5">
-            <button
-              type="button"
-              onClick={() => setNewGameOpen(true)}
-              disabled={!ready}
-              className="soft-btn btn-mint flex flex-1 items-center justify-center gap-2 px-4 py-3.5 tv-body-base"
-            >
-              <PlayIcon className="h-3 w-3" />
-              New Game
-            </button>
-            <Link
-              href="/join"
-              className="soft-btn btn-sky flex flex-1 items-center justify-center gap-2 px-4 py-3.5 tv-body-base"
-            >
-              <HeartIcon className="h-3 w-3" />
-              Join
-            </Link>
-          </div>
-        </section>
-
-        {hasGames && <GameList title="Continue your games" games={activeGames} />}
+          How to play?
+        </Chunky>
       </div>
 
-      <div
-        className={`pointer-events-none absolute inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 flex items-center justify-end px-6 pb-3.5 pt-2 lg:bottom-0 ${NAV_CONTENT_INSET}`}
-      >
-        <HowToPlay className="pointer-events-auto" />
-      </div>
-
-      <BottomNav />
+      <HowToPlaySheet open={rulesOpen} onClose={() => setRulesOpen(false)} />
       <NewGameSheet open={newGameOpen} onClose={() => setNewGameOpen(false)} />
     </main>
   );
 }
 
-function GameList({ title, games }: { title: string; games: any[] }) {
-  if (games.length === 0) return null;
-
-  return (
-    <section className="py-2">
-      <SectionLabel className="px-5">{title}</SectionLabel>
-      <ul className="no-scrollbar flex snap-x snap-mandatory overflow-x-scroll py-4 mt-2">
-        {games.map((game, idx) => (
-          <GameCard key={game.id} game={game} idx={idx} totalGames={games.length} />
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function GameCard({ game, idx, totalGames }: { game: any; idx: number; totalGames: number }) {
-  const [, setTick] = useState(0);
-
-  const { sessionId } = useSession();
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (game.status !== "active" || !game.turnDeadline) return;
-
-    const interval = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [game.status, game.turnDeadline]);
-
-  useEffect(() => {
-    if (game.status !== "active" || !game.turnDeadline) return;
-
-    const msLeft = new Date(game.turnDeadline).getTime() + SWEEP_DELAY_MS - Date.now();
-
-    const triggerSweep = () => {
-      if (!sessionId) return;
-      timeoutGameFn({ sessionId, roomCode: game.roomCode })
-        .then(() => queryClient.invalidateQueries({ queryKey: ["lobby"] }))
-        .catch(console.error);
-    };
-
-    if (msLeft <= 0) {
-      triggerSweep();
-      return;
-    }
-
-    const timer = setTimeout(triggerSweep, msLeft);
-    return () => clearTimeout(timer);
-  }, [game.turnDeadline, game.status, queryClient, sessionId, game.roomCode]);
-
-  const yours = game.viewerSlot;
-  const yourTurn =
-    game.currentTurnPlayerId && yours !== null
-      ? (yours === 1 ? game.players.one?.id : game.players.two?.id) === game.currentTurnPlayerId
-      : false;
-  const opponent = yours === 1 ? game.players.two : game.players.one;
-
-  return (
-    <li
-      className={`w-60 shrink-0 snap-start ${idx === 0 ? "pl-5" : "pl-2.5"} ${idx === totalGames - 1 ? "pr-5" : "pr-2.5"}`}
-    >
-      <Link
-        href={`/game/${game.roomCode}`}
-        className="soft-btn btn-surface flex h-full flex-col items-stretch justify-start gap-2 p-3.5 text-left"
-      >
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="truncate tv-label leading-tight">
-            <span className="mr-1 tv-caption leading-tight text-muted-foreground">vs</span>
-            {opponent?.name ?? "?"}
-          </p>
-          <p className="text-[0.7rem] font-semibold tracking-[0.12em] text-muted-foreground">
-            #{game.roomCode}
-          </p>
-        </div>
-
-        <p className="flex items-baseline font-display text-2xl font-semibold tracking-tight">
-          <span className="text-p1">{game.scores[1]}</span>
-          <span className="mx-1 text-xl font-medium text-muted-foreground">:</span>
-          <span className="text-p2">{game.scores[2]}</span>
-        </p>
-
-        <div className="mt-auto flex items-center justify-between gap-2">
-          <span
-            className={`text-[0.65rem] font-bold tracking-wide ${yourTurn ? "text-sun" : "text-muted-foreground"}`}
-          >
-            {yourTurn ? "Your turn" : "Their turn"}
-          </span>
-          {game.status === "active" && game.turnDeadline && (
-            <span className="text-[0.65rem] font-semibold tabular-nums text-muted-foreground">
-              {timeLeftLabel(game.turnDeadline)}
-            </span>
-          )}
-        </div>
-      </Link>
-    </li>
-  );
+function Chunky({
+  className,
+  ...props
+}: {
+  className: string;
+  children: ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return <button type="button" className={cn(CHUNKY, className)} {...props} />;
 }

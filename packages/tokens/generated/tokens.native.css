@@ -6,13 +6,13 @@
  */
 
 :root {
-  --radius-sm: 7.6px;
-  --radius-md: 9.6px;
-  --radius-lg: 11.6px;
-  --radius-xl: 13.6px;
-  --radius-2xl: 15.6px;
-  --radius-3xl: 17.6px;
-  --radius-4xl: 19.6px;
+  --radius-sm: 14px;
+  --radius-md: 16px;
+  --radius-lg: 18px;
+  --radius-xl: 20px;
+  --radius-2xl: 22px;
+  --radius-3xl: 24px;
+  --radius-4xl: 26px;
 
   /* Semantic surfaces and text. */
   --background: #fbf9ed;
@@ -21,37 +21,40 @@
   --card-foreground: #090909;
   --popover: #fbf9ed;
   --popover-foreground: #090909;
-  --primary: #fcdf00;
+  --primary: #ffc400;
   --primary-foreground: #090909;
   --secondary: #ece8d9;
   --secondary-foreground: #090909;
   --muted: #ece8d9;
   --muted-foreground: #57554f;
-  --accent: #00e1e2;
+  --accent: #ff7a00;
   --accent-foreground: #090909;
-  --destructive: #ee0f1f;
+  --destructive: #ff3a1a;
   --destructive-foreground: #ffffff;
   --border: rgba(15, 20, 25, 0.12);
-  --nav-active: #ddf4ff;
-  --nav-active-border: #84d8ff;
+  --nav-active: rgba(139, 30, 255, 0.12);
+  --nav-active-border: #8b1eff;
   --input: rgba(15, 20, 25, 0.12);
   /* Theme-invariant. Light and dark both declared this, identically. */
-  --ring: #29a8f0;
+  --ring: #8b1eff;
 
   /* Board and player colours. */
-  --p1: #ff254d;
-  --p1-deep: #e2002f;
-  --p1-soft: #ffdbda;
-  --p2: #2a8eff;
-  --p2-deep: #006edc;
-  --p2-soft: #d2eaff;
+  --p1: #e40049;
+  --p1-deep: #e40049;
+  --p1-soft: #ffbfd2;
+  --p2: #1f7bff;
+  --p2-deep: #0057d9;
+  --p2-soft: #bfd8ff;
   --neutral-tile: #fbf9ed;
   --neutral-tile-deep: #f0ebd9;
   /* Theme-invariant. */
-  --sun: #fcdf00;
+  --sun: #ffc400;
   /* Theme-invariant. */
-  --sun-deep: #e2c500;
-  --leaf: #50df5f;
+  --sun-deep: #ffa600;
+  /* Theme-invariant green for a played streak day. */
+  --leaf: #58cc02;
+  /* Theme-invariant. Today ring on a played day. */
+  --leaf-deep: #3f9a00;
   /* In dark mode, letters on an owned tile are the colour of the page. */
   --tile-text: #ffffff;
 
@@ -59,19 +62,21 @@
   --surface: #fbf9ed;
   --surface-2: #f0ebd9;
   /* Theme-invariant. */
-  --sky: #29a8f0;
+  --sky: #8b1eff;
   /* Theme-invariant. */
-  --blush: #ff86d0;
+  --blush: #8b1eff;
   /* Theme-invariant. */
-  --mint: #17c98a;
+  --mint: #ff7a00;
   /* Theme-invariant. */
-  --aqua: #55d4e8;
+  --aqua: #8b1eff;
   /* Theme-invariant. */
-  --grape: #ff6fd8;
+  --grape: #8b1eff;
   /* Theme-invariant streak color. */
-  --streak: #fc9502;
+  --streak: #ff7a00;
   /* Theme-invariant ice blue for a day a Streak Freeze covered. */
-  --freeze: #8fd3fe;
+  --freeze: #1cb0f6;
+  /* Theme-invariant. Today ring on a frozen day. */
+  --freeze-deep: #0e86c2;
   /* Theme-invariant. Light and dark both declared this, identically. */
   --on-accent: #0f1419;
   --hairline: rgba(15, 20, 25, 0.12);
@@ -93,15 +98,15 @@
    * Solid "lip" colours painted under each button fill by the soft-btn utility. Not exposed to
    * Tailwind as colours — consumed directly as var(--depth-*).
    */
-  --depth-sky: #3b6fe8;
-  --depth-blush: #cc6ba6;
-  --depth-sun: #e0a600;
-  --depth-mint: #0f9e6b;
-  --depth-aqua: #2aa8bf;
-  --depth-grape: #d93fae;
+  --depth-sky: #4b008b;
+  --depth-blush: #4b008b;
+  --depth-sun: #ffa600;
+  --depth-mint: #ff3a1a;
+  --depth-aqua: #4b008b;
+  --depth-grape: #4b008b;
   --depth-surface: #d4d4d4;
   --depth-surface-2: #c2c2c2;
-  --depth-danger: #a90000;
+  --depth-danger: #e40049;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -113,31 +118,24 @@
     --card-foreground: #f2f5f7;
     --popover: #3e4852;
     --popover-foreground: #f2f5f7;
-    --primary: #f5d800;
     --primary-foreground: #000000;
     --secondary: #2f3740;
     --secondary-foreground: #f2f5f7;
     --muted: #2f3740;
     --muted-foreground: #8793a0;
-    --accent: #00d4d5;
     --accent-foreground: #000000;
-    --destructive: #f52027;
     --destructive-foreground: #f8f8f8;
     --border: #37464f;
-    --nav-active: #202f36;
-    --nav-active-border: #3f85a7;
+    --nav-active: rgba(139, 30, 255, 0.22);
     --input: #37464f;
 
     /* Board and player colours. */
-    --p1: #ff4a5d;
-    --p1-deep: #de1d3f;
-    --p1-soft: #2e1011;
-    --p2: #4699fe;
-    --p2-deep: #2279dc;
-    --p2-soft: #091b31;
+    --p1-soft: #8a0a36;
+    --p2: #3d8dff;
+    --p2-deep: #2f78f0;
+    --p2-soft: #0f4396;
     --neutral-tile: #3e4852;
     --neutral-tile-deep: #2f3740;
-    --leaf: #51d75e;
     --tile-text: #131f24;
 
     /* Flat redesign palette. */

@@ -52,10 +52,23 @@ jobs:
         with:
           ref: ${{ env.BUILD_REF }}
 
+      - name: Guard production builds
+        if: ${{ env.PROFILE == 'production' }}
+        run: |
+          [ "$WORKFLOW_REF" = "refs/heads/main" ] \
+            || { echo "::error::Production builds must be dispatched from main, not $WORKFLOW_REF"; exit 1; }
+          [[ "$INPUT_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+            || { echo "::error::Production builds require ref to be a release tag like v1.2.3"; exit 1; }
+        shell: bash
+        working-directory: .
+        env:
+          WORKFLOW_REF: ${{ github.ref }}
+          INPUT_REF: ${{ inputs.ref }}
+
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
 
       - name: Setup Java

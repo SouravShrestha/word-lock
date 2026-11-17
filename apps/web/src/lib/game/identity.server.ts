@@ -39,16 +39,22 @@ export const roomCodeSchema = z.string().min(3).max(12);
 function verifySameOrigin(request: Request): void {
   const origin = request.headers.get("origin");
   if (!origin) return;
+  // CSRF only rides ambient credentials (cookies). A bearer token is attached
+  // explicitly by our own client, so a cross-origin bearer call (the Expo app)
+  // is not forgeable; getVerifiedUser also ignores cookies once one is present.
+  if (/^bearer\s/i.test(request.headers.get("authorization") ?? "")) return;
 
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  let expected: string;
-  try {
-    expected = configured ? new URL(configured).origin : new URL(request.url).origin;
-  } catch {
-    return;
-  }
+  // The host the request actually arrived on is always same-origin, even when
+  // NEXT_PUBLIC_SITE_URL names a different one (LAN IP vs localhost in dev).
+  const allowed = [request.url, process.env.NEXT_PUBLIC_SITE_URL?.trim()].flatMap((u) => {
+    try {
+      return u ? [new URL(u).origin] : [];
+    } catch {
+      return [];
+    }
+  });
 
-  if (origin !== expected) {
+  if (!allowed.includes(origin)) {
     throw new PublicError("Cross-origin request rejected.", 403);
   }
 }

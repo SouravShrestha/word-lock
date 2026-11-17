@@ -7,17 +7,19 @@ import { colors } from "@word-lock/tokens/native";
 import { BottomSheet, SheetTouchable } from "@/components/BottomSheet";
 import { HowToPlaySheet } from "@/components/HowToPlaySheet";
 import { IconButton } from "@/components/IconButton";
-import { Toggle } from "@/components/Toggle";
+import { AppearanceSheet, THEME_LABELS } from "@/components/AppearanceSheet";
 import { useTheme } from "@/theme/ThemeProvider";
 
 function MenuRow({
   label,
   hint,
+  value,
   onPress,
   destructive,
 }: {
   label: string;
   hint?: string;
+  value?: string;
   onPress: () => void;
   destructive?: boolean;
 }) {
@@ -46,6 +48,11 @@ function MenuRow({
           </Text>
         ) : null}
       </View>
+      {value ? (
+        <Text variant="body" className="max-w-[60%] font-normal" numberOfLines={1}>
+          {value}
+        </Text>
+      ) : null}
       <View style={{ transform: [{ rotate: "-90deg" }], opacity: 0.6 }}>
         <ChevronDownIcon size={16} color={palette.foreground} />
       </View>
@@ -64,8 +71,8 @@ export function GameMenuSheet({
   canForfeit: boolean;
   onForfeit: () => void;
 }) {
-  const [showRules, setShowRules] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const [nested, setNested] = useState<"rules" | "appearance" | null>(null);
+  const { theme } = useTheme();
 
   return (
     <>
@@ -73,34 +80,27 @@ export function GameMenuSheet({
         open={open}
         onClose={onClose}
         label="Game menu"
-        dismissable={!showRules}
-        showHandle={!showRules}
+        dismissable={!nested}
+        showHandle={!nested}
       >
-        <View className="flex-row items-center justify-between gap-4">
-          <Text variant="autoGen9">Game menu</Text>
+        <View className="flex-row items-center justify-end">
           <IconButton variant="danger" size={32} accessibilityLabel="Close" onPress={onClose}>
             <CrossIcon size={14} color="#ffffff" />
           </IconButton>
         </View>
 
         <View className="mt-6">
-          <View className="w-full flex-row items-center gap-3.5 py-4">
-            <View className="min-w-0 flex-1">
-              <Text variant="autoGen12">Dark theme</Text>
-            </View>
-            <Toggle
-              label="Dark theme"
-              checked={theme === "dark"}
-              onChange={(next) => setTheme(next ? "dark" : "light")}
-            />
-          </View>
-
-          <MenuRow label="How to play" onPress={() => setShowRules(true)} />
+          <MenuRow
+            label="Appearance"
+            value={THEME_LABELS[theme]}
+            onPress={() => setNested("appearance")}
+          />
+          <MenuRow label="How to play" onPress={() => setNested("rules")} />
 
           {canForfeit && (
             <MenuRow
               label="Quit game"
-              hint="Your opponent wins and you lose stars."
+              hint="Your opponent wins and you lose medals."
               onPress={() => {
                 onClose();
                 onForfeit();
@@ -111,7 +111,8 @@ export function GameMenuSheet({
         </View>
       </BottomSheet>
 
-      <HowToPlaySheet open={showRules} onClose={() => setShowRules(false)} />
+      <HowToPlaySheet open={nested === "rules"} onClose={() => setNested(null)} />
+      <AppearanceSheet open={nested === "appearance"} onClose={() => setNested(null)} />
     </>
   );
 }

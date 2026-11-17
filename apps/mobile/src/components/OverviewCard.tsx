@@ -1,14 +1,8 @@
 import { Text } from "@/components/text";
-import { useAccount, useLeaderboard } from "@word-lock/client";
-import { browserTimezone, leagueById } from "@word-lock/core/account";
+import { useAccount } from "@word-lock/client";
+import { browserTimezone } from "@word-lock/core/account";
 import { currentStreak, localDate } from "@word-lock/core/game";
-import {
-  LeagueIcon,
-  LEAGUE_TEXT_COLOR,
-  RankIcon,
-  StarIcon,
-  StreakIcon,
-} from "@word-lock/icons/native";
+import { StarIcon, StreakIcon } from "@word-lock/icons/native";
 import { View } from "react-native";
 import type { ReactNode } from "react";
 import { colors } from "@word-lock/tokens/native";
@@ -19,11 +13,7 @@ export function OverviewCard() {
   const { resolvedTheme } = useTheme();
   const palette = colors[resolvedTheme];
   const { data: account } = useAccount();
-  const { data: leaderboard } = useLeaderboard();
-
-  const me = leaderboard?.me ?? null;
   const stars = account?.stars ?? 0;
-  const league = account?.league ?? "bronze";
   const streak = currentStreak(
     {
       play_streak: account?.playStreak ?? 0,
@@ -47,17 +37,7 @@ export function OverviewCard() {
       <Fact
         icon={<StarIcon size={24} color={palette.mint} />}
         tint={palette.foreground}
-        label={`${stars} stars`}
-      />
-      <Fact
-        icon={<LeagueIcon league={league} size={28} />}
-        tint={palette.foreground}
-        label={leagueById(league).name}
-      />
-      <Fact
-        icon={<RankIcon size={20} color={palette.foreground} />}
-        tint={palette.foreground}
-        label={me ? `#${me.leagueRank} in league` : "Unranked"}
+        label={`${stars} ${stars === 1 ? "medal" : "medals"}`}
       />
     </View>
   );

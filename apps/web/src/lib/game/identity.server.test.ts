@@ -46,9 +46,10 @@ afterEach(() => {
 
 const SESSION_ID = "11111111-1111-1111-1111-111111111111";
 
-function requestWith(options: { origin?: string; cookie?: string } = {}) {
+function requestWith(options: { origin?: string; cookie?: string; bearer?: string } = {}) {
   const headers: Record<string, string> = {};
   if (options.origin) headers.origin = options.origin;
+  if (options.bearer) headers.authorization = `Bearer ${options.bearer}`;
   if (options.cookie) headers.cookie = options.cookie;
   return new Request("https://wordlock.example/api/game/join", { headers });
 }
@@ -75,6 +76,23 @@ describe("resolveCaller — same-origin check", () => {
     await expect(
       resolveCaller(requestWith({ origin: "https://evil.example" }), { sessionId: SESSION_ID }),
     ).rejects.toThrow("Cross-origin request rejected.");
+  });
+
+  it("allows the request's own origin when NEXT_PUBLIC_SITE_URL differs", async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "http://192.168.29.4:3002";
+    const { resolveCaller } = await import("./identity.server");
+    await expect(
+      resolveCaller(requestWith({ origin: "https://wordlock.example" }), { sessionId: SESSION_ID }),
+    ).resolves.toMatchObject({ sessionId: SESSION_ID });
+  });
+
+  it("allows a cross-origin bearer request (the mobile app)", async () => {
+    const { resolveCaller } = await import("./identity.server");
+    await expect(
+      resolveCaller(requestWith({ origin: "http://localhost:8081", bearer: "jwt" }), {
+        sessionId: SESSION_ID,
+      }),
+    ).resolves.toMatchObject({ sessionId: SESSION_ID });
   });
 });
 

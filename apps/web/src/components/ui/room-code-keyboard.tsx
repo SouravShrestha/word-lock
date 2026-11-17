@@ -160,14 +160,14 @@ function LetterKey({
       className={cn(
         `
         flex-1 h-12 flex items-center justify-center
-        rounded-lg select-none touch-manipulation
-        bg-surface text-foreground font-bold text-lg
-        shadow-[0_3px_0_0_var(--depth-surface)]
+        rounded-md select-none touch-manipulation
+        bg-[#EBDFC0] dark:bg-surface text-foreground font-bold text-lg
+        shadow-[0_3px_0_0_#C2B085] dark:shadow-[0_3px_0_0_var(--depth-surface)]
         transition-all duration-75
       `,
         isActive
-          ? "translate-y-[2px] shadow-[0_1px_0_0_var(--depth-surface)]"
-          : "active:translate-y-[2px] active:shadow-[0_1px_0_0_var(--depth-surface)]",
+          ? "translate-y-[2px] shadow-[0_1px_0_0_#C2B085] dark:shadow-[0_1px_0_0_var(--depth-surface)]"
+          : "active:translate-y-[2px] active:shadow-[0_1px_0_0_#C2B085] dark:active:shadow-[0_1px_0_0_var(--depth-surface)]",
       )}
     >
       {char}
@@ -215,14 +215,14 @@ function ActionKey({
       className={cn(
         `
         flex-[1.5] h-12 flex items-center justify-center
-        rounded-lg select-none touch-manipulation
-        bg-surface-2 text-foreground
-        shadow-[0_3px_0_0_var(--depth-surface-2)]
+        rounded-md select-none touch-manipulation
+        bg-[#EBDFC0] dark:bg-surface-2 text-foreground
+        shadow-[0_3px_0_0_#C2B085] dark:shadow-[0_3px_0_0_var(--depth-surface-2)]
         transition-all duration-75
       `,
         isActive
-          ? "translate-y-[2px] shadow-[0_1px_0_0_var(--depth-surface-2)]"
-          : "active:translate-y-[2px] active:shadow-[0_1px_0_0_var(--depth-surface-2)]",
+          ? "translate-y-[2px] shadow-[0_1px_0_0_#C2B085] dark:shadow-[0_1px_0_0_var(--depth-surface-2)]"
+          : "active:translate-y-[2px] active:shadow-[0_1px_0_0_#C2B085] dark:active:shadow-[0_1px_0_0_var(--depth-surface-2)]",
       )}
     >
       {children}

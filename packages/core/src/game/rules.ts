@@ -18,9 +18,8 @@ export const RULES: readonly Rule[] = [
   },
   {
     title: "Win the board",
-    body: "The game ends when every tile is claimed. Whoever owns the most tiles wins. In a timed game, running out of clock loses; in a daily game, a move expires after 24 hours.",
+    body: "The game ends when every tile is claimed. Whoever owns the most tiles wins. Running out of clock loses.",
   },
 ] as const;
 
 export const MIN_WORD_LENGTH = 3;
-export const TURN_LIMIT_HOURS = 24;

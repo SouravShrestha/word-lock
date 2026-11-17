@@ -1,15 +1,12 @@
 import { Text } from "@/components/text";
 import { browserTimezone } from "@word-lock/core/account";
-import {
-  freezeLabel,
-  localDate,
-  streakHeadline,
-  streakMessage,
-  streakWeek,
-} from "@word-lock/core/game";
-import { CrossIcon, StreakIcon, TickIcon } from "@word-lock/icons/native";
+import { currentStreak, localDate, streakMessage, streakWeek } from "@word-lock/core/game";
+import { CrossIcon, TickIcon } from "@word-lock/icons/native";
 import { colors, radius } from "@word-lock/tokens/native";
+import { Image } from "expo-image";
 import { View } from "react-native";
+
+import STREAK_IMAGE from "../../assets/christmas/streak.png";
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { IconButton } from "@/components/IconButton";
@@ -38,7 +35,6 @@ export function StreakSheet({
     last_freeze_on: lastFreezeOn,
   };
   const days = streakWeek(state, today);
-  const freeze = freezeLabel(state, today);
   const footer = streakMessage(state, today);
 
   return (
@@ -49,16 +45,23 @@ export function StreakSheet({
         </IconButton>
       </View>
 
-      <View className="mt-8 items-center">
-        <View style={{ paddingLeft: 36 }}>
-          <StreakIcon size={112} />
+      <View className="mt-8 flex-row items-center justify-between px-6">
+        <View>
+          <Text
+            className="font-display text-[60px] leading-[64px]"
+            style={{ color: palette.streak }}
+          >
+            {String(currentStreak(state, today)).padStart(2, "0")}
+          </Text>
+          <Text className="mt-1 font-display text-lg" style={{ color: palette.streak }}>
+            day streak!
+          </Text>
         </View>
+        <Image source={STREAK_IMAGE} contentFit="contain" style={{ width: 83, height: 96 }} />
+      </View>
 
-        <Text variant="autoGen26" className="mt-6">
-          {streakHeadline(state, today)}
-        </Text>
-
-        <View accessibilityRole="list" className="mt-6 w-full flex-row items-end justify-between">
+      <View className="mt-12 items-center">
+        <View accessibilityRole="list" className="w-full flex-row items-end justify-between">
           {days.map((day) => (
             <View key={day.date} className="items-center gap-1.5">
               <Text
@@ -73,7 +76,13 @@ export function StreakSheet({
               <View
                 style={{
                   borderWidth: RING_WIDTH,
-                  borderColor: day.isToday ? STREAK_RING_COLOR : "transparent",
+                  borderColor: !day.isToday
+                    ? "transparent"
+                    : day.played
+                      ? palette.leafDeep
+                      : day.frozen
+                        ? palette.freezeDeep
+                        : palette.streak,
                   borderRadius: radius.md + RING_WIDTH + RING_OFFSET,
                   padding: RING_OFFSET,
                 }}
@@ -97,15 +106,7 @@ export function StreakSheet({
           ))}
         </View>
 
-        {freeze && (
-          <View className="mt-4 rounded-full px-3 py-1" style={{ backgroundColor: palette.freeze }}>
-            <Text className="font-sans text-xs font-bold" style={{ color: palette.onAccent }}>
-              {freeze}
-            </Text>
-          </View>
-        )}
-
-        <Text variant="body" className="mt-8 leading-relaxed">
+        <Text variant="body" className="mt-8 w-full pr-6 text-right leading-relaxed">
           {footer}
         </Text>
       </View>
@@ -115,4 +116,3 @@ export function StreakSheet({
 
 const RING_WIDTH = 2;
 const RING_OFFSET = 2;
-const STREAK_RING_COLOR = "#FC9502";

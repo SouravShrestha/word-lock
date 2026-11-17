@@ -168,14 +168,14 @@ describe("streakStatus / streakHeadline / streakMessage", () => {
     expect(streakStatus(base, "2026-03-17")).toBe("lost");
     expect(currentStreak(base, "2026-03-17")).toBe(0);
     expect(streakHeadline(base, "2026-03-17")).toBe("Streak Lost");
-    expect(streakMessage(base, "2026-03-17")).toContain("missed more than one day");
-    expect(streakMessage(base, "2026-03-17")).toContain("start a fresh one");
+    expect(streakMessage(base, "2026-03-17")).toBe(
+      "Your 9-day streak has ended.\nNo worries, play a game today and start a fresh one!",
+    );
   });
 
-  it("is lost after one missed day while the freeze is recharging, and says why", () => {
+  it("is lost after one missed day while the freeze is recharging", () => {
     const recharging = { ...base, last_freeze_on: "2026-03-10" };
     expect(streakStatus(recharging, "2026-03-16")).toBe("lost");
-    expect(streakMessage(recharging, "2026-03-16")).toContain("still recharging");
   });
 
   it("stays lost however long the lapse", () => {

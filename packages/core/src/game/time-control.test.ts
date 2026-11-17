@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   CLOCK_GRACE_MS,
-  DAILY_TURN_MS,
   chargeClock,
   clockLabelFor,
   formatClock,
@@ -16,17 +15,18 @@ const T0 = Date.UTC(2026, 0, 1, 12, 0, 0);
 const iso = (ms: number) => new Date(ms).toISOString();
 
 describe("time controls", () => {
-  it("knows the four ids and falls back to daily", () => {
-    expect(isTimeControl("10m")).toBe(true);
-    expect(isTimeControl("daily")).toBe(true);
-    expect(isTimeControl("5m")).toBe(false);
-    expect(timeControlFor(undefined).id).toBe("daily");
-    expect(timeControlFor("nonsense").id).toBe("daily");
+  it("knows the three ids and reads retired ones as the default", () => {
+    expect(isTimeControl("5m")).toBe(true);
+    expect(isTimeControl("15m")).toBe(true);
+    expect(isTimeControl("daily")).toBe(false);
+    expect(isTimeControl("30m")).toBe(false);
+    expect(timeControlFor(undefined).id).toBe("10m");
+    expect(timeControlFor("daily").id).toBe("10m");
   });
 
-  it("gives both players the same bank, none for daily", () => {
-    expect(initialClocks("30m")).toEqual({ 1: 30 * 60_000, 2: 30 * 60_000 });
-    expect(initialClocks("daily")).toEqual({ 1: null, 2: null });
+  it("gives both players the same bank", () => {
+    expect(initialClocks("5m")).toEqual({ 1: 5 * 60_000, 2: 5 * 60_000 });
+    expect(initialClocks("15m")).toEqual({ 1: 15 * 60_000, 2: 15 * 60_000 });
   });
 
   it("charges only the elapsed turn and floors at zero", () => {
@@ -37,9 +37,8 @@ describe("time controls", () => {
     expect(chargeClock(600_000, iso(T0), T0 - 5_000)).toBe(600_000);
   });
 
-  it("sets the deadline from the bank, or 24h for daily", () => {
-    expect(turnDeadlineFor("10m", 123_000, T0)).toBe(iso(T0 + 123_000));
-    expect(turnDeadlineFor("daily", null, T0)).toBe(iso(T0 + DAILY_TURN_MS));
+  it("sets the deadline from the bank", () => {
+    expect(turnDeadlineFor(123_000, T0)).toBe(iso(T0 + 123_000));
   });
 
   it("allows the grace period before a turn counts as expired", () => {
@@ -51,7 +50,7 @@ describe("time controls", () => {
   it("formats bank clocks consistently as mm:ss", () => {
     expect(formatClock(600_000)).toBe("10:00");
     expect(formatClock(59_001)).toBe("01:00");
-    expect(formatClock(3_600_000)).toBe("60:00");
+    expect(formatClock(15 * 60_000)).toBe("15:00");
     expect(formatClock(-5)).toBe("00:00");
   });
 });
@@ -59,7 +58,6 @@ describe("time controls", () => {
 describe("clockLabelFor", () => {
   const bank = {
     status: "active",
-    timeControl: "10m",
     turnDeadline: iso(T0 + 90_000),
     clocks: { 1: 600_000, 2: 420_000 },
   };
@@ -75,19 +73,5 @@ describe("clockLabelFor", () => {
   it("shows banks before and after the game", () => {
     expect(clockLabelFor({ ...bank, status: "waiting" }, 1, false, T0)).toBe("10:00");
     expect(clockLabelFor({ ...bank, status: "completed" }, 2, false, T0)).toBe("07:00");
-  });
-
-  it("gives daily games a clock only on the player on turn", () => {
-    const daily = {
-      status: "active",
-      timeControl: "daily",
-      turnDeadline: iso(T0 + 5 * 3_600_000 + 7 * 60_000),
-      clocks: { 1: null, 2: null },
-    };
-    expect(clockLabelFor(daily, 1, true, T0)).toBe("05:07:00");
-    expect(clockLabelFor(daily, 2, false, T0)).toBe("-");
-    expect(clockLabelFor({ ...daily, turnDeadline: iso(T0 + 65_000) }, 1, true, T0)).toBe(
-      "00:01:05",
-    );
   });
 });

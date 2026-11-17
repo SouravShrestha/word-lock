@@ -1,9 +1,12 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { BackspaceIcon, BinIcon, EnterIcon, SkipIcon } from "@word-lock/icons/native";
 import { colors } from "@word-lock/tokens/native";
 
+import { Lip, lipPadding } from "@/components/lip";
 import { useTheme } from "@/theme/ThemeProvider";
+
+const LIP = 4;
 
 function ActionButton({
   label,
@@ -18,17 +21,31 @@ function ActionButton({
 }) {
   const { resolvedTheme } = useTheme();
   const palette = colors[resolvedTheme];
+  const [pressed, setPressed] = useState(false);
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
       disabled={disabled}
-      className="h-12 w-12 shrink-0 items-center justify-center rounded-full"
-      style={{ backgroundColor: palette.surface2, opacity: disabled ? 0.35 : 1 }}
+      needsOffscreenAlphaCompositing={disabled}
+      className="w-12 shrink-0 overflow-hidden rounded-full"
+      style={{
+        height: 48 + LIP,
+        opacity: disabled ? 0.35 : 1,
+        ...lipPadding(LIP, pressed && !disabled),
+      }}
     >
-      {children}
+      <Lip depth={palette.depthSurface2} />
+      <View
+        className="h-12 w-12 items-center justify-center rounded-full"
+        style={{ backgroundColor: palette.surface2 }}
+      >
+        {children}
+      </View>
     </Pressable>
   );
 }

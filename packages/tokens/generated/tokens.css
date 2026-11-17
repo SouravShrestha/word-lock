@@ -6,7 +6,7 @@
  */
 
 :root {
-  --radius: 0.6rem;
+  --radius: 1rem;
 
   /* Semantic surfaces and text. */
   --background: oklch(0.98 0.015 95);
@@ -15,37 +15,40 @@
   --card-foreground: oklch(0.14 0 0);
   --popover: oklch(0.98 0.015 95);
   --popover-foreground: oklch(0.14 0 0);
-  --primary: oklch(0.9 0.19 100);
+  --primary: #FFC400;
   --primary-foreground: oklch(0.14 0 0);
   --secondary: oklch(0.93 0.02 95);
   --secondary-foreground: oklch(0.14 0 0);
   --muted: oklch(0.93 0.02 95);
   --muted-foreground: oklch(0.45 0.01 95);
-  --accent: oklch(0.82 0.15 195);
+  --accent: #FF7A00;
   --accent-foreground: oklch(0.14 0 0);
-  --destructive: oklch(0.6 0.24 27);
+  --destructive: #FF3A1A;
   --destructive-foreground: oklch(1 0 0);
   --border: rgb(15 20 25 / 12%);
-  --nav-active: #ddf4ff;
-  --nav-active-border: #84d8ff;
+  --nav-active: rgb(139 30 255 / 12%);
+  --nav-active-border: #8B1EFF;
   --input: rgb(15 20 25 / 12%);
   /* Theme-invariant. Light and dark both declared this, identically. */
-  --ring: #29a8f0;
+  --ring: #8B1EFF;
 
   /* Board and player colours. */
-  --p1: oklch(0.66 0.25 20);
-  --p1-deep: oklch(0.56 0.25 20);
-  --p1-soft: oklch(0.93 0.05 20);
-  --p2: oklch(0.65 0.19 255);
-  --p2-deep: oklch(0.55 0.19 255);
-  --p2-soft: oklch(0.93 0.05 255);
+  --p1: #E40049;
+  --p1-deep: #E40049;
+  --p1-soft: #FFBFD2;
+  --p2: #1F7BFF;
+  --p2-deep: #0057D9;
+  --p2-soft: #BFD8FF;
   --neutral-tile: oklch(0.98 0.015 95);
   --neutral-tile-deep: oklch(0.94 0.025 95);
   /* Theme-invariant. */
-  --sun: oklch(0.9 0.19 100);
+  --sun: #FFC400;
   /* Theme-invariant. */
-  --sun-deep: oklch(0.82 0.19 100);
-  --leaf: oklch(0.8 0.21 145);
+  --sun-deep: #FFA600;
+  /* Theme-invariant green for a played streak day. */
+  --leaf: #58CC02;
+  /* Theme-invariant. Today ring on a played day. */
+  --leaf-deep: #3F9A00;
   /* In dark mode, letters on an owned tile are the colour of the page. */
   --tile-text: oklch(1 0 0);
 
@@ -53,19 +56,21 @@
   --surface: oklch(0.98 0.015 95);
   --surface-2: oklch(0.94 0.025 95);
   /* Theme-invariant. */
-  --sky: #29a8f0;
+  --sky: #8B1EFF;
   /* Theme-invariant. */
-  --blush: #ff86d0;
+  --blush: #8B1EFF;
   /* Theme-invariant. */
-  --mint: #17c98a;
+  --mint: #FF7A00;
   /* Theme-invariant. */
-  --aqua: #55d4e8;
+  --aqua: #8B1EFF;
   /* Theme-invariant. */
-  --grape: #ff6fd8;
+  --grape: #8B1EFF;
   /* Theme-invariant streak color. */
-  --streak: #FC9502;
+  --streak: #FF7A00;
   /* Theme-invariant ice blue for a day a Streak Freeze covered. */
-  --freeze: #8fd3fe;
+  --freeze: #1CB0F6;
+  /* Theme-invariant. Today ring on a frozen day. */
+  --freeze-deep: #0E86C2;
   /* Theme-invariant. Light and dark both declared this, identically. */
   --on-accent: #0f1419;
   --hairline: rgb(15 20 25 / 12%);
@@ -87,15 +92,15 @@
    * Solid "lip" colours painted under each button fill by the soft-btn utility. Not exposed to
    * Tailwind as colours — consumed directly as var(--depth-*).
    */
-  --depth-sky: #3b6fe8;
-  --depth-blush: #cc6ba6;
-  --depth-sun: #e0a600;
-  --depth-mint: #0f9e6b;
-  --depth-aqua: #2aa8bf;
-  --depth-grape: #d93fae;
+  --depth-sky: #4B008B;
+  --depth-blush: #4B008B;
+  --depth-sun: #FFA600;
+  --depth-mint: #FF3A1A;
+  --depth-aqua: #4B008B;
+  --depth-grape: #4B008B;
   --depth-surface: #d4d4d4;
   --depth-surface-2: #c2c2c2;
-  --depth-danger: oklch(0.45 0.2 27);
+  --depth-danger: #E40049;
 }
 
 .dark {
@@ -106,31 +111,24 @@
   --card-foreground: #f2f5f7;
   --popover: #3e4852;
   --popover-foreground: #f2f5f7;
-  --primary: oklch(0.88 0.19 100);
   --primary-foreground: oklch(0 0 0);
   --secondary: #2f3740;
   --secondary-foreground: #f2f5f7;
   --muted: #2f3740;
   --muted-foreground: #8793a0;
-  --accent: oklch(0.78 0.15 195);
   --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(0.62 0.24 27);
   --destructive-foreground: oklch(0.98 0 0);
   --border: #37464f;
-  --nav-active: #202f36;
-  --nav-active-border: #3f85a7;
+  --nav-active: rgb(139 30 255 / 22%);
   --input: #37464f;
 
   /* Board and player colours. */
-  --p1: oklch(0.68 0.22 20);
-  --p1-deep: oklch(0.58 0.22 20);
-  --p1-soft: oklch(0.22 0.05 20);
-  --p2: oklch(0.68 0.17 255);
-  --p2-deep: oklch(0.58 0.17 255);
-  --p2-soft: oklch(0.22 0.05 255);
+  --p1-soft: #8A0A36;
+  --p2: #3D8DFF;
+  --p2-deep: #2F78F0;
+  --p2-soft: #0F4396;
   --neutral-tile: #3e4852;
   --neutral-tile-deep: #2f3740;
-  --leaf: oklch(0.78 0.2 145);
   --tile-text: var(--background);
 
   /* Flat redesign palette. */

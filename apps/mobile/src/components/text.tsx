@@ -15,16 +15,8 @@ export const TEXT_STYLE_CONFIG = {
     Usage: "Top-level screen title",
     "Font-Family": "font-display",
     Size: "text-3xl",
-    Weight: "font-bold",
+    Weight: "font-semibold",
     Color: "text-foreground",
-    LetterSpacing: "tracking-wide",
-  },
-  leagueTitle: {
-    Usage: "Leaderboard league name",
-    "Font-Family": "font-display",
-    Size: "text-3xl",
-    Weight: "font-bold",
-    Color: "",
     LetterSpacing: "tracking-wide",
   },
   sectionHeading: {
@@ -39,6 +31,13 @@ export const TEXT_STYLE_CONFIG = {
     "Font-Family": "font-display",
     Size: "text-xl",
     Weight: "font-bold",
+    Color: "text-foreground",
+  },
+  sheetTitleSoft: {
+    Usage: "Auth sheet title",
+    "Font-Family": "font-display",
+    Size: "text-xl",
+    Weight: "font-semibold",
     Color: "text-foreground",
   },
   heading: {
@@ -199,7 +198,7 @@ export const TEXT_STYLE_CONFIG = {
     Color: "text-mutedForeground",
   },
   leagueStars: {
-    Usage: "Star count",
+    Usage: "Medal count",
     Size: "text-sm",
     Weight: "font-semibold",
     LetterSpacing: "tracking-wider",

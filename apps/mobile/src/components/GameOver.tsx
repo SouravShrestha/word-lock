@@ -1,9 +1,6 @@
 import { Text } from "@/components/text";
 import { Modal, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useAccount } from "@word-lock/client";
-import { leagueChange, leagueForStars } from "@word-lock/core/account";
-import { LeagueIcon, LEAGUE_TEXT_COLOR } from "@word-lock/icons/native";
 
 import { GameResultCard, type ResultGame } from "@/components/GameResultCard";
 
@@ -32,39 +29,10 @@ export function GameOver({
                   ? { label: "New Game", onPress: onRematch, pending: rematchPending }
                   : null
               }
-              note={<LeagueMove game={game} />}
             />
           </View>
         </View>
       </GestureHandlerRootView>
     </Modal>
-  );
-}
-
-function LeagueMove({ game }: { game: ResultGame }) {
-  const { data: account } = useAccount();
-
-  const slot = game.viewerSlot;
-  const delta: number | null = slot ? (game.starDeltas?.[slot] ?? null) : null;
-  const after = account?.stars ?? null;
-
-  if (delta === null || after === null) return null;
-
-  const change = leagueChange(after - delta, after);
-  if (!change) return null;
-
-  const league = leagueForStars(after);
-
-  return (
-    <View className="flex-row items-center gap-1.5">
-      <LeagueIcon league={league.id} size={20} />
-      <Text
-        variant="autoGen13"
-        className="uppercase"
-        style={{ color: LEAGUE_TEXT_COLOR[league.id] }}
-      >
-        {change === "promotion" ? `Promoted to ${league.name}` : `Dropped to ${league.name}`}
-      </Text>
-    </View>
   );
 }

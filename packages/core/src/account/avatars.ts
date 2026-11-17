@@ -1,6 +1,6 @@
 import { supabaseOrigin } from "../build-env";
 
-export const AVATAR_COUNT = 51;
+export const AVATAR_COUNT = 28;
 
 const AVATAR_BUCKET = "avatar";
 

@@ -16,6 +16,7 @@
     "lint": "node scripts/check-boundaries.mjs && eslint .",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "deploy": "npm run deploy --workspace @word-lock/web",
     "preview": "npm run preview --workspace @word-lock/web",
     "db:types": "supabase gen types typescript --project-id falecdhgmzmnoryremus > packages/core/src/db/types.ts"
