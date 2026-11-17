@@ -7,6 +7,9 @@ package-lock.json
 bun.lock
 routeTree.gen.ts
 
+# Expo-generated type declaration (gitignored, must not be edited)
+**/expo-env.d.ts
+
 # Monorepo build output
 **/.next/**
 **/.open-next/**
@@ -21,3 +24,9 @@ routeTree.gen.ts
 # Generated from packages/tokens/src/tokens.ts. The staleness test compares the
 # committed bytes against a fresh generator run, so Prettier must not touch them.
 packages/tokens/generated/**
+
+# Written by release-please, whose output Prettier would rewrite on every release.
+CHANGELOG.md
+
+# Email templates are HTML with Go template tags; Prettier rewrites inline styles.
+supabase/templates/**
