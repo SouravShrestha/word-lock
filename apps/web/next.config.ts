@@ -8,7 +8,12 @@ const pkg = JSON.parse(readFileSync(path.join(__dirname, "../../package.json"), 
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  transpilePackages: ["@word-lock/core", "@word-lock/client", "@word-lock/icons"],
+  transpilePackages: [
+    "@word-lock/core",
+    "@word-lock/client",
+    "@word-lock/icons",
+    "@word-lock/tokens",
+  ],
   outputFileTracingRoot: path.join(__dirname, "../../"),
   env: {
     NEXT_PUBLIC_APP_VERSION: pkg.version,
@@ -25,7 +30,7 @@ const nextConfig: NextConfig = {
     // connect-src for WebSocket connections — `wss://` must be listed explicitly
     // alongside the `https://` origin, otherwise Supabase Realtime is blocked.
     const supabaseHost = supabaseUrl ? new URL(supabaseUrl).host : "";
-    const supabaseWss = supabaseUrl ? supabaseUrl.replace(/^https?:\/\//, "wss://") : "";
+    const supabaseWss = supabaseUrl ? supabaseUrl.replace(/^http/, "ws") : "";
 
     const isDev = process.env.NODE_ENV === "development";
 
@@ -49,6 +54,16 @@ const nextConfig: NextConfig = {
     ].join("; ");
 
     return [
+      {
+        // Mobile (Expo web in dev) calls the API cross-origin with a Bearer
+        // token, never cookies, so a wildcard origin without credentials is safe.
+        source: "/api/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET,POST,OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Authorization, Content-Type" },
+        ],
+      },
       {
         source: "/:path*",
         headers: [

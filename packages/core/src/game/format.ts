@@ -3,6 +3,23 @@ export function formatDate(iso: string): string {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
+/** A room code from pasted text: the bare 5-char code or an invite link ending in /game/CODE. */
+export function parseRoomCode(text: string): string | null {
+  const t = text.trim().toUpperCase();
+  return (t.match(/\/GAME\/([A-Z0-9]{5})\b/) ?? t.match(/^([A-Z0-9]{5})$/))?.[1] ?? null;
+}
+
+/** What a code field holds after `pasted` lands on `current`: a recognised code replaces it, anything else is appended, filtered and capped. */
+export function roomCodeAfterPaste(current: string, pasted: string): string {
+  return (
+    parseRoomCode(pasted) ??
+    (current + pasted)
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 5)
+  );
+}
+
 export function timeLeftLabel(deadlineIso: string): string {
   const ms = new Date(deadlineIso).getTime() - Date.now();
   const pad = (n: number) => String(n).padStart(2, "0");

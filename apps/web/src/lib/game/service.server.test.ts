@@ -55,9 +55,9 @@ function game(overrides: Partial<FakeGame>): FakeGame {
     p2_star_delta: null,
     p1_stars_after: null,
     p2_stars_after: null,
-    time_control: "daily",
-    p1_clock_ms: null,
-    p2_clock_ms: null,
+    time_control: "10m",
+    p1_clock_ms: 10 * 60_000,
+    p2_clock_ms: 10 * 60_000,
     turn_deadline: null,
     ...overrides,
   };
@@ -448,7 +448,7 @@ describe("taking a seat requires a named account", () => {
     games = [];
 
     const { createGame } = await import("./service.server");
-    await expect(createGame(callerFor(players[0]), "daily")).rejects.toThrow("Sign in to play.");
+    await expect(createGame(callerFor(players[0]), "10m")).rejects.toThrow("Sign in to play.");
     expect(games).toHaveLength(0);
   });
 });
@@ -528,40 +528,17 @@ describe("time controls", () => {
     expect(moves).toHaveLength(0);
   });
 
-  it("still passes an expired daily turn rather than ending the game", async () => {
-    games = [
-      game({
-        id: "g1",
-        room_code: "DAILY",
-        last_move_at: ago(25 * 60 * MIN),
-        turn_deadline: ago(60 * MIN),
-      }),
-    ];
-
-    const { timeoutGame } = await import("./service.server");
-    await timeoutGame(callerFor(players[1]), "DAILY");
-
-    const g = games[0];
-    expect(g.status).toBe("active");
-    expect(g.current_turn_player_id).toBe("p2");
-    expect(moves).toHaveLength(1);
-    const deadlineIn = new Date(g.turn_deadline!).getTime() - Date.now();
-    expect(deadlineIn).toBeGreaterThan(24 * 60 * MIN - 1000);
-  });
-
-  it("sweeps expired turns of both kinds by their stored deadline", async () => {
+  it("sweeps expired turns by their stored deadline", async () => {
     games = [
       timed({ id: "g1", room_code: "TIMED", turn_deadline: ago(MIN) }),
-      game({ id: "g2", room_code: "DAILY", turn_deadline: ago(MIN) }),
       timed({ id: "g3", room_code: "FRESH", turn_deadline: fromNow(MIN) }),
     ];
 
     const { sweepExpiredTurns } = await import("./service.server");
-    await expect(sweepExpiredTurns()).resolves.toEqual({ swept: 2 });
+    await expect(sweepExpiredTurns()).resolves.toEqual({ swept: 1 });
 
     const byRoom = Object.fromEntries(games.map((g) => [g.room_code, g]));
     expect(byRoom.TIMED.end_reason).toBe("timeout");
-    expect(byRoom.DAILY.current_turn_player_id).toBe("p2");
     expect(byRoom.FRESH.status).toBe("active");
   });
 });

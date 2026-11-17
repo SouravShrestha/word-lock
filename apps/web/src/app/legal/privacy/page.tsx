@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
         <Section title="The short version">
           <P>
             Word lock is a two-player word game. To play you need an account, and the account is
-            only reason any personal data is stored: it is what your username, stars, streak and
+            only reason any personal data is stored: it is what your username, medals, streak and
             match history hang off so they follow you between devices.
           </P>
           <P>
@@ -41,9 +41,9 @@ export default function PrivacyPolicyPage() {
           <List
             items={[
               "Your email address, handled by our authentication provider so you can sign in with Google or an email link. It is never shown to other players.",
-              "Your username, which is public: opponents, the leaderboard and match history all show it.",
+              "Your username, which is public: opponents and match history all show it.",
               "Your chosen avatar, which is a reference to one of our own images, not an uploaded photo.",
-              "Your game data: games played, words submitted, scores, stars, league, daily streak and results.",
+              "Your game data: games played, words submitted, scores, medals, daily streak and results.",
               "Your device's time zone, reported by the browser. It is used for one thing — deciding when your day rolls over so the streak advances correctly.",
               "A random session identifier kept in your browser's local storage, so a game can be created before you sign in and attached to your account afterwards.",
             ]}
@@ -116,9 +116,9 @@ export default function PrivacyPolicyPage() {
         <Section title="How long it is kept">
           <P>
             Account and game data are kept while your account exists. Deleting your account (see
-            below) removes your email, your username and your leaderboard entries. Games you already
-            played stay in your opponents&apos; own match history, but without your username
-            attached — the same as if you had never claimed one.
+            below) removes your email, your username. Games you already played stay in your
+            opponents&apos; own match history, but without your username attached — the same as if
+            you had never claimed one.
           </P>
         </Section>
 

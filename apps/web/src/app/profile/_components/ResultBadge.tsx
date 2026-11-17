@@ -10,7 +10,7 @@ export function ResultBadge({ result }: { result: GameResult }) {
         : "bg-muted text-foreground";
   return (
     <span
-      className={`rounded-[3px] ml-1 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide ${classes}`}
+      className={`rounded-md ml-1 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide ${classes}`}
     >
       {label}
     </span>

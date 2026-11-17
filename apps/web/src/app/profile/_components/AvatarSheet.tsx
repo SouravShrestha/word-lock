@@ -50,13 +50,7 @@ export function AvatarSheet({
 
   return (
     <BottomSheet open={open} onClose={onClose} label="Choose your avatar">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="tv-heading leading-tight">Choose your avatar</h2>
-          <p className="tv-body leading-relaxed text-muted-foreground">
-            This is the face players see next to your name
-          </p>
-        </div>
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={onClose}
@@ -69,11 +63,11 @@ export function AvatarSheet({
 
       <div
         ref={gridRef}
-        className="mt-8 max-h-[46vh] overflow-y-auto overscroll-contain pt-5"
+        className="mt-2 max-h-[46vh] overflow-y-auto overscroll-contain pt-5"
         role="radiogroup"
         aria-label="Avatars"
       >
-        <div className="grid grid-cols-4 justify-items-center gap-3 pb-1">
+        <div className="grid grid-cols-3 justify-items-center gap-4 pb-1">
           {AVATAR_IDS.map((id, index) => {
             const active = id === selected;
             return (
@@ -90,11 +84,11 @@ export function AvatarSheet({
                   active ? "ring-2 ring-sky" : "ring-0",
                 )}
               >
-                <Avatar avatar={id} className="h-16 w-16" />
+                <Avatar avatar={id} className="h-24 w-24" />
                 {active && (
                   <span
                     aria-hidden
-                    className="absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full bg-sky text-background"
+                    className="absolute bottom-1 right-1 grid h-5 w-5 place-items-center rounded-full bg-sky text-background"
                   >
                     <CheckIcon className="h-5 w-5" />
                   </span>

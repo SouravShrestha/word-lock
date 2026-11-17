@@ -3,7 +3,6 @@ import { UNNAMED_PLAYER } from "@word-lock/core/account";
 import {
   computeBoardState,
   timeControlFor,
-  DAILY_TURN_MS,
   type EngineMove,
   type PlayerSlot,
   type GamePlayerRow,
@@ -12,16 +11,9 @@ import {
   type PlayerRow,
 } from "@word-lock/core/game";
 
-/**
- * When the current turn expires. Every write that starts a turn stores it, but a
- * game already active before migration 015 was backfilled only if it was active
- * at the time, so fall back to the one limit that existed then.
- */
-export function turnDeadlineOf(game: GameRow): string {
-  return (
-    game.turn_deadline ??
-    new Date(new Date(game.last_move_at).getTime() + DAILY_TURN_MS).toISOString()
-  );
+/** When the current turn expires. Every write that starts a turn stores it. */
+export function turnDeadlineOf(game: GameRow): string | null {
+  return game.turn_deadline;
 }
 
 export type {

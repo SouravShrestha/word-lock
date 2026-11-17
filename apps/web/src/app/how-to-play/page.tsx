@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BackButton } from "@/components/BackButton";
-import { LEAGUES } from "@word-lock/core/account";
 import {
   MIN_WORD_LENGTH,
   RULES,
-  TURN_LIMIT_HOURS,
   bankControlsSentence,
   BASE_STARS,
   FREEZE_COOLDOWN_DAYS,
@@ -14,9 +12,9 @@ import {
 } from "@word-lock/core/game";
 
 export const metadata: Metadata = {
-  title: "How to play Word lock - rules, locking and leagues",
+  title: "How to play Word lock - rules and locking",
   description:
-    "The full rules of Word lock: spell words from a shared 5x5 grid, claim tiles, surround your own tiles to lock them, and win the board. Plus stars, leagues and streaks.",
+    "The full rules of Word lock: spell words from a shared 5x5 grid, claim tiles, surround your own tiles to lock them, and win the board. Plus medals and streaks.",
   alternates: { canonical: "/how-to-play" },
   openGraph: {
     title: "How to play Word lock",
@@ -109,37 +107,25 @@ export default function HowToPlayPage() {
             more tiles wins, and an even split is a draw.
           </P>
           <P>
-            The host picks the pace when creating a room. A timed game gives each player{" "}
-            {bankControlsSentence()} for the whole game, spent only while it is their turn — run out
-            and you lose. A daily game gives every move {TURN_LIMIT_HOURS} hours instead; run out
-            and your turn is passed for you, so a game can never stall forever waiting on someone.
+            The host picks the pace when creating a room: each player gets {bankControlsSentence()}{" "}
+            for the whole game, spent only while it is their turn — run out and you lose.
           </P>
           <P>You can also forfeit from the in-game menu, which hands the win to your opponent.</P>
         </Section>
 
-        <Section title="Stars, leagues and streaks">
+        <Section title="Medals and streaks">
           <P>
-            Every account starts at {BASE_STARS} stars. Win a ranked game and you gain stars, lose
-            one and you drop some, with the size of the swing depending on how strong your opponent
-            was — a win against someone well above you is worth more than a win against someone
-            below you. Stars never fall below {MIN_STARS}, and a game is only ranked when both
-            players are logged in.
+            Every account starts with {BASE_STARS} medals. Win a ranked game and you earn medals,
+            lose one and you drop some, with the size of the swing depending on how strong your
+            opponent was — a win against someone well above you is worth more than a win against
+            someone below you. Medals never fall below {MIN_STARS}, and a game is only ranked when
+            both players are logged in.
           </P>
-          <P>Your star total puts you in a league:</P>
-          <List
-            items={LEAGUES.map((tier) =>
-              tier.maxStars === null
-                ? `${tier.name} — ${tier.minStars} stars and up`
-                : `${tier.name} — ${tier.minStars} to ${tier.maxStars} stars`,
-            )}
-          />
           <P>
-            Leagues are worked out from your stars rather than stored, so you move between them the
-            moment your total crosses a boundary. Separately, a streak counts the days in a row you
-            have played at least one turn, measured against your own device&apos;s time zone. Miss a
-            single day and a Streak Freeze keeps it alive; play the next day to thaw it out. A
-            freeze then takes {FREEZE_COOLDOWN_DAYS} days to recharge, and missing two days in a row
-            ends the streak.
+            A streak counts the days in a row you have played at least one turn, measured against
+            your own device&apos;s time zone. Miss a single day and a Streak Freeze keeps it alive;
+            play the next day to thaw it out. A freeze then takes {FREEZE_COOLDOWN_DAYS} days to
+            recharge, and missing two days in a row ends the streak.
           </P>
         </Section>
 
@@ -151,7 +137,7 @@ export default function HowToPlayPage() {
             is and how long is left.
           </P>
           <P>
-            Playing needs a free account, which is what your username, stars, streak and match
+            Playing needs a free account, which is what your username, medals, streak and match
             history are attached to. You can sign in with Google or with a link sent to your email.
           </P>
         </Section>

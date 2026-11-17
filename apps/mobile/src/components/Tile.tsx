@@ -61,8 +61,10 @@ export function Tile({
       className={`aspect-square w-full items-center justify-center border-b border-r ${
         isTop ? "border-t" : ""
       } ${isLeft ? "border-l" : ""}`}
-      style={{ backgroundColor: fill, borderColor: palette.border }}
+      // Board colour under the translucent border, fill inside it, so grid lines match on every tile.
+      style={{ backgroundColor: palette.board, borderColor: palette.border }}
     >
+      <View className="absolute inset-0" style={{ backgroundColor: fill }} />
       {locked ? (
         <View
           className="aspect-square w-[62%] items-center justify-center rounded-full"

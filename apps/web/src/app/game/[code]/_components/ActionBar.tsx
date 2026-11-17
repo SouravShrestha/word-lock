@@ -24,7 +24,9 @@ function ActionButton({
       disabled={disabled}
       aria-label={label}
       className={cn(
-        "press grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface-2 text-foreground",
+        "grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface-2 text-foreground",
+        "transition-[transform,box-shadow] duration-75 shadow-[0_4px_0_0_var(--depth-surface-2)]",
+        "active:enabled:translate-y-[3px] active:enabled:shadow-[0_1px_0_0_var(--depth-surface-2)]",
         "disabled:pointer-events-none disabled:opacity-35",
       )}
     >

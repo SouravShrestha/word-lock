@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { ChevronRightIcon } from "@word-lock/icons";
 
 import { DrawFaceIcon } from "@/components/icons/DrawFaceIcon";
 import { LossFaceIcon } from "@/components/icons/LossFaceIcon";
@@ -30,7 +31,7 @@ export function MatchRow({
     <button
       type="button"
       onClick={() => onSelect(entry)}
-      className="press flex w-full items-center gap-3.5 px-5 py-3.5 text-left mt-1.5"
+      className="flex w-full items-center gap-3.5 px-5 py-3.5 text-left mt-1.5 transition-colors duration-100 active:bg-foreground/[0.04]"
     >
       <Avatar avatar={entry.opponentAvatar} />
 
@@ -47,8 +48,8 @@ export function MatchRow({
         </span>
       </span>
 
-      <span className="flex shrink-0 flex-col items-end gap-1.5">
-        <span className="font-semibold tracking-wide tv-body text-sky">Details</span>
+      <span className="shrink-0 text-muted-foreground">
+        <ChevronRightIcon size={16} />
       </span>
     </button>
   );

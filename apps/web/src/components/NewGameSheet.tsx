@@ -10,19 +10,11 @@ import { TIME_CONTROLS, type TimeControl } from "@word-lock/core/game";
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { CrossIcon } from "@/components/icons/CrossIcon";
-import { BulletIcon, ClockIcon, LightningIcon, SunFullIcon } from "@word-lock/icons";
 import { cn } from "@/lib/utils";
 
-// Placeholder artwork until the modes get icons of their own.
-const ICONS: Record<TimeControl, ReactNode> = {
-  "10m": <BulletIcon size={24} />,
-  "30m": <LightningIcon size={24} />,
-  "60m": <ClockIcon size={24} />,
-  daily: <SunFullIcon size={20} />,
-};
-
-const BANK = TIME_CONTROLS.filter((c) => c.group === "bank");
-const DAILY = TIME_CONTROLS.filter((c) => c.group === "daily");
+const icon = (id: TimeControl): ReactNode => (
+  <img src={`/christmas/modes/mode-${id}.webp`} alt="" width={28} height={28} />
+);
 
 /**
  * The one way a room gets created: every "New Game" button (home, the game-over
@@ -63,8 +55,7 @@ export function NewGameSheet({
 
   return (
     <BottomSheet open={open} onClose={onClose} label="New game" zClassName={zClassName}>
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg">Start a game</h2>
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={onClose}
@@ -74,43 +65,29 @@ export function NewGameSheet({
           <CrossIcon className="h-3.5 w-3.5" />
         </button>
       </div>
-      <div className="mt-8 flex gap-3">
-        {BANK.map((c) => (
+      <div className="mt-10 flex gap-3">
+        {TIME_CONTROLS.map((c) => (
           <button
             key={c.id}
             {...option(c.id)}
             className={cn(
-              "soft-btn flex flex-1 flex-col items-center gap-2 px-2 py-4 tv-label",
+              "soft-btn flex flex-1 flex-col items-center gap-3 px-2 py-7 tv-label",
               tone(c.id),
             )}
           >
-            {ICONS[c.id]}
+            {icon(c.id)}
             {c.label}
           </button>
         ))}
       </div>
 
-      {DAILY.map((c) => (
-        <button
-          key={c.id}
-          {...option(c.id)}
-          className={cn(
-            "soft-btn mt-3 flex w-full items-center justify-center gap-3 px-4 py-4 tv-label",
-            tone(c.id),
-          )}
-        >
-          {ICONS[c.id]}
-          {c.label}
-        </button>
-      ))}
-
       <button
         type="button"
         onClick={() => createMutation.mutate()}
         disabled={!ready || createMutation.isPending}
-        className="soft-btn btn-mint mt-8 w-full py-3.5 tv-body-base tracking-wide disabled:opacity-60"
+        className="soft-btn btn-mint mt-10 w-full py-3.5 tv-body-base tracking-wide disabled:opacity-60"
       >
-        {createMutation.isPending ? "Creating" : "Create room"}
+        {createMutation.isPending ? "Creating" : "Start game"}
       </button>
     </BottomSheet>
   );

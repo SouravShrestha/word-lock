@@ -8,7 +8,6 @@ import { loadGame, toEngineMoves, turnDeadlineOf, type GameRow, type MoveRow } f
 import {
   chargeClock,
   computeBoardState,
-  isBankControl,
   isTurnExpired,
   turnDeadlineFor,
   validateMove,
@@ -41,7 +40,7 @@ export async function claimTurn(game: GameRow, expectedPlayerId: string): Promis
 function chargedClock(game: GameRow, moverId: string, turnStartedAt: string, nowMs: number) {
   const slot = moverId === game.player1_id ? 1 : 2;
   const bank = slot === 1 ? game.p1_clock_ms : game.p2_clock_ms;
-  const charged = isBankControl(game.time_control) ? chargeClock(bank, turnStartedAt, nowMs) : bank;
+  const charged = chargeClock(bank, turnStartedAt, nowMs);
   return { slot, charged, patch: slot === 1 ? { p1_clock_ms: charged } : { p2_clock_ms: charged } };
 }
 
@@ -94,14 +93,14 @@ export async function finishOrAdvance(game: GameRow, moves: MoveRow[], turnStart
     .update({
       current_turn_player_id: next,
       last_move_at: now,
-      turn_deadline: turnDeadlineFor(game.time_control, nextBank, nowMs),
+      turn_deadline: turnDeadlineFor(nextBank, nowMs),
       ...mover.patch,
     })
     .eq("id", game.id);
 }
 
 /**
- * A timed game whose player on turn ran out: the opponent wins, ranked exactly
+ * A player on turn who ran out of time: the opponent wins, ranked exactly
  * like a forfeit. `claimTurn` first, so a move racing the flag either lands
  * before this (and the claim fails) or is rejected after it.
  */
@@ -140,41 +139,17 @@ async function loseOnTime(game: GameRow, loserId: string): Promise<boolean> {
 
 /**
  * The one path for a turn whose deadline has passed, shared by the client-fired
- * timeout and the cron sweep. A timed game is lost on time; a daily game passes
- * the move for the player, as every game did before time controls existed.
+ * timeout and the cron sweep: the player on turn loses on time.
  */
-export async function expireTurn(game: GameRow, moves: MoveRow[]): Promise<boolean> {
+export async function expireTurn(game: GameRow): Promise<boolean> {
   const playerId = game.current_turn_player_id;
   if (!playerId) return false;
-
-  if (isBankControl(game.time_control)) return loseOnTime(game, playerId);
-
-  const turnStartedAt = game.last_move_at;
-  try {
-    await claimTurn(game, playerId);
-  } catch {
-    return false;
-  }
-
-  const { data: inserted, error } = await getSupabaseAdmin()
-    .from("wl_moves")
-    .insert({ game_id: game.id, player_id: playerId, word: "", tile_indices: [], passed: true })
-    .select("*")
-    .single();
-  if (error || !inserted) return false;
-
-  await finishOrAdvance(game, [...moves, inserted as MoveRow], turnStartedAt);
-  return true;
+  return loseOnTime(game, playerId);
 }
 
-/**
- * A move from a player whose bank already ran out ends the game instead of
- * landing. Daily games have no such rule: a late move there is still a move
- * until someone sweeps the turn.
- */
+/** A move from a player whose bank already ran out ends the game instead of landing. */
 async function rejectIfOutOfTime(game: GameRow, playerId: string) {
   if (game.status !== "active" || game.current_turn_player_id !== playerId) return;
-  if (!isBankControl(game.time_control)) return;
   if (!isTurnExpired(turnDeadlineOf(game), Date.now())) return;
 
   await loseOnTime(game, playerId);
@@ -286,7 +261,7 @@ export async function timeoutGame(caller: Caller, roomCode: string) {
   const player = await resolvePlayer(caller);
   const loaded = await loadGame(roomCode);
   if (!loaded) throw new PublicError("No game found with that code. ");
-  const { game, moves } = loaded;
+  const { game } = loaded;
 
   if (game.status !== "active") throw new PublicError("This game isn't active.");
   if (game.player1_id !== player.id && game.player2_id !== player.id) {
@@ -297,6 +272,6 @@ export async function timeoutGame(caller: Caller, roomCode: string) {
     throw new PublicError("Turn has not expired yet.");
   }
 
-  await expireTurn(game, moves);
+  await expireTurn(game);
   return { ok: true };
 }

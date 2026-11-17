@@ -1,7 +1,13 @@
 import { Text } from "@/components/text";
 import type { ComponentType } from "react";
 import { Pressable, View } from "react-native";
-import { DrawFaceIcon, LossFaceIcon, WinFaceIcon, type IconProps } from "@word-lock/icons/native";
+import {
+  ChevronRightIcon,
+  DrawFaceIcon,
+  LossFaceIcon,
+  WinFaceIcon,
+  type IconProps,
+} from "@word-lock/icons/native";
 import type { GameResult, RecentGameEntry } from "@word-lock/core/game";
 import { colors } from "@word-lock/tokens/native";
 
@@ -37,9 +43,7 @@ export function MatchRow({
         </View>
       </View>
 
-      <Text variant="label" className="shrink-0 tracking-wide" style={{ color: palette.sky }}>
-        Details
-      </Text>
+      <ChevronRightIcon size={16} color={palette.mutedForeground} />
     </Pressable>
   );
 }

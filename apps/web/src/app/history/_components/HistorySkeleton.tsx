@@ -13,9 +13,9 @@ export function HistorySkeleton() {
         <h1 className="font-display tv-screen-title">Your matches</h1>
       </header>
 
-      <span className="shimmer mt-7 inline-block h-4 w-28 rounded-xs" />
+      <div className="mt-7 h-px bg-hairline opacity-60" />
 
-      <ul className="-mx-5 mt-3 flex flex-col pt-1">
+      <ul className="-mx-5 mt-3 flex flex-col gap-3 pt-1">
         {Array.from({ length: 6 }, (_, i) => (
           <li key={i}>
             <MatchRowSkeleton />
@@ -32,14 +32,14 @@ function MatchRowSkeleton() {
       <span className="shimmer h-14 w-14 shrink-0 rounded-full" />
 
       <span className="min-w-0 flex-1">
-        <span className="shimmer block h-4 w-28 rounded-xs" />
+        <span className="shimmer block h-4 w-28 rounded-lg" />
         <span className={cn("mt-2 flex items-center gap-3")}>
-          <span className="shimmer h-3 w-16 rounded-xs" />
-          <span className="shimmer h-3 w-12 rounded-xs" />
+          <span className="shimmer h-3 w-16 rounded-lg" />
+          <span className="shimmer h-3 w-12 rounded-lg" />
         </span>
       </span>
 
-      <span className="shimmer h-4 w-14 shrink-0 rounded-xs" />
+      <span className="shimmer h-4 w-14 shrink-0 rounded-lg" />
     </div>
   );
 }

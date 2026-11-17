@@ -137,7 +137,6 @@ export function BottomSheet({
         onClick={dismissable ? guardedClose : undefined}
         className={cn(
           "fixed inset-0 bg-black/50 duration-200",
-          !dismissable && "pointer-events-none",
           zClassName,
           closing ? "animate-out fade-out fill-mode-forwards" : "animate-in fade-in",
         )}
@@ -163,7 +162,7 @@ export function BottomSheet({
           }}
           className={cn(
             "pointer-events-auto w-full max-w-md rounded-t-2xl bg-background p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]",
-            "max-h-[calc(100dvh-1.5rem)] overflow-y-auto",
+            "max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain",
             closing
               ? "animate-out slide-out-to-bottom fill-mode-forwards duration-200"
               : "animate-in slide-in-from-bottom duration-300",

@@ -19,7 +19,7 @@ export function ReviewBar({
     : move.word.charAt(0).toUpperCase() + move.word.slice(1).toLowerCase();
 
   return (
-    <div className="bg-board flex h-12 w-full items-center justify-between gap-3 px-4 py-3 rounded-xs">
+    <div className="bg-board flex h-12 w-full items-center justify-between gap-3 px-4 py-3 rounded-lg">
       <span className="shrink-0 select-none tv-caption font-medium tabular-nums text-muted-foreground">
         {moveNumber} / {moveCount}
       </span>

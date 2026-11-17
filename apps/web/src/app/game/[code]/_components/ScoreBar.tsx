@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { clockLabelFor, isBankControl } from "@word-lock/core/game";
+import { clockLabelFor } from "@word-lock/core/game";
 import { Avatar } from "@/components/Avatar";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,6 @@ function PlayerChip({
   slot,
   mirrored,
   reaction,
-  isBank,
 }: {
   player: { name: string; avatar: string } | null;
   score: number;
@@ -31,15 +30,15 @@ function PlayerChip({
   slot: 1 | 2;
   mirrored: boolean;
   reaction?: { key: number; emoji: string } | null;
-  isBank: boolean;
 }) {
   const ring = slot === 1 ? "ring-p1" : "ring-p2";
   const scoreColor = active ? (slot === 1 ? "text-p1" : "text-p2") : "text-muted-foreground";
-  const cardColor = active ? (slot === 1 ? "bg-p1/30" : "bg-p2/30") : "bg-card";
-  const borderColor = active ? (slot === 1 ? "border-p1/40" : "border-p2/40") : "border-border";
-  const timeColor = active ? (slot === 1 ? "text-p1" : "text-p2") : "text-muted-foreground";
+  const cardColor = active ? (slot === 1 ? "bg-p1-soft" : "bg-p2-soft") : "bg-card";
+  const borderColor = active ? (slot === 1 ? "border-p1" : "border-p2") : "border-border";
+  const timeColor = active
+    ? cn(slot === 1 ? "text-p1" : "text-p2", "dark:text-white")
+    : "text-muted-foreground";
   const row = cn("flex items-center gap-2", mirrored && "flex-row-reverse");
-  const clockWidth = isBank ? "w-16" : "w-20";
 
   return (
     <div className={cn(row, "-mx-3 justify-between")}>
@@ -59,7 +58,7 @@ function PlayerChip({
             className={cn(
               "h-12 w-12 shrink-0 ring-offset-card transition-opacity duration-200",
               ring,
-              active ? "ring-[3px] ring-offset-2" : "ring-2 ring-offset-2 opacity-60",
+              active ? "ring-[3px] ring-offset-2" : "ring-2 ring-offset-2 opacity-85",
             )}
           />
         </div>
@@ -76,8 +75,7 @@ function PlayerChip({
       <div className={cn("flex flex-col", mirrored ? "items-center gap-1" : "items-center gap-2")}>
         <div
           className={cn(
-            clockWidth,
-            "flex flex-col items-center rounded-md pb-2 pt-2.5 border-2",
+            "w-16 flex flex-col items-center rounded-md pb-2 pt-2.5 border-2",
             cardColor,
             borderColor,
           )}
@@ -135,7 +133,6 @@ export function ScoreBar({
     score: (scores ?? game.scores)[slot],
     active: slot === 1 ? p1Active : p2Active,
     reaction: reaction?.slot === slot ? reaction : null,
-    isBank: isBankControl(game.timeControl),
   });
 
   return (

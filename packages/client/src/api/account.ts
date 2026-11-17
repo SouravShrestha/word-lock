@@ -1,5 +1,5 @@
 import { get, post } from "./transport";
-import type { AccountSummary, LeaderboardView, UsernameAvailability } from "./types";
+import type { AccountSummary, UsernameAvailability } from "./types";
 
 export async function claimAccountFn(data: { sessionId: string }) {
   return post("/api/account/claim", data);
@@ -24,8 +24,11 @@ export async function deleteAccountFn(data: { sessionId: string }) {
   return post("/api/account/delete", data);
 }
 
-export async function fetchLeaderboardFn(): Promise<LeaderboardView> {
-  return get("/api/account/leaderboard");
+/** Store-review sign-in; 404s unless the email and code match the server's. */
+export async function reviewLoginFn(data: { email: string; code: string }): Promise<{
+  tokenHash: string;
+}> {
+  return post("/api/auth/review-login", data);
 }
 
 export async function checkUsernameFn(username: string): Promise<UsernameAvailability> {

@@ -1,7 +1,7 @@
 import { Text } from "@/components/text";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
-import { clockLabelFor, isBankControl } from "@word-lock/core/game";
+import { clockLabelFor } from "@word-lock/core/game";
 import { colors } from "@word-lock/tokens/native";
 
 import { Avatar } from "@/components/Avatar";
@@ -25,7 +25,6 @@ function PlayerChip({
   slot,
   mirrored,
   reaction,
-  isBank,
 }: {
   player: { name: string; avatar?: string | null } | null;
   score: number;
@@ -34,17 +33,19 @@ function PlayerChip({
   slot: 1 | 2;
   mirrored: boolean;
   reaction?: { key: number; emoji: string } | null;
-  isBank: boolean;
 }) {
   const { resolvedTheme } = useTheme();
   const palette = colors[resolvedTheme];
   const ring = slot === 1 ? palette.p1 : palette.p2;
   const scoreColor = active ? ring : palette.mutedForeground;
-  const cardColor = active ? ring + "30" : palette.card;
-  const borderColor = active ? ring + "40" : palette.border;
-  const timeColor = active ? ring : palette.mutedForeground;
+  const cardColor = active ? (slot === 1 ? palette.p1Soft : palette.p2Soft) : palette.card;
+  const borderColor = active ? ring : palette.border;
+  const timeColor = active
+    ? resolvedTheme === "dark"
+      ? palette.foreground
+      : ring
+    : palette.mutedForeground;
   const row = `flex-row items-center gap-2 ${mirrored ? "flex-row-reverse" : ""}`;
-  const clockWidth = isBank ? "w-16" : "w-20";
 
   return (
     <View className={`${row} -mx-5 justify-between`}>
@@ -60,7 +61,7 @@ function PlayerChip({
             padding: active ? 3 : 2,
             borderWidth: active ? 3 : 2,
             borderColor: ring,
-            opacity: active ? 1 : 0.6,
+            opacity: active ? 1 : 0.85,
           }}
         >
           <Avatar avatar={player?.avatar} size={40} />
@@ -76,7 +77,7 @@ function PlayerChip({
       </View>
       <View className={mirrored ? "items-center gap-1" : "items-center gap-2"}>
         <View
-          className={`${clockWidth} items-center rounded-md pb-2 pt-2.5 border-2`}
+          className={`w-16 items-center rounded-md pb-2 pt-2.5 border-2`}
           style={{ backgroundColor: cardColor, borderColor: borderColor }}
         >
           <Text variant="score" className="text-sm leading-none" style={{ color: timeColor }}>
@@ -137,7 +138,6 @@ export function ScoreBar({
     score: (scores ?? game.scores)[slot],
     active: slot === 1 ? p1Active : p2Active,
     reaction: reaction?.slot === slot ? reaction : null,
-    isBank: isBankControl(game.timeControl),
   });
 
   return (

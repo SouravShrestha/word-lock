@@ -69,7 +69,9 @@ export function StatisticsCard({
       <div className="flex items-baseline justify-between gap-3 px-5">
         <div className="flex items-baseline gap-2">
           <span className="font-display text-4xl font-bold tabular-nums">{stars}</span>
-          <TrendLabel delta={delta} />
+          <span className="relative -top-1">
+            <TrendLabel delta={delta} />
+          </span>
         </div>
         <span className="tv-caption text-muted-foreground">Peak {account?.peakStars ?? stars}</span>
       </div>
@@ -107,7 +109,7 @@ export function StatisticsCard({
         ) : (
           <div className="grid h-56 place-items-center px-6 text-center">
             <p className="tv-body text-muted-foreground">
-              Play a few ranked games and your star history will show up here.
+              Play a few ranked games and your medal history will show up here.
             </p>
           </div>
         )}

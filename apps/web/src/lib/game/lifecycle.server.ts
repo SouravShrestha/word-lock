@@ -110,7 +110,7 @@ export async function startGame(caller: Caller, roomCode: string) {
   const player = await resolvePlayer(caller);
   const { data: game } = await getSupabaseAdmin()
     .from("wl_games")
-    .select("id, status, player1_id, player2_id, time_control, p1_clock_ms")
+    .select("id, status, player1_id, player2_id, p1_clock_ms")
     .eq("room_code", roomCode.toUpperCase())
     .maybeSingle();
 
@@ -126,7 +126,7 @@ export async function startGame(caller: Caller, roomCode: string) {
       status: "active",
       current_turn_player_id: game.player1_id,
       last_move_at: new Date(now).toISOString(),
-      turn_deadline: turnDeadlineFor(game.time_control, game.p1_clock_ms, now),
+      turn_deadline: turnDeadlineFor(game.p1_clock_ms, now),
     })
     .eq("id", game.id);
   if (error) throw new Error(error.message);

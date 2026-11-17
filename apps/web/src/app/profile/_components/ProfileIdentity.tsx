@@ -38,7 +38,7 @@ export function ProfileIdentity({
         <Avatar avatar={avatar} className="h-18 w-18" />
         <span
           aria-hidden
-          className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full bg-sky text-background"
+          className="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full bg-sky text-white"
         >
           <PencilIcon className="h-3 w-3" />
         </span>

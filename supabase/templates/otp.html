@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#ffffff; font-family:Helvetica, Arial, sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff; padding:40px 0;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="420" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:12px; padding:32px; border:1px solid #e5e5e5;">
+        <tr>
+          <td>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="left" valign="middle" style="font-size:18px; font-weight:700; color:#18181b;">Word Lock</td>
+                <td align="right" valign="middle">
+                  <span style="background-color:#f4f4f5; color:#52525b; font-size:12px; padding:6px 14px; border-radius:20px; white-space:nowrap;">Sign-in code</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:28px;">
+            <p style="margin:0; font-size:22px; color:#18181b;">Hello!</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:6px;">
+            <p style="margin:0; font-size:14px; color:#71717a;">Your one-time password (OTP) is:</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:18px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center" style="background-color:#f4f4f5; border-radius:10px; padding:20px 0;">
+                  <span style="font-size:34px; font-weight:600; letter-spacing:8px; color:#18181b;">{{ .Token }}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:24px;">
+            <p style="margin:0; font-size:13px; color:#71717a;">
+              On the web, you can <a href="{{ .ConfirmationURL }}" style="color:#18181b;">sign in with this link</a> instead.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:24px;">
+            <p style="margin:0; font-size:13px; color:#71717a;">
+              This code expires shortly and can only be used once.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

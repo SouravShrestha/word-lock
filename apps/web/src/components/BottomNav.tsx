@@ -4,19 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HomeNavIcon } from "@/components/icons/nav/HomeNavIcon";
 import { HistoryNavIcon } from "@/components/icons/nav/HistoryNavIcon";
-import { TrophyNavIcon } from "@/components/icons/nav/TrophyNavIcon";
 import { ProfileNavIcon } from "@/components/icons/nav/ProfileNavIcon";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { href: "/", label: "Home", Icon: HomeNavIcon, iconClassName: "h-6 w-6" },
   { href: "/history", label: "Matches", Icon: HistoryNavIcon, iconClassName: "h-10 w-10" },
-  {
-    href: "/leaderboard",
-    label: "Leaderboards",
-    Icon: TrophyNavIcon,
-    iconClassName: "h-8 w-8",
-  },
   { href: "/profile", label: "Profile", Icon: ProfileNavIcon, iconClassName: "h-7 w-7 mr-1" },
 ] as const;
 

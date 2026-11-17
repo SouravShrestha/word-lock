@@ -75,7 +75,6 @@ export function UsernameSheet() {
     mutationFn: () => setUsernameFn({ sessionId: sessionId!, username: normalized }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["account"] });
-      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
     },
   });
 

@@ -1,16 +1,16 @@
 import { Text } from "@/components/text";
 import { useSession, joinGameFn } from "@word-lock/client";
+import { roomCodeAfterPaste } from "@word-lock/core/game";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@word-lock/tokens/native";
 
 import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/Button";
 import { RoomCodeKeypad } from "@/components/RoomCodeKeypad";
-import { SectionLabel } from "@/components/SectionLabel";
 import { useTheme } from "@/theme/ThemeProvider";
 
 const CODE_LENGTH = 5;
@@ -44,6 +44,16 @@ export default function JoinScreen() {
     if (joinMutation.error) joinMutation.reset();
   };
 
+  // Only a paste reaches the overlay TextInput (its soft keyboard is off), so treat any change as one.
+  const handleChangeText = (text: string) => {
+    setJoinCode(
+      text.startsWith(joinCode)
+        ? roomCodeAfterPaste(joinCode, text.slice(joinCode.length))
+        : roomCodeAfterPaste("", text),
+    );
+    if (joinMutation.error) joinMutation.reset();
+  };
+
   const handleSubmit = () => {
     if (joinCode.length === CODE_LENGTH) {
       joinMutation.mutate();
@@ -57,9 +67,18 @@ export default function JoinScreen() {
       </View>
 
       <View className="mx-auto flex-1 w-full max-w-sm px-0">
-        <SectionLabel className="mt-8">Join a room</SectionLabel>
-
-        <View className="mx-auto mb-8 mt-8 w-full max-w-[300px] flex-row gap-2.5">
+        <View className="mx-auto mb-8 mt-20 w-full max-w-[300px] flex-row gap-2.5">
+          {/* Invisible input over the boxes so a long-press offers the system Paste menu. */}
+          <TextInput
+            value={joinCode}
+            onChangeText={handleChangeText}
+            showSoftInputOnFocus={false}
+            caretHidden
+            autoCorrect={false}
+            autoCapitalize="characters"
+            accessibilityLabel="Room code"
+            style={[StyleSheet.absoluteFill, { zIndex: 1, color: "transparent" }]}
+          />
           {Array.from({ length: CODE_LENGTH }, (_, i) => {
             const char = joinCode[i];
             const isCursor = i === joinCode.length;

@@ -1,11 +1,11 @@
 import { useState } from "react";
+import { copyText } from "@/lib/copy-text";
 import { Check, Copy } from "@/components/icons";
 import { Avatar } from "@/components/Avatar";
 import { InviteIcon } from "@/components/icons/InviteIcon";
 import { BackButton } from "@/components/BackButton";
 import { SectionLabel } from "@/components/SectionLabel";
 import { InviteFriends } from "./InviteFriends";
-import { timeControlFor } from "@word-lock/core/game";
 
 export function WaitingLobby({
   roomCode,
@@ -29,6 +29,7 @@ export function WaitingLobby({
   onLeave: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -37,19 +38,26 @@ export function WaitingLobby({
   const isHost = game.viewerSlot === 1;
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(roomCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: "Join my Word-lock game!", url: shareUrl }).catch(console.error);
-    } else {
-      navigator.clipboard?.writeText(shareUrl);
+    copyText(roomCode).then((ok) => {
+      if (!ok) return;
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }
+    });
+  };
+
+  const copyLink = () =>
+    copyText(shareUrl).then((ok) => {
+      if (!ok) return;
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    });
+
+  // navigator.share only exists on secure origins; a cancel is AbortError, anything else falls back.
+  const handleShare = () => {
+    if (!navigator.share) return void copyLink();
+    navigator.share({ title: "Join my Word-lock game!", url: shareUrl }).catch((e) => {
+      if (e?.name !== "AbortError") copyLink();
+    });
   };
 
   const handleStart = async () => {
@@ -89,12 +97,6 @@ export function WaitingLobby({
             </div>
           )}
 
-          {/* The joiner sees the pace before the host starts, not after. */}
-          <p className="-mt-6 flex items-center gap-1.5 tv-caption text-muted-foreground">
-            This is a <span className="font-bold">{timeControlFor(game.timeControl).label} </span>
-            game
-          </p>
-
           <div className="flex w-full max-w-xs items-start justify-between px-4 mt-0 mb-3">
             <PlayerSlot name={game.players.one?.name ?? "You"}>
               <Avatar avatar={game.players.one?.avatar} className="h-16 w-16" />
@@ -116,12 +118,12 @@ export function WaitingLobby({
                   <InviteIcon className="h-5 w-5" />
                 </span>
                 <span className="max-w-20 truncate text-center tv-caption font-bold">
-                  Share link
+                  {linkCopied ? "Link copied" : "Share link"}
                 </span>
               </button>
             ) : (
               <div className="flex flex-col items-center gap-2.5">
-                <span className="grid h-16 w-16 place-items-center rounded-[0.9rem] bg-surface/40">
+                <span className="grid h-16 w-16 place-items-center rounded-[1.25rem] bg-surface/40">
                   <span
                     aria-hidden
                     className="h-11 w-11 rounded-full border-2 border-dashed border-muted-foreground/30"

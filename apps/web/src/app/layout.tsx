@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 
 import { QueryProvider } from "@/components/QueryProvider";
 import { TopLoader } from "@/components/TopLoader";
+import { HomeSnow } from "./_components/HomeSnow";
 import { SessionProvider } from "@/components/SessionProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { AuthGate } from "@/components/AuthGate";
@@ -23,8 +24,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1b2026" },
+    // Must equal --background (packages/tokens) for each theme, or the bar shows a seam.
+    { media: "(prefers-color-scheme: light)", color: "#fbf9ed" },
+    { media: "(prefers-color-scheme: dark)", color: "#131f24" },
   ],
 };
 
@@ -69,12 +71,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body suppressHydrationWarning>
         <TopLoader />
+        <HomeSnow />
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SessionProvider>
               <AuthProvider>
-                {children}
-                <AuthGate />
+                <AuthGate>{children}</AuthGate>
                 <Suspense fallback={null}>
                   <AuthErrorNotice />
                 </Suspense>

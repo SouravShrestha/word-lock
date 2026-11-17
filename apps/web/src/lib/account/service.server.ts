@@ -14,8 +14,6 @@ import {
   validateUsername,
   isAvatarId,
   normalizeAvatarId,
-  leagueForStars,
-  type LeagueId,
 } from "@word-lock/core/account";
 
 /** Postgres unique-violation. Raised by the unique index on `lower(username)`. */
@@ -42,11 +40,6 @@ export interface AccountSummary {
   /** Highest star count ever reached. Never decreases. */
   peakStars: number;
   starGames: number;
-  /**
-   * Derived from `stars` rather than stored, and sent anyway so every surface
-   * reads the same band the server does instead of each recomputing it.
-   */
-  league: LeagueId;
   playStreak: number;
   bestPlayStreak: number;
   /**
@@ -71,7 +64,6 @@ export async function getAccountSummary(caller: Caller): Promise<AccountSummary>
     stars: player.stars,
     peakStars: player.peak_stars,
     starGames: player.star_games,
-    league: leagueForStars(player.stars).id,
     playStreak: player.play_streak,
     bestPlayStreak: player.best_play_streak,
     lastPlayedOn: player.last_played_on,

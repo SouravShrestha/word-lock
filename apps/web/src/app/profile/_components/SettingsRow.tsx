@@ -4,56 +4,67 @@ import type { ReactNode } from "react";
 import { ChevronRightIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-const ROW = "flex w-full items-center gap-3.5 px-2 py-4 text-left";
+const ROW = "flex min-h-16 w-full items-center text-left";
+
+export function SettingsGroup({ children }: { children: ReactNode }) {
+  return <section className="flex flex-col">{children}</section>;
+}
 
 function Body({
+  icon,
   label,
   hint,
-  labelClassName,
+  value,
 }: {
+  icon?: ReactNode;
   label: string;
   hint?: ReactNode;
-  labelClassName?: string;
+  value?: ReactNode;
 }) {
   return (
-    <div className="min-w-0 flex-1">
-      <p className={cn("tv-body tracking-wide", labelClassName)}>{label}</p>
-      {hint ? <p className="mt-0.5 tv-caption text-muted-foreground">{hint}</p> : null}
-    </div>
+    <>
+      {icon ? <span className="flex w-8 shrink-0">{icon}</span> : null}
+      <span className="min-w-0 flex-1">
+        <span className="block text-base font-normal">{label}</span>
+        {hint ? (
+          <span className="mt-0.5 block tv-caption text-muted-foreground">{hint}</span>
+        ) : null}
+      </span>
+      {value ? (
+        <span className="ml-3 max-w-[60%] truncate text-sm font-normal text-muted-foreground">
+          {value}
+        </span>
+      ) : null}
+    </>
   );
 }
 
+const Chevron = () => (
+  <ChevronRightIcon aria-hidden size={16} className="ml-2 shrink-0 text-muted-foreground" />
+);
+
 export function SettingsRow({
+  icon,
   label,
   hint,
+  value,
   href,
   onClick,
   className,
-  destructive = false,
 }: {
+  icon?: ReactNode;
   label: string;
   hint?: ReactNode;
+  value?: ReactNode;
   href?: string;
   onClick?: () => void;
   className?: string;
-  destructive?: boolean;
 }) {
   const content = (
-    <div className="py-1 flex flex-row justify-between w-full">
-      <Body
-        label={label}
-        hint={hint}
-        labelClassName={destructive ? "text-destructive" : undefined}
-      />
-      {!destructive && (
-        <ChevronRightIcon
-          aria-hidden
-          size={16}
-          className="shrink-0 text-muted-foreground"
-          strokeWidth={2.5}
-        />
-      )}
-    </div>
+    <>
+      <Body icon={icon} label={label} hint={hint} value={value} />
+      <Chevron />
+    </>
   );
 
   if (href) {
@@ -76,26 +87,18 @@ export function SettingsRow({
   );
 }
 
-export function SettingsField({
+export function SettingsInfoRow({
+  icon,
   label,
   value,
-  hint,
 }: {
+  icon?: ReactNode;
   label: string;
   value: ReactNode;
-  hint?: ReactNode;
 }) {
   return (
     <div className={ROW}>
-      <div className="min-w-0 flex-1">
-        <p className="tv-eyebrow text-muted-foreground">{label}</p>
-        <p className="mt-1 truncate tv-body tracking-wide">{value}</p>
-        {hint ? <p className="mt-0.5 tv-caption text-muted-foreground">{hint}</p> : null}
-      </div>
+      <Body icon={icon} label={label} value={value} />
     </div>
   );
-}
-
-export function SettingsGroup({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col">{children}</div>;
 }

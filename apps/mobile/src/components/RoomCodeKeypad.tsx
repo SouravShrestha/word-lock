@@ -11,6 +11,16 @@ const ROW1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"] as const;
 const ROW2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L"] as const;
 const ROW3 = ["Z", "X", "C", "V", "B", "N", "M"] as const;
 
+/* Light theme keys match the home screen's Join button. */
+function useKeyColors(surface: "surface" | "surface2") {
+  const { resolvedTheme } = useTheme();
+  const palette = colors[resolvedTheme];
+  if (resolvedTheme === "light") return { fill: "#EBDFC0", lip: "#C2B085" };
+  return surface === "surface"
+    ? { fill: palette.surface, lip: palette.depthSurface }
+    : { fill: palette.surface2, lip: palette.depthSurface2 };
+}
+
 interface RoomCodeKeypadProps {
   onKey: (char: string) => void;
   onBackspace: () => void;
@@ -81,8 +91,7 @@ export function RoomCodeKeypad({
 }
 
 function LetterKey({ char, onPress }: { char: string; onPress: () => void }) {
-  const { resolvedTheme } = useTheme();
-  const palette = colors[resolvedTheme];
+  const key = useKeyColors("surface");
   const [pressed, setPressed] = useState(false);
 
   return (
@@ -92,11 +101,11 @@ function LetterKey({ char, onPress }: { char: string; onPress: () => void }) {
       onPress={onPress}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
-      className="h-12 flex-1 items-center justify-center rounded-lg"
+      className="h-12 flex-1 items-center justify-center rounded-md"
       style={{
-        backgroundColor: palette.surface,
+        backgroundColor: key.fill,
         transform: [{ translateY: pressed ? 2 : 0 }],
-        shadowColor: palette.depthSurface,
+        shadowColor: key.lip,
         shadowOffset: { width: 0, height: pressed ? 1 : 3 },
         shadowOpacity: 1,
         shadowRadius: 0,
@@ -116,8 +125,7 @@ function LetterKey({ char, onPress }: { char: string; onPress: () => void }) {
  * version needed three DOM listeners for.
  */
 function ActionKey({ onPress, children }: { onPress: () => void; children: ReactNode }) {
-  const { resolvedTheme } = useTheme();
-  const palette = colors[resolvedTheme];
+  const key = useKeyColors("surface2");
   const [pressed, setPressed] = useState(false);
   const holdTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdInterval = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -152,11 +160,11 @@ function ActionKey({ onPress, children }: { onPress: () => void; children: React
       accessibilityLabel="Backspace"
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      className="h-12 flex-[1.5] items-center justify-center rounded-lg"
+      className="h-12 flex-[1.5] items-center justify-center rounded-md"
       style={{
-        backgroundColor: palette.surface2,
+        backgroundColor: key.fill,
         transform: [{ translateY: pressed ? 2 : 0 }],
-        shadowColor: palette.depthSurface2,
+        shadowColor: key.lip,
         shadowOffset: { width: 0, height: pressed ? 1 : 3 },
         shadowOpacity: 1,
         shadowRadius: 0,

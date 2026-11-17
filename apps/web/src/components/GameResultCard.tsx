@@ -214,8 +214,7 @@ function verdict(game: ResultGame) {
  * A forfeit is worded from the viewer's side: the player who walked out saw the
  * same screen as the one left behind, and telling them their opponent left would
  * be plainly wrong; running out of a timed game's clock is worded the same way.
- * `null` and any unrecognised reason fall through to "Board filled", which is
- * also what an expired daily move ends up recording.
+ * `null` and any unrecognised reason fall through to "Board filled".
  */
 function reasonLabel(game: ResultGame) {
   if (game.endReason === "forfeit") {
@@ -237,7 +236,7 @@ function playerId(game: ResultGame, slot: 1 | 2) {
 }
 
 /**
- * The viewer's star movement, if this game moved any.
+ * The viewer's medal movement, if this game moved any.
  *
  * Nothing renders on an unranked game — the server stored a null delta because
  * one side was a guest, and a zero would read as having held your ground.
@@ -256,7 +255,7 @@ function StarDelta({ game }: { game: ResultGame }) {
       )}
     >
       {delta > 0 ? "+" : ""}
-      {delta} stars
+      {delta} {Math.abs(delta) === 1 ? "medal" : "medals"}
     </p>
   );
 }

@@ -1,7 +1,7 @@
 export function WordPreview({ letters, yourTurn }: { letters: string[]; yourTurn: boolean }) {
   const word = letters.join("");
   return (
-    <div className="bg-board flex h-12 w-full items-center justify-center px-4 py-3 rounded-xs">
+    <div className="bg-board flex h-12 w-full items-center justify-center px-4 py-3 rounded-lg">
       {word.length === 0 ? (
         <span className="select-none tv-body tracking-wide text-foreground/90">
           {yourTurn ? "Select tiles to form a word" : "Opponent's turn"}

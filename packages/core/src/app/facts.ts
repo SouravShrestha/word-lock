@@ -1,4 +1,4 @@
-export const SUPPORT_EMAIL = "souravshrestha@cbsdev.me";
+export const SUPPORT_EMAIL = "hello@cbsdev.me";
 
 export const AUTHOR_NAME = "Sourav Shrestha";
 export const AUTHOR_URL = "https://www.cbsdev.me/";
